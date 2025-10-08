@@ -1,6 +1,6 @@
-# CardSightAI Node.js SDK
+# CardSight AI Node.js SDK
 
-Official TypeScript/JavaScript SDK for the CardSightAI REST API.
+Official TypeScript/JavaScript SDK for the CardSight AI REST API.
 
 ## Features
 
@@ -253,7 +253,7 @@ The SDK provides convenient methods for all CardSightAI API endpoints:
 ## Requirements
 
 - Node.js 18.0 or higher
-- API key from CardSightAI
+- API key from CardSight AI
 
 ## Contributing
 
@@ -265,4 +265,4 @@ MIT
 
 ## Support
 
-For support, please contact support@cardsightai.com or visit our [documentation](https://docs.cardsightai.com)
+For support, please contact support@cardsight.ai or visit our [documentation](https://api.cardsight.ai/documentation)
