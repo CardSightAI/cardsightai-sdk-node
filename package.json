@@ -1,6 +1,6 @@
 {
   "name": "cardsightai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript SDK for CardSight AI REST API",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -27,6 +27,7 @@
     "clean": "rm -rf dist src/generated",
     "prepublishOnly": "npm run build",
     "test": "node --test",
+    "test:integration": "npm run build && node --test test/integration.test.js",
     "dev": "tsc --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
@@ -47,7 +48,7 @@
   "keywords": [
     "cardsightai",
     "baseball",
-    "cards",
+    "baseball cards",
     "trading cards",
     "api",
     "sdk",

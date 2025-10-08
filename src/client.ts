@@ -101,26 +101,36 @@ export class CardSightAI {
   private setupMiddleware() {
     const config = this.config; // Capture config for closure
 
+    // WeakMap to store timeout cleanup functions
+    const timeoutCleanups = new WeakMap<any, () => void>();
+
     // Error handling middleware
     this.client.use({
-      async onRequest({ request }) {
+      async onRequest({ request, options }) {
         // Add timeout using AbortController
         if (config.timeout) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), config.timeout);
 
-          // Store cleanup function
-          (request as any).__timeoutCleanup = () => clearTimeout(timeoutId);
-          (request as any).signal = controller.signal;
+          // Store cleanup function in WeakMap
+          timeoutCleanups.set(options, () => clearTimeout(timeoutId));
+
+          // Return new request with signal
+          return new Request(request, {
+            signal: controller.signal
+          });
         }
 
         return request;
       },
 
-      async onResponse({ response, request }) {
+      async onResponse({ response, request, options }) {
         // Clean up timeout
-        const cleanup = (request as any).__timeoutCleanup;
-        if (cleanup) cleanup();
+        const cleanup = timeoutCleanups.get(options);
+        if (cleanup) {
+          cleanup();
+          timeoutCleanups.delete(options);
+        }
 
         // Handle errors
         if (!response.ok) {

@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2024-10-08
+
+### Added
+- Integration test suite for core SDK functionality
+- Test documentation with setup instructions
+- Enhanced README with API key signup information
+
+### Changed
+- Improved request timeout handling using WeakMap for better memory management
+- Updated Node.js requirement to 20.0+ for improved performance and stability
+- Simplified API type generation to use production endpoint directly
+
+### Fixed
+- Request middleware compatibility with frozen option objects
+- TypeScript build configuration for proper module exports
+
+### Removed
+- Local OpenAPI specification file dependency
+- Redundant configuration options
+
 ## [1.0.0] - 2024-10-08
 
 ### Added

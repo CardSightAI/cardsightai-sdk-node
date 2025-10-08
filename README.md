@@ -11,7 +11,17 @@ Official TypeScript/JavaScript SDK for the CardSight AI REST API.
 - 📦 **Dual Module Support** - Works with both CommonJS and ESM
 - 🛠️ **Developer Friendly** - Intuitive API with comprehensive error handling
 
-## Installation
+## Getting Started
+
+### Get Your Free API Key
+
+Sign up for a **free API key** at [https://cardsight.ai](https://cardsight.ai) - no credit card required! You'll get instant access to:
+- Card identification from images
+- Full catalog search and browsing
+- AI-powered natural language search
+- Collection management features
+
+### Installation
 
 ```bash
 npm install cardsightai
@@ -252,8 +262,18 @@ The SDK provides convenient methods for all CardSightAI API endpoints:
 
 ## Requirements
 
-- Node.js 18.0 or higher
-- API key from CardSight AI
+- Node.js 20.0 or higher
+- API key from [CardSight AI](https://cardsight.ai) (free, no credit card required)
+
+## Testing
+
+Run integration tests with your API key:
+
+```bash
+CARDSIGHTAI_API_KEY=YOUR_API_KEY npm run test:integration
+```
+
+See [test/README.md](test/README.md) for detailed testing documentation.
 
 ## Contributing
 
