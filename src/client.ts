@@ -86,7 +86,6 @@ export class CardSightAI {
       fetch: this.config.fetch,
       headers: {
         'X-API-Key': this.config.apiKey,
-        'Content-Type': 'application/json',
         ...this.config.headers
       }
     });
@@ -107,7 +106,19 @@ export class CardSightAI {
     // Error handling middleware
     this.client.use({
       async onRequest({ request, options }) {
+        // Check if body is FormData - if so, don't set Content-Type
+        const isFormData = (options as any).body instanceof FormData;
+
+        // Create headers object
+        const headers = new Headers(request.headers);
+
+        // Only set Content-Type for non-FormData requests that don't already have it
+        if (!isFormData && !headers.has('Content-Type') && request.method !== 'GET' && request.method !== 'HEAD') {
+          headers.set('Content-Type', 'application/json');
+        }
+
         // Add timeout using AbortController
+        let signal = undefined;
         if (config.timeout) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), config.timeout);
@@ -115,13 +126,14 @@ export class CardSightAI {
           // Store cleanup function in WeakMap
           timeoutCleanups.set(options, () => clearTimeout(timeoutId));
 
-          // Return new request with signal
-          return new Request(request, {
-            signal: controller.signal
-          });
+          signal = controller.signal;
         }
 
-        return request;
+        // Return new request with updated headers and signal
+        return new Request(request, {
+          headers,
+          signal
+        });
       },
 
       async onResponse({ response, request, options }) {

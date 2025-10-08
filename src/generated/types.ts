@@ -8000,6 +8000,130 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/collection/{collectionId}/cards/{cardId}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get collection card image
+         * @description Retrieve the full-resolution image added for the specified card within the collection.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Collection UUID */
+                    collectionId: string;
+                    /** @description Collection Card UUID */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Upload collection card image
+         * @description Upload a photo of a card in your collection. Maximum file size: 2MB. Accepts JPEG, PNG, WebP, and HEIC formats.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Collection UUID */
+                    collectionId: string;
+                    /** @description Collection Card UUID */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * Format: uuid
+                             * @description Unique identifier for the image record
+                             */
+                            imageId: string;
+                            /** @description Timestamp when the image was uploaded */
+                            uploadedAt: string;
+                            /** @description URL to retrieve the full-resolution image */
+                            fullImageUrl: string;
+                            /** @description URL to retrieve the thumbnail image */
+                            thumbnailUrl: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/collection/{collectionId}/cards/{cardId}/image/thumb": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get collection card image thumbnail
+         * @description Retrieve the thumbnail image added for the specified card within the collection.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Collection UUID */
+                    collectionId: string;
+                    /** @description Collection Card UUID */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/lists/": {
         parameters: {
             query?: never;
@@ -10204,6 +10328,131 @@ export interface paths {
                 };
                 /** @description Default Response */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subscription/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get subscription information
+         * @description Retrieve subscription usage information for the authenticated client.
+         *
+         *     **Returns:**
+         *     - Total aggregate API calls made across all API keys for the current billing period
+         *     - Array containing usage information for the current API key being used to make this request
+         *
+         *     **Billing Period:**
+         *     - The billing period is calculated monthly (first day of the current month to present)
+         *     - Usage data is tracked in the api_key_usage_monthly table
+         *     - Calls are aggregated across all API keys belonging to the client
+         *
+         *     **Response Fields:**
+         *     - `calls`: Total number of API calls across all your API keys for the current billing period
+         *     - `api_keys`: Array with one element showing the current API key and its usage
+         *       - `key`: The API key used to make this request
+         *       - `calls`: Number of API calls made using this specific key for the current billing period
+         *
+         *     **Example Response:**
+         *     ```json
+         *     {
+         *       "calls": 1250,
+         *       "api_keys": [
+         *         {
+         *           "key": "csa_live_abc123...",
+         *           "calls": 450
+         *         }
+         *       ]
+         *     }
+         *     ```
+         *
+         *     **Use Cases:**
+         *     - Monitor your API usage to stay within subscription limits
+         *     - Track usage by individual API key
+         *     - Identify which keys are making the most requests
+         *     - Billing and cost tracking
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Total aggregate number of API calls made across all API keys for the current billing period */
+                            calls: number;
+                            /** @description Array containing usage information for the current API key only */
+                            api_keys: {
+                                /** @description The API key (masked or full depending on context) */
+                                key: string;
+                                /** @description Total number of API calls made using this key for the current billing period */
+                                calls: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
