@@ -1,0 +1,33 @@
+# Source files
+src/
+tsconfig*.json
+cardsight.json
+
+# Development files
+*.test.ts
+*.spec.ts
+examples/
+.git/
+.github/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Documentation source
+docs/
+
+# Config files
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*

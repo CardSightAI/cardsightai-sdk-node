@@ -1,0 +1,88 @@
+{
+  "name": "cardsightai",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for CardSightAI REST API",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript https://api.cardsight.ai/documentation/json -o src/generated/types.ts",
+    "generate:local": "openapi-typescript cardsight.json -o src/generated/types.ts",
+    "build": "npm run clean && npm run generate && npm run build:esm && npm run build:cjs && npm run build:types",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "clean": "rm -rf dist src/generated",
+    "prepublishOnly": "npm run build",
+    "test": "node --test",
+    "dev": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\" \"*.{json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\" \"*.{json,md}\"",
+    "check": "npm run lint && npm run format:check && npm run test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "cardsightai",
+    "baseball",
+    "cards",
+    "trading cards",
+    "api",
+    "sdk",
+    "typescript"
+  ],
+  "author": "CardSightAI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
+    "openapi-typescript": "^7.9.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.14.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cardsightai/cardsightai-node-sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/cardsightai/cardsightai-node-sdk/issues"
+  },
+  "homepage": "https://github.com/cardsightai/cardsightai-node-sdk#readme"
+}
