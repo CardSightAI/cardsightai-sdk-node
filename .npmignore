@@ -1,7 +1,6 @@
 # Source files
 src/
 tsconfig*.json
-cardsight.json
 
 # Development files
 *.test.ts

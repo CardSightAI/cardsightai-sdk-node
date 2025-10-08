@@ -1,6 +1,6 @@
-# Contributing to CardSightAI Node.js SDK
+# Contributing to CardSight AI Node.js SDK
 
-We welcome contributions to the CardSightAI Node.js SDK! This document provides guidelines for contributing to the project.
+We welcome contributions to the CardSight AI Node.js SDK! This document provides guidelines for contributing to the project.
 
 ## Development Setup
 
@@ -46,14 +46,12 @@ We welcome contributions to the CardSightAI Node.js SDK! This document provides 
 │   ├── esm/              # ES modules build
 │   └── types/            # TypeScript declarations
 ├── examples/              # Usage examples
-├── test/                  # Test files
-└── cardsight.json        # OpenAPI specification
+└── test/                  # Test files
 ```
 
 ### Available Scripts
 
 - `npm run generate` - Generate TypeScript types from production API (https://api.cardsight.ai/documentation/json)
-- `npm run generate:local` - Generate TypeScript types from local cardsight.json file
 - `npm run build` - Build the SDK for production
 - `npm run build:esm` - Build ES modules only
 - `npm run build:cjs` - Build CommonJS only
@@ -162,11 +160,6 @@ The SDK automatically generates types from the production API. When the API chan
 1. Regenerate types from the production API:
    ```bash
    npm run generate
-   ```
-
-   Or if you have a local OpenAPI spec file:
-   ```bash
-   npm run generate:local
    ```
 
 2. Update client methods if new endpoints were added

@@ -1,7 +1,7 @@
 {
   "name": "cardsightai",
   "version": "1.0.0",
-  "description": "TypeScript SDK for CardSightAI REST API",
+  "description": "TypeScript SDK for CardSight AI REST API",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -20,7 +20,6 @@
   ],
   "scripts": {
     "generate": "openapi-typescript https://api.cardsight.ai/documentation/json -o src/generated/types.ts",
-    "generate:local": "openapi-typescript cardsight.json -o src/generated/types.ts",
     "build": "npm run clean && npm run generate && npm run build:esm && npm run build:cjs && npm run build:types",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
@@ -54,14 +53,14 @@
     "sdk",
     "typescript"
   ],
-  "author": "CardSightAI",
+  "author": "CardSight AI, Inc.",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
-    "@types/node": "^22.10.0",
+    "@types/node": "^24.7.0",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "eslint": "^9.37.0",
@@ -84,5 +83,5 @@
   "bugs": {
     "url": "https://github.com/cardsightai/cardsightai-node-sdk/issues"
   },
-  "homepage": "https://github.com/cardsightai/cardsightai-node-sdk#readme"
+  "homepage": "https://cardsight.ai"
 }
