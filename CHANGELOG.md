@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2024-10-08
+
+### Added
+- Complete API coverage - all available endpoints from OpenAPI specification now implemented
+- **Collectors** - Full CRUD operations:
+  - `collectors.list()` - List all collectors
+  - `collectors.create()` - Create a new collector
+  - `collectors.get()` - Get a specific collector
+  - `collectors.update()` - Update a collector
+  - `collectors.delete()` - Delete a collector
+- **Lists** - Card list management:
+  - `lists.list()` - Get all lists
+  - `lists.get()` - Get a specific list
+  - `lists.cards.list()` - Get cards in a list
+  - `lists.cards.delete()` - Remove card from list
+- **Images** - Direct card image access:
+  - `images.getCard()` - Get card image by ID
+- **Subscription**:
+  - `subscription.get()` - Get subscription information
+- **Extended Feedback** - Additional entity feedback endpoints:
+  - `feedback.release()` - Submit release feedback
+  - `feedback.set()` - Submit set feedback
+  - `feedback.manufacturer()` - Submit manufacturer feedback
+  - `feedback.segment()` - Submit segment feedback
+  - `feedback.get()` - Get feedback by ID
+- **Collection Enhancements**:
+  - `collections.binders.list()` - List binders in collection
+  - `collections.binders.get()` - Get specific binder
+  - `collections.binders.cards.list()` - List cards in binder
+  - `collections.cards.getImage()` - Get card image from collection
+  - `collections.cards.getThumbnail()` - Get card thumbnail from collection
+
 ## [1.0.2] - 2024-10-08
 
 ### Fixed

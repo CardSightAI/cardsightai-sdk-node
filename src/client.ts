@@ -363,7 +363,45 @@ export class CardSightAI {
       delete: (collectionId: string, cardId: string) =>
         this.client.DELETE('/v1/collection/{collectionId}/cards/{cardId}', {
           params: { path: { collectionId, cardId } }
+        }),
+
+      /**
+       * Get card image
+       */
+      getImage: (collectionId: string, cardId: string) =>
+        this.client.GET('/v1/collection/{collectionId}/cards/{cardId}/image', {
+          params: { path: { collectionId, cardId } }
+        }),
+
+      /**
+       * Get card thumbnail image
+       */
+      getThumbnail: (collectionId: string, cardId: string) =>
+        this.client.GET('/v1/collection/{collectionId}/cards/{cardId}/image/thumb', {
+          params: { path: { collectionId, cardId } }
         })
+    },
+
+    /**
+     * Collection binders
+     */
+    binders: {
+      list: (collectionId: string, params?: any) =>
+        this.client.GET('/v1/collection/{collectionId}/binders', {
+          params: { path: { collectionId }, query: params }
+        }),
+
+      get: (collectionId: string, binderId: string) =>
+        this.client.GET('/v1/collection/{collectionId}/binders/{binderId}', {
+          params: { path: { collectionId, binderId } }
+        }),
+
+      cards: {
+        list: (collectionId: string, binderId: string, params?: any) =>
+          this.client.GET('/v1/collection/{collectionId}/binders/{binderId}/cards', {
+            params: { path: { collectionId, binderId }, query: params }
+          })
+      }
     },
 
     /**
@@ -449,6 +487,112 @@ export class CardSightAI {
   };
 
   /**
+   * Collectors endpoints - Manage card collectors
+   */
+  public readonly collectors = {
+    /**
+     * List all collectors
+     */
+    list: (params?: any) =>
+      this.client.GET('/v1/collectors/', {
+        params: { query: params }
+      }),
+
+    /**
+     * Create a new collector
+     */
+    create: (data?: any) =>
+      this.client.POST('/v1/collectors/', {
+        body: data || {}
+      }),
+
+    /**
+     * Get a specific collector by ID
+     */
+    get: (collectorId: string) =>
+      this.client.GET('/v1/collectors/{collectorId}', {
+        params: { path: { collectorId } }
+      }),
+
+    /**
+     * Update a collector
+     */
+    update: (collectorId: string, data?: any) =>
+      this.client.PUT('/v1/collectors/{collectorId}', {
+        params: { path: { collectorId } },
+        body: data || {}
+      }),
+
+    /**
+     * Delete a collector (also deletes associated collections)
+     */
+    delete: (collectorId: string) =>
+      this.client.DELETE('/v1/collectors/{collectorId}', {
+        params: { path: { collectorId } }
+      })
+  };
+
+  /**
+   * Lists endpoints - Manage card lists
+   */
+  public readonly lists = {
+    /**
+     * Get all lists
+     */
+    list: (params?: any) =>
+      this.client.GET('/v1/lists/', {
+        params: { query: params }
+      }),
+
+    /**
+     * Get a specific list
+     */
+    get: (listId: string) =>
+      this.client.GET('/v1/lists/{listId}', {
+        params: { path: { listId } }
+      }),
+
+    /**
+     * Cards in lists
+     */
+    cards: {
+      list: (listId: string, params?: any) =>
+        this.client.GET('/v1/lists/{listId}/cards', {
+          params: { path: { listId }, query: params }
+        }),
+
+      // Note: This endpoint only supports DELETE
+      delete: (listId: string, cardId: string) =>
+        this.client.DELETE('/v1/lists/{listId}/cards/{cardId}', {
+          params: { path: { listId, cardId } }
+        })
+    }
+  };
+
+  /**
+   * Images endpoints
+   */
+  public readonly images = {
+    /**
+     * Get card image by ID
+     */
+    getCard: (id: string) =>
+      this.client.GET('/v1/images/cards/{id}', {
+        params: { path: { id } }
+      })
+  };
+
+  /**
+   * Subscription endpoints
+   */
+  public readonly subscription = {
+    /**
+     * Get subscription information
+     */
+    get: () => this.client.GET('/v1/subscription/')
+  };
+
+  /**
    * Feedback endpoints
    */
   public readonly feedback = {
@@ -464,6 +608,38 @@ export class CardSightAI {
       this.client.POST('/v1/feedback/identify/{id}', {
         params: { path: { id } },
         body: data
+      }),
+
+    release: (id: string, data: any) =>
+      this.client.POST('/v1/feedback/release/{id}', {
+        params: { path: { id } },
+        body: data
+      }),
+
+    set: (id: string, data: any) =>
+      this.client.POST('/v1/feedback/set/{id}', {
+        params: { path: { id } },
+        body: data
+      }),
+
+    manufacturer: (id: string, data: any) =>
+      this.client.POST('/v1/feedback/manufacturer/{id}', {
+        params: { path: { id } },
+        body: data
+      }),
+
+    segment: (id: string, data: any) =>
+      this.client.POST('/v1/feedback/segment/{id}', {
+        params: { path: { id } },
+        body: data
+      }),
+
+    /**
+     * Get feedback by ID (GET endpoint)
+     */
+    get: (id: string) =>
+      this.client.GET('/v1/feedback/{id}', {
+        params: { path: { id } }
       })
   };
 

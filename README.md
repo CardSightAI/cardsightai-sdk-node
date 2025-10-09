@@ -256,6 +256,7 @@ The SDK provides convenient methods for all CardSightAI API endpoints:
 - **Identification**: `identify.card()`
 - **Catalog**: `catalog.cards`, `catalog.sets`, `catalog.releases`, `catalog.manufacturers`
 - **Collections**: Full CRUD operations for collections and cards
+- **Collectors**: Full CRUD operations for card collectors
 - **AI Search**: `ai.query()`
 - **Autocomplete**: Search suggestions for all entity types
 - **Feedback**: Submit feedback for cards and identifications
