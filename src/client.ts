@@ -410,20 +410,75 @@ export class CardSightAI {
      * Collection binders
      */
     binders: {
+      /**
+       * List all binders in a collection
+       */
       list: (collectionId: string, params?: GetQueryParams<'/v1/collection/{collectionId}/binders'>) =>
         this.client.GET('/v1/collection/{collectionId}/binders', {
           params: { path: { collectionId }, query: params }
         }),
 
+      /**
+       * Create a new binder
+       */
+      create: (collectionId: string, data?: PostBody<'/v1/collection/{collectionId}/binders'>) =>
+        this.client.POST('/v1/collection/{collectionId}/binders', {
+          params: { path: { collectionId } },
+          body: data || {}
+        }),
+
+      /**
+       * Get binder details
+       */
       get: (collectionId: string, binderId: string) =>
         this.client.GET('/v1/collection/{collectionId}/binders/{binderId}', {
           params: { path: { collectionId, binderId } }
         }),
 
+      /**
+       * Update a binder
+       */
+      update: (collectionId: string, binderId: string, data?: PutBody<'/v1/collection/{collectionId}/binders/{binderId}'>) =>
+        this.client.PUT('/v1/collection/{collectionId}/binders/{binderId}', {
+          params: { path: { collectionId, binderId } },
+          body: data || {}
+        }),
+
+      /**
+       * Delete a binder (removes all card associations)
+       */
+      delete: (collectionId: string, binderId: string) =>
+        this.client.DELETE('/v1/collection/{collectionId}/binders/{binderId}', {
+          params: { path: { collectionId, binderId } }
+        }),
+
+      /**
+       * Binder cards management
+       */
       cards: {
+        /**
+         * List cards in a binder
+         */
         list: (collectionId: string, binderId: string, params?: GetQueryParams<'/v1/collection/{collectionId}/binders/{binderId}/cards'>) =>
           this.client.GET('/v1/collection/{collectionId}/binders/{binderId}/cards', {
             params: { path: { collectionId, binderId }, query: params }
+          }),
+
+        /**
+         * Add a card to a binder
+         */
+        add: (collectionId: string, binderId: string, data: PostBody<'/v1/collection/{collectionId}/binders/{binderId}/cards'>) =>
+          this.client.POST('/v1/collection/{collectionId}/binders/{binderId}/cards', {
+            params: { path: { collectionId, binderId } },
+            body: data
+          }),
+
+        /**
+         * Remove a card from a binder (card stays in collection)
+         */
+        delete: (collectionId: string, binderId: string, cardId: string) =>
+          this.client.DELETE('/v1/collection/{collectionId}/binders/{binderId}/cards/{cardId}', {
+            params: { path: { collectionId, binderId, cardId } }
           })
       }
     },
