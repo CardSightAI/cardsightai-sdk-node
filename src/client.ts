@@ -2,6 +2,26 @@ import createClient, { type Client as OpenAPIClient, type Middleware } from 'ope
 import type { paths } from './generated/types.js';
 
 /**
+ * Type helpers for extracting request/response types from OpenAPI paths
+ */
+type GetQueryParams<T extends keyof paths> = paths[T] extends { get: { parameters: { query?: infer Q } } }
+  ? Q
+  : never;
+
+type PostBody<T extends keyof paths> = paths[T] extends { post: { requestBody?: { content: { 'application/json': infer B } } } }
+  ? B
+  : paths[T] extends { post: { requestBody: { content: { 'application/json': infer B } } } }
+  ? B
+  : never;
+
+type PutBody<T extends keyof paths> = paths[T] extends { put: { requestBody?: { content: { 'application/json': infer B } } } }
+  ? B
+  : paths[T] extends { put: { requestBody: { content: { 'application/json': infer B } } } }
+  ? B
+  : never;
+
+
+/**
  * CardSightAI API client configuration options
  */
 export interface CardSightAIConfig {
@@ -169,7 +189,7 @@ export class CardSightAI {
           throw new CardSightAIError(errorMessage, response.status, responseData, {
             url: response.url,
             method: request.method,
-            headers: Object.fromEntries(request.headers.entries())
+            headers: Object.fromEntries([...request.headers as any])
           });
         }
 
@@ -225,7 +245,8 @@ export class CardSightAI {
      * Get cards with optional filters
      */
     cards: {
-      list: (params?: any) => this.client.GET('/v1/catalog/cards', { params: { query: params } }),
+      list: (params?: GetQueryParams<'/v1/catalog/cards'>) =>
+        this.client.GET('/v1/catalog/cards', { params: { query: params } }),
 
       get: (id: string) => this.client.GET('/v1/catalog/cards/{id}', { params: { path: { id } } })
     },
@@ -234,11 +255,11 @@ export class CardSightAI {
      * Get sets with optional filters
      */
     sets: {
-      list: (params?: any) => this.client.GET('/v1/catalog/sets', { params: { query: params } }),
+      list: (params?: GetQueryParams<'/v1/catalog/sets'>) => this.client.GET('/v1/catalog/sets', { params: { query: params } }),
 
       get: (id: string) => this.client.GET('/v1/catalog/sets/{id}', { params: { path: { id } } }),
 
-      cards: (id: string, params?: any) =>
+      cards: (id: string, params?: GetQueryParams<'/v1/catalog/sets/{id}/cards'>) =>
         this.client.GET('/v1/catalog/sets/{id}/cards', {
           params: { path: { id }, query: params }
         })
@@ -248,13 +269,13 @@ export class CardSightAI {
      * Get releases
      */
     releases: {
-      list: (params?: any) =>
+      list: (params?: GetQueryParams<'/v1/catalog/releases'>) =>
         this.client.GET('/v1/catalog/releases', { params: { query: params } }),
 
       get: (id: string) =>
         this.client.GET('/v1/catalog/releases/{id}', { params: { path: { id } } }),
 
-      cards: (id: string, params?: any) =>
+      cards: (id: string, params?: GetQueryParams<'/v1/catalog/releases/{id}/cards'>) =>
         this.client.GET('/v1/catalog/releases/{id}/cards', {
           params: { path: { id }, query: params }
         })
@@ -263,26 +284,26 @@ export class CardSightAI {
     /**
      * Get manufacturers
      */
-    manufacturers: (params?: any) =>
+    manufacturers: (params?: GetQueryParams<'/v1/catalog/manufacturers'>) =>
       this.client.GET('/v1/catalog/manufacturers', { params: { query: params } }),
 
     /**
      * Get segments
      */
-    segments: (params?: any) =>
+    segments: (params?: GetQueryParams<'/v1/catalog/segments'>) =>
       this.client.GET('/v1/catalog/segments', { params: { query: params } }),
 
     /**
      * Get parallels
      */
-    parallels: (params?: any) =>
+    parallels: (params?: GetQueryParams<'/v1/catalog/parallels'>) =>
       this.client.GET('/v1/catalog/parallels', { params: { query: params } }),
 
     /**
      * Get attributes
      */
     attributes: {
-      list: (params?: any) =>
+      list: (params?: GetQueryParams<'/v1/catalog/attributes'>) =>
         this.client.GET('/v1/catalog/attributes', { params: { query: params } }),
 
       get: (id: string) =>
@@ -302,7 +323,7 @@ export class CardSightAI {
     /**
      * List all collections
      */
-    list: (params?: any) =>
+    list: (params?: GetQueryParams<'/v1/collection/'>) =>
       this.client.GET('/v1/collection/', {
         params: { query: params }
       }),
@@ -318,12 +339,12 @@ export class CardSightAI {
     /**
      * Create a new collection
      */
-    create: (data: any) => this.client.POST('/v1/collection/', { body: data }),
+    create: (data: PostBody<'/v1/collection/'>) => this.client.POST('/v1/collection/', { body: data }),
 
     /**
      * Update collection
      */
-    update: (collectionId: string, data: any) =>
+    update: (collectionId: string, data: PutBody<'/v1/collection/{collectionId}'>) =>
       this.client.PUT('/v1/collection/{collectionId}', {
         params: { path: { collectionId } },
         body: data
@@ -341,12 +362,12 @@ export class CardSightAI {
      * Collection cards
      */
     cards: {
-      list: (collectionId: string, params?: any) =>
+      list: (collectionId: string, params?: GetQueryParams<'/v1/collection/{collectionId}/cards'>) =>
         this.client.GET('/v1/collection/{collectionId}/cards', {
           params: { path: { collectionId }, query: params }
         }),
 
-      add: (collectionId: string, data: any) =>
+      add: (collectionId: string, data: PostBody<'/v1/collection/{collectionId}/cards'>) =>
         this.client.POST('/v1/collection/{collectionId}/cards', {
           params: { path: { collectionId } },
           body: data
@@ -357,7 +378,7 @@ export class CardSightAI {
           params: { path: { collectionId, cardId } }
         }),
 
-      update: (collectionId: string, cardId: string, data: any) =>
+      update: (collectionId: string, cardId: string, data: PutBody<'/v1/collection/{collectionId}/cards/{cardId}'>) =>
         this.client.PUT('/v1/collection/{collectionId}/cards/{cardId}', {
           params: { path: { collectionId, cardId } },
           body: data
@@ -389,7 +410,7 @@ export class CardSightAI {
      * Collection binders
      */
     binders: {
-      list: (collectionId: string, params?: any) =>
+      list: (collectionId: string, params?: GetQueryParams<'/v1/collection/{collectionId}/binders'>) =>
         this.client.GET('/v1/collection/{collectionId}/binders', {
           params: { path: { collectionId }, query: params }
         }),
@@ -400,7 +421,7 @@ export class CardSightAI {
         }),
 
       cards: {
-        list: (collectionId: string, binderId: string, params?: any) =>
+        list: (collectionId: string, binderId: string, params?: GetQueryParams<'/v1/collection/{collectionId}/binders/{binderId}/cards'>) =>
           this.client.GET('/v1/collection/{collectionId}/binders/{binderId}/cards', {
             params: { path: { collectionId, binderId }, query: params }
           })
@@ -418,7 +439,7 @@ export class CardSightAI {
     /**
      * Collection breakdown
      */
-    breakdown: (collectionId: string, params?: any) =>
+    breakdown: (collectionId: string, params: GetQueryParams<'/v1/collection/{collectionId}/breakdown'>) =>
       this.client.GET('/v1/collection/{collectionId}/breakdown', {
         params: { path: { collectionId }, query: params }
       }),
@@ -483,9 +504,9 @@ export class CardSightAI {
    * AI query endpoint
    */
   public readonly ai = {
-    query: (question: string, options?: any) =>
+    query: (data: PostBody<'/v1/ai/query'>) =>
       this.client.POST('/v1/ai/query', {
-        body: { question, ...options }
+        body: data
       })
   };
 
@@ -496,7 +517,7 @@ export class CardSightAI {
     /**
      * List all collectors
      */
-    list: (params?: any) =>
+    list: (params?: GetQueryParams<'/v1/collectors/'>) =>
       this.client.GET('/v1/collectors/', {
         params: { query: params }
       }),
@@ -504,7 +525,7 @@ export class CardSightAI {
     /**
      * Create a new collector
      */
-    create: (data?: any) =>
+    create: (data?: PostBody<'/v1/collectors/'>) =>
       this.client.POST('/v1/collectors/', {
         body: data || {}
       }),
@@ -520,7 +541,7 @@ export class CardSightAI {
     /**
      * Update a collector
      */
-    update: (collectorId: string, data?: any) =>
+    update: (collectorId: string, data?: PutBody<'/v1/collectors/{collectorId}'>) =>
       this.client.PUT('/v1/collectors/{collectorId}', {
         params: { path: { collectorId } },
         body: data || {}
@@ -542,7 +563,7 @@ export class CardSightAI {
     /**
      * Get all lists
      */
-    list: (params?: any) =>
+    list: (params?: GetQueryParams<'/v1/lists/'>) =>
       this.client.GET('/v1/lists/', {
         params: { query: params }
       }),
@@ -559,7 +580,7 @@ export class CardSightAI {
      * Cards in lists
      */
     cards: {
-      list: (listId: string, params?: any) =>
+      list: (listId: string, params?: GetQueryParams<'/v1/lists/{listId}/cards'>) =>
         this.client.GET('/v1/lists/{listId}/cards', {
           params: { path: { listId }, query: params }
         }),
@@ -631,39 +652,39 @@ export class CardSightAI {
    * Feedback endpoints
    */
   public readonly feedback = {
-    general: (data: any) => this.client.POST('/v1/feedback/general', { body: data }),
+    general: (data: PostBody<'/v1/feedback/general'>) => this.client.POST('/v1/feedback/general', { body: data }),
 
-    card: (id: string, data: any) =>
+    card: (id: string, data: PostBody<'/v1/feedback/card/{id}'>) =>
       this.client.POST('/v1/feedback/card/{id}', {
         params: { path: { id } },
         body: data
       }),
 
-    identify: (id: string, data: any) =>
+    identify: (id: string, data: PostBody<'/v1/feedback/identify/{id}'>) =>
       this.client.POST('/v1/feedback/identify/{id}', {
         params: { path: { id } },
         body: data
       }),
 
-    release: (id: string, data: any) =>
+    release: (id: string, data: PostBody<'/v1/feedback/release/{id}'>) =>
       this.client.POST('/v1/feedback/release/{id}', {
         params: { path: { id } },
         body: data
       }),
 
-    set: (id: string, data: any) =>
+    set: (id: string, data: PostBody<'/v1/feedback/set/{id}'>) =>
       this.client.POST('/v1/feedback/set/{id}', {
         params: { path: { id } },
         body: data
       }),
 
-    manufacturer: (id: string, data: any) =>
+    manufacturer: (id: string, data: PostBody<'/v1/feedback/manufacturer/{id}'>) =>
       this.client.POST('/v1/feedback/manufacturer/{id}', {
         params: { path: { id } },
         body: data
       }),
 
-    segment: (id: string, data: any) =>
+    segment: (id: string, data: PostBody<'/v1/feedback/segment/{id}'>) =>
       this.client.POST('/v1/feedback/segment/{id}', {
         params: { path: { id } },
         body: data

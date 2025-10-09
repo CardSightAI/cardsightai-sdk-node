@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-01-09
+
+### Changed
+- **BREAKING CHANGE**: Full TypeScript type safety implementation
+  - All API methods now use proper types extracted from OpenAPI specification
+  - Removed all `any` types in favor of strongly-typed parameters
+  - IDE autocomplete now provides accurate suggestions for all API parameters
+  - Compile-time error checking prevents invalid API calls
+  - **Breaking**: `collections.breakdown()` now correctly requires `params` with mandatory `groupBy` field
+  - **Breaking**: `ai.query()` signature changed from `(question: string, options?: any)` to `(data: PostBody<'/v1/ai/query'>)` requiring `{ query: string, ... }` object
+
+### Added
+- Type extraction utilities for leveraging auto-generated OpenAPI types
+- Full type inference for all GET query parameters, POST/PUT request bodies
+- Comprehensive type checking across all 50+ API endpoints
+- Better developer experience with accurate IntelliSense support
+
+### Fixed
+- Headers compatibility issue with `entries()` method for broader Node.js support
+
 ## [1.0.5] - 2025-01-09
 
 ### Added
