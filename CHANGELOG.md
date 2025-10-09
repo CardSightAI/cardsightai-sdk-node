@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-01-09
+
+### Fixed
+- **Card Images Format Parameter** - `images.getCard()` now properly supports the `format` query parameter:
+  - `format: 'raw'` - Returns the raw JPEG binary (default)
+  - `format: 'json'` - Returns image metadata with base64 data
+  - Backwards compatible - existing code without params continues to work (returns raw by default)
+
 ## [1.1.1] - 2025-01-09
 
 ### Added

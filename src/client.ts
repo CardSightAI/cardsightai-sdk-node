@@ -686,10 +686,13 @@ export class CardSightAI {
   public readonly images = {
     /**
      * Get card image by ID
+     * @param id - Card ID
+     * @param params - Optional query parameters
+     * @param params.format - Image format: 'raw' (returns JPEG binary, default) or 'json' (returns metadata with base64)
      */
-    getCard: (id: string) =>
+    getCard: (id: string, params?: GetQueryParams<'/v1/images/cards/{id}'>) =>
       this.client.GET('/v1/images/cards/{id}', {
-        params: { path: { id } }
+        params: { path: { id }, query: params }
       })
   };
 
