@@ -573,6 +573,38 @@ export class CardSightAI {
   };
 
   /**
+   * Grades endpoints - Manage grading companies, types, and grades
+   */
+  public readonly grades = {
+    /**
+     * Grading companies
+     */
+    companies: {
+      /**
+       * List all grading companies
+       */
+      list: () =>
+        this.client.GET('/v1/grades/companies'),
+
+      /**
+       * Get grading types for a specific company
+       */
+      types: (companyId: string) =>
+        this.client.GET('/v1/grades/companies/{companyId}/types', {
+          params: { path: { companyId } }
+        }),
+
+      /**
+       * Get grades for a specific grading type
+       */
+      grades: (companyId: string, typeId: string) =>
+        this.client.GET('/v1/grades/companies/{companyId}/types/{typeId}/grades', {
+          params: { path: { companyId, typeId } }
+        })
+    }
+  };
+
+  /**
    * Images endpoints
    */
   public readonly images = {

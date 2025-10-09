@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-01-09
+
+### Added
+- **Grades endpoints** - Complete grading system integration:
+  - `grades.companies.list()` - Get all grading companies (PSA, BGS, SGC, CGC, etc.)
+  - `grades.companies.types()` - Get grading types for a company (e.g., PSA Regular, BGS Black Label)
+  - `grades.companies.grades()` - Get specific grades for a grading type (1-10 with half grades)
+  - Enables full grading support when saving cards to collections
+
 ## [1.0.4] - 2024-10-08
 
 ### Added

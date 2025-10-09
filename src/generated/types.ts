@@ -5814,8 +5814,8 @@ export interface paths {
                     cardId?: string;
                     /** @description Filter by parallel UUID */
                     parallelId?: string;
-                    /** @description Filter by grade ID */
-                    gradeId?: number;
+                    /** @description Filter by grade UUID */
+                    gradeId?: string;
                     /** @description Filter by sold status (true for sold, false for not sold) */
                     hasSold?: boolean;
                     /** @description Field to sort by */
@@ -5860,8 +5860,11 @@ export interface paths {
                                  * @description ID of the card parallel if applicable
                                  */
                                 parallelId?: string;
-                                /** @description ID of the grade if card is graded */
-                                gradeId?: number;
+                                /**
+                                 * Format: uuid
+                                 * @description UUID of the grade if card is graded
+                                 */
+                                gradeId?: string;
                                 /**
                                  * @description Quantity of this card in the collection
                                  * @default 1
@@ -5912,8 +5915,11 @@ export interface paths {
                                  * @description ID of the card parallel if applicable
                                  */
                                 parallelId?: string;
-                                /** @description ID of the grade if card is graded */
-                                gradeId?: number;
+                                /**
+                                 * Format: uuid
+                                 * @description UUID of the grade if card is graded
+                                 */
+                                gradeId?: string;
                                 /**
                                  * @description Quantity of this card in the collection
                                  * @default 1
@@ -6051,8 +6057,11 @@ export interface paths {
                          * @description UUID of the card parallel if applicable
                          */
                         parallelId?: string;
-                        /** @description Grade ID if card is graded */
-                        gradeId?: number;
+                        /**
+                         * Format: uuid
+                         * @description UUID of the grade if card is graded
+                         */
+                        gradeId?: string;
                         /**
                          * @description Quantity of this card to add
                          * @default 1
@@ -6079,8 +6088,11 @@ export interface paths {
                          * @description UUID of the card parallel if applicable
                          */
                         parallelId?: string;
-                        /** @description Grade ID if card is graded */
-                        gradeId?: number;
+                        /**
+                         * Format: uuid
+                         * @description UUID of the grade if card is graded
+                         */
+                        gradeId?: string;
                         /**
                          * @description Quantity of this card to add
                          * @default 1
@@ -6127,8 +6139,11 @@ export interface paths {
                              * @description ID of the card parallel if applicable
                              */
                             parallelId?: string;
-                            /** @description ID of the grade if card is graded */
-                            gradeId?: number;
+                            /**
+                             * Format: uuid
+                             * @description UUID of the grade if card is graded
+                             */
+                            gradeId?: string;
                             /**
                              * @description Quantity of this card in the collection
                              * @default 1
@@ -6167,8 +6182,11 @@ export interface paths {
                                  * @description ID of the card parallel if applicable
                                  */
                                 parallelId?: string;
-                                /** @description ID of the grade if card is graded */
-                                gradeId?: number;
+                                /**
+                                 * Format: uuid
+                                 * @description UUID of the grade if card is graded
+                                 */
+                                gradeId?: string;
                                 /**
                                  * @description Quantity of this card in the collection
                                  * @default 1
@@ -6335,8 +6353,11 @@ export interface paths {
                              * @description ID of the card parallel if applicable
                              */
                             parallelId?: string;
-                            /** @description ID of the grade if card is graded */
-                            gradeId?: number;
+                            /**
+                             * Format: uuid
+                             * @description UUID of the grade if card is graded
+                             */
+                            gradeId?: string;
                             /**
                              * @description Quantity of this card in the collection
                              * @default 1
@@ -6382,8 +6403,11 @@ export interface paths {
                              * @description ID of the card parallel if applicable
                              */
                             parallelId?: string;
-                            /** @description ID of the grade if card is graded */
-                            gradeId?: number;
+                            /**
+                             * Format: uuid
+                             * @description UUID of the grade if card is graded
+                             */
+                            gradeId?: string;
                             /**
                              * @description Quantity of this card in the collection
                              * @default 1
@@ -6515,8 +6539,11 @@ export interface paths {
                          * @description UUID of the card parallel (null to remove)
                          */
                         parallelId?: string | null;
-                        /** @description Grade ID (null to remove) */
-                        gradeId?: number | null;
+                        /**
+                         * Format: uuid
+                         * @description UUID of the grade (null to remove)
+                         */
+                        gradeId?: string | null;
                         /** @description Updated quantity */
                         quantity?: number;
                         /** @description Purchase price (null to remove) */
@@ -6560,8 +6587,11 @@ export interface paths {
                              * @description ID of the card parallel if applicable
                              */
                             parallelId?: string;
-                            /** @description ID of the grade if card is graded */
-                            gradeId?: number;
+                            /**
+                             * Format: uuid
+                             * @description UUID of the grade if card is graded
+                             */
+                            gradeId?: string;
                             /**
                              * @description Quantity of this card in the collection
                              * @default 1
@@ -6607,8 +6637,11 @@ export interface paths {
                              * @description ID of the card parallel if applicable
                              */
                             parallelId?: string;
-                            /** @description ID of the grade if card is graded */
-                            gradeId?: number;
+                            /**
+                             * Format: uuid
+                             * @description UUID of the grade if card is graded
+                             */
+                            gradeId?: string;
                             /**
                              * @description Quantity of this card in the collection
                              * @default 1
@@ -10453,6 +10486,575 @@ export interface paths {
                 };
                 /** @description Default Response */
                 403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grades/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all grading companies
+         * @description Retrieve a complete list of all grading companies available in the system.
+         *
+         *     **Grading companies** are organizations that authenticate and grade trading cards, such as PSA, BGS (Beckett), SGC, and CGC.
+         *
+         *     **Response includes:**
+         *     - List of all grading companies with metadata
+         *     - Company names, descriptions, and notes
+         *     - Total count of companies
+         *
+         *     **Use Cases:**
+         *     - Display grading company selection in UI
+         *     - Populate dropdown menus for grading filters
+         *     - Show available grading options to users
+         *     - Reference data for collection management
+         *
+         *     **Example Companies:**
+         *     - PSA (Professional Sports Authenticator)
+         *     - BGS (Beckett Grading Services)
+         *     - SGC (Sportscard Guaranty)
+         *     - CGC (Certified Guaranty Company)
+         *
+         *     **Important Notes:**
+         *     - This endpoint returns all companies in the system
+         *     - Companies are sorted alphabetically by name
+         *     - No authentication required (public reference data)
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            companies: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            companies: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grades/companies/{companyId}/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get grading types for a company
+         * @description Retrieve all grading types offered by a specific grading company.
+         *
+         *     **Grading types** represent different grading services offered by a company, such as:
+         *     - PSA: Regular, Crossover, Dual Grade
+         *     - BGS: Standard, Black Label, Pristine
+         *     - SGC: Regular, Tuxedo, Premium
+         *
+         *     **Path Parameters:**
+         *     - **companyId**: UUID of the grading company
+         *
+         *     **Response includes:**
+         *     - List of all grading types for the company
+         *     - Type names, descriptions, and notes
+         *     - Parent grading company information for context
+         *     - Total count of types
+         *
+         *     **Use Cases:**
+         *     - Display available grading services for a company
+         *     - Filter grades by grading type
+         *     - Show grading options when adding cards to collection
+         *     - Populate grading type selection in UI
+         *
+         *     **Example Types:**
+         *     - PSA Regular (standard PSA grading)
+         *     - BGS Black Label (perfect 10 across all subgrades)
+         *     - SGC Tuxedo (premium black label holder)
+         *
+         *     **Important Notes:**
+         *     - Types are specific to each grading company
+         *     - Returns 404 if company ID doesn't exist
+         *     - Types are sorted alphabetically by name
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    companyId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            types: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                            gradingCompany: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            types: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                            gradingCompany: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grades/companies/{companyId}/types/{typeId}/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get grades for a grading type
+         * @description Retrieve all specific grades available for a grading type.
+         *
+         *     **Grades** are the actual numeric/letter grades assigned to cards, such as:
+         *     - PSA: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+         *     - BGS: 1, 1.5, 2, 2.5, ... 9, 9.5, 10
+         *     - SGC: 1, 1.5, 2, 2.5, ... 9, 9.5, 10
+         *
+         *     **Path Parameters:**
+         *     - **companyId**: UUID of the grading company
+         *     - **typeId**: UUID of the grading type
+         *
+         *     **Response includes:**
+         *     - List of all grades for the grading type
+         *     - Grade values (as strings to support decimals like "9.5")
+         *     - Parent grading type and company information for context
+         *     - Total count of grades
+         *
+         *     **Use Cases:**
+         *     - Display available grades when adding graded cards to collection
+         *     - Filter collection cards by specific grade
+         *     - Show grade options in grading selection UI
+         *     - Validate grade values for card submissions
+         *
+         *     **Example Grades:**
+         *     - PSA 10 (Gem Mint)
+         *     - PSA 9 (Mint)
+         *     - BGS 9.5 (Gem Mint)
+         *     - SGC 10 (Pristine)
+         *
+         *     **Important Notes:**
+         *     - Grades are specific to each grading type
+         *     - Grade values are stored as strings to support decimal grades
+         *     - Returns 404 if company or type ID doesn't exist
+         *     - Validates that the type belongs to the specified company
+         *     - Grades are sorted by their grade value
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    companyId: string;
+                    typeId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            grades: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingTypeId: string;
+                                gradingTypeName: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                grade: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                            gradingType: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                            gradingCompany: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            grades: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingTypeId: string;
+                                gradingTypeName: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                grade: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            }[];
+                            total: number;
+                            gradingType: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                gradingCompanyId: string;
+                                gradingCompanyName: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                            gradingCompany: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                note: string | null;
+                                /** Format: date-time */
+                                createdAt: string;
+                                /** Format: date-time */
+                                updatedAt: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
