@@ -302,7 +302,10 @@ export class CardSightAI {
     /**
      * List all collections
      */
-    list: () => this.client.GET('/v1/collection/'),
+    list: (params?: any) =>
+      this.client.GET('/v1/collection/', {
+        params: { query: params }
+      }),
 
     /**
      * Get collection details

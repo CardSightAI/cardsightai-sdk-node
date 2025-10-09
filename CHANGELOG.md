@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2024-10-08
+
+### Added
+- Enhanced `collections.list()` with advanced filtering and pagination support:
+  - Filter by collection name with partial matching
+  - Filter by specific collector ID
+  - Pagination with `take` and `skip` parameters
+  - Sort collections by name in ascending or descending order
+  - Improved performance for large collection sets
+
 ## [1.0.3] - 2024-10-08
 
 ### Added
