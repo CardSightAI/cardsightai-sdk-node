@@ -612,7 +612,7 @@ export class CardSightAI {
   };
 
   /**
-   * Lists endpoints - Manage card lists
+   * Lists endpoints - Manage card lists (want lists, wishlists, etc.)
    */
   public readonly lists = {
     /**
@@ -624,6 +624,14 @@ export class CardSightAI {
       }),
 
     /**
+     * Create a new list
+     */
+    create: (data: PostBody<'/v1/lists/'>) =>
+      this.client.POST('/v1/lists/', {
+        body: data
+      }),
+
+    /**
      * Get a specific list
      */
     get: (listId: string) =>
@@ -632,15 +640,46 @@ export class CardSightAI {
       }),
 
     /**
+     * Update a list
+     */
+    update: (listId: string, data?: PutBody<'/v1/lists/{listId}'>) =>
+      this.client.PUT('/v1/lists/{listId}', {
+        params: { path: { listId } },
+        body: data || {}
+      }),
+
+    /**
+     * Delete a list (removes all card associations)
+     */
+    delete: (listId: string) =>
+      this.client.DELETE('/v1/lists/{listId}', {
+        params: { path: { listId } }
+      }),
+
+    /**
      * Cards in lists
      */
     cards: {
+      /**
+       * Get cards in a list
+       */
       list: (listId: string, params?: GetQueryParams<'/v1/lists/{listId}/cards'>) =>
         this.client.GET('/v1/lists/{listId}/cards', {
           params: { path: { listId }, query: params }
         }),
 
-      // Note: This endpoint only supports DELETE
+      /**
+       * Add card(s) to a list
+       */
+      add: (listId: string, data: PostBody<'/v1/lists/{listId}/cards'>) =>
+        this.client.POST('/v1/lists/{listId}/cards', {
+          params: { path: { listId } },
+          body: data
+        }),
+
+      /**
+       * Remove a card from a list
+       */
       delete: (listId: string, cardId: string) =>
         this.client.DELETE('/v1/lists/{listId}/cards/{cardId}', {
           params: { path: { listId, cardId } }

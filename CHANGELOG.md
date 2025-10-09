@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-01-09
+
+### Added
+- **Complete Lists Management** - Full CRUD operations for card lists (want lists, wishlists, etc.):
+  - `lists.create()` - Create new lists for tracking cards you want or are interested in
+  - `lists.update()` - Update list properties (name, description)
+  - `lists.delete()` - Delete a list (removes all card associations)
+  - `lists.cards.add()` - Add one or multiple cards to lists (supports batch operations)
+  - These complement the existing read operations (list, get, cards.list, cards.delete)
+  - Lists are now fully functional for tracking cards users want vs Collections for cards they own
+
 ## [1.1.3] - 2025-01-09
 
 ### Fixed
