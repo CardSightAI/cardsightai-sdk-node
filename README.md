@@ -1,6 +1,7 @@
 # CardSight AI Node.js SDK
 
 ![NPM Version](https://img.shields.io/npm/v/cardsightai)
+![Node LTS](https://img.shields.io/node/v-lts/cardsightai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Official TypeScript/JavaScript SDK for the CardSight AI REST API - The most comprehensive baseball card identification and collection management platform.
