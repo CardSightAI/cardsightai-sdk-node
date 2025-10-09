@@ -690,10 +690,25 @@ export class CardSightAI {
      * @param params - Optional query parameters
      * @param params.format - Image format: 'raw' (returns JPEG binary, default) or 'json' (returns metadata with base64)
      */
-    getCard: (id: string, params?: GetQueryParams<'/v1/images/cards/{id}'>) =>
-      this.client.GET('/v1/images/cards/{id}', {
-        params: { path: { id }, query: params }
-      })
+    getCard: async (id: string, params?: GetQueryParams<'/v1/images/cards/{id}'>) => {
+      // For raw format, we need to handle the response differently
+      // since openapi-fetch doesn't know it's binary data
+      if (params?.format === 'raw' || !params?.format) {
+        // Raw is the default, so handle both explicit raw and undefined
+        const response = await this.client.GET('/v1/images/cards/{id}', {
+          params: { path: { id }, query: params },
+          // Tell openapi-fetch not to parse the response
+          parseAs: 'blob'
+        } as any);
+
+        return response;
+      } else {
+        // JSON format - let openapi-fetch handle normally
+        return this.client.GET('/v1/images/cards/{id}', {
+          params: { path: { id }, query: params }
+        });
+      }
+    }
   };
 
   /**
