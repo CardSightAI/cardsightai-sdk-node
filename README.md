@@ -12,6 +12,7 @@ Official TypeScript/JavaScript SDK for the CardSight AI REST API - The most comp
 |---------|-------------|-----------------|
 | **Card Identification** | Identify cards from images using AI | `identify.card()` |
 | **Catalog Search** | Search 2M+ baseball cards database | `catalog.cards.list()`, `catalog.sets.list()` |
+| **Collectors** | Manage collectors with names | `collectors.create()`, `.list()`, `.update()` |
 | **Collections** | Manage owned card collections | `collections.create()`, `.cards.add()`, `.analytics()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `.cards.add()` |
 | **Binders** | Organize collection subsets | `collections.binders.create()`, `.cards.add()` |
