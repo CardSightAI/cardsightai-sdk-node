@@ -475,18 +475,20 @@ await client.lists.delete('list_id');
 // List collectors
 const collectors = await client.collectors.list();
 
-// Create collector
+// Create collector with optional name
 const collector = await client.collectors.create({
-  name: 'John Doe',
-  email: 'john@example.com'
+  name: 'Eric'  // Optional: Name of the collector (e.g., "Mike", "Eric")
 });
 
-// Update collector
+// Get a specific collector
+const collectorDetails = await client.collectors.get('collector_id');
+
+// Update collector name
 await client.collectors.update('collector_id', {
-  name: 'Updated Name'
+  name: 'Mike'  // Optional: Update the collector's name
 });
 
-// Delete collector
+// Delete collector (also deletes associated collections)
 await client.collectors.delete('collector_id');
 ```
 

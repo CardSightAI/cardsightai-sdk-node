@@ -3355,6 +3355,8 @@ export interface paths {
                             collectors: {
                                 /** @description Unique identifier for the collector */
                                 id: string;
+                                /** @description Name of the collector (e.g., "Mike", "Eric") */
+                                name?: string;
                             }[];
                             total_count: number;
                             skip: number;
@@ -3372,6 +3374,8 @@ export interface paths {
                             collectors: {
                                 /** @description Unique identifier for the collector */
                                 id: string;
+                                /** @description Name of the collector (e.g., "Mike", "Eric") */
+                                name?: string;
                             }[];
                             total_count: number;
                             skip: number;
@@ -3451,7 +3455,10 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Name of the collector (e.g., "Mike", "Eric") */
+                        name?: string;
+                    };
                 };
             };
             responses: {
@@ -3464,6 +3471,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };
@@ -3476,6 +3485,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };
@@ -3575,6 +3586,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };
@@ -3587,6 +3600,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };
@@ -3664,7 +3679,10 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": {
+                        /** @description Name of the collector (e.g., "Mike", "Eric") */
+                        name?: string;
+                    };
                 };
             };
             responses: {
@@ -3677,6 +3695,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };
@@ -3689,6 +3709,8 @@ export interface paths {
                         "application/json": {
                             /** @description Unique identifier for the collector */
                             id: string;
+                            /** @description Name of the collector (e.g., "Mike", "Eric") */
+                            name?: string;
                         };
                     };
                 };

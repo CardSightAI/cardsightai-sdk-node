@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2025-10-13
+
+### Added
+- **Collector Name Field** - Collectors now support an optional `name` field:
+  - `collectors.create({ name: 'Eric' })` - Create collectors with a friendly name (e.g., "Mike", "Eric")
+  - `collectors.update(id, { name: 'Mike' })` - Update collector names
+  - `collectors.get(id)` - Returns collector details including name if set
+  - `collectors.list()` - Returns all collectors with their names
+  - The name field is optional and provides a human-readable identifier for collectors
+  - Updated documentation with examples showing proper usage of the name field
+
 ## [1.1.4] - 2025-01-09
 
 ### Added
