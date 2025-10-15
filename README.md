@@ -157,20 +157,21 @@ const setCards = await client.catalog.sets.cards('set_id_here');
 // List your collections
 const collections = await client.collections.list();
 
-// Create a new collection
+// Create a new collection (collectorId is required)
 const newCollection = await client.collections.create({
+  collectorId: 'collector_uuid',
   name: 'My Vintage Cards',
-  description: 'Pre-1980 baseball cards',
-  isPublic: false
+  description: 'Pre-1980 baseball cards'
 });
 
 // Add a card to collection
 await client.collections.cards.add('collection_id', {
-  cardId: 'card_id',
+  cardId: 'card_uuid',
+  parallelId: 'parallel_uuid',  // Optional
+  gradeId: 'grade_uuid',         // Optional
   quantity: 1,
-  condition: 'NM',
-  purchasePrice: 50.00,
-  notes: 'Purchased at card show'
+  buyPrice: '50.00',             // Optional: Purchase price as string
+  buyDate: '2024-01-15'          // Optional: Purchase date (YYYY-MM-DD)
 });
 
 // Get collection analytics
@@ -647,3 +648,6 @@ For detailed version history and release notes, see [CHANGELOG.md](CHANGELOG.md)
 - **Email**: support@cardsight.ai
 - **Issues**: [GitHub Issues](https://github.com/cardsightai/cardsightai-node-sdk/issues)
 - **Website**: [cardsight.ai](https://cardsight.ai)
+
+*Made with ❤️ by CardSight AI, Inc.*
+

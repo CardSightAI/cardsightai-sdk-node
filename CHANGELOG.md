@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2025-10-15
+
+### Changed
+- **Enhanced Update Methods** - Improved flexibility for collection update operations:
+  - `collections.update()` - Data parameter is now optional, allowing empty updates
+  - `collections.cards.update()` - Data parameter is now optional, allowing empty updates
+  - Both methods can now be called with just an ID parameter for streamlined usage
+
+### Improved
+- **Documentation Updates** - Enhanced README with clearer examples and accurate field references:
+  - Updated `collections.create()` example to highlight the `collectorId` field
+  - Improved `collections.cards.add()` examples with proper field names: `buyPrice`, `buyDate`
+  - Added comprehensive list of optional fields: `parallelId`, `gradeId`, `sellPrice`, `soldPrice`, `soldDate`
+  - Clarified that price fields use string format for precision
+  - Enhanced Quick Reference table with complete Collectors endpoint information
+
 ## [1.1.5] - 2025-10-13
 
 ### Added

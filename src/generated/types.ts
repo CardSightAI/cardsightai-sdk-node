@@ -9204,6 +9204,16 @@ export interface paths {
                         } & {
                             [key: string]: unknown;
                         };
+                        /** @description Optional conversation history (max 50 messages). Messages should alternate between user and assistant roles. */
+                        conversationHistory?: {
+                            /**
+                             * @description The role of the message sender
+                             * @enum {string}
+                             */
+                            role: "user" | "assistant";
+                            /** @description The message content */
+                            content: string;
+                        }[];
                         /** @description Maximum tool use iterations (default: 5) */
                         maxIterations?: number;
                     };

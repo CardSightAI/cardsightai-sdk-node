@@ -344,10 +344,10 @@ export class CardSightAI {
     /**
      * Update collection
      */
-    update: (collectionId: string, data: PutBody<'/v1/collection/{collectionId}'>) =>
+    update: (collectionId: string, data?: PutBody<'/v1/collection/{collectionId}'>) =>
       this.client.PUT('/v1/collection/{collectionId}', {
         params: { path: { collectionId } },
-        body: data
+        body: data || {}
       }),
 
     /**
@@ -378,10 +378,10 @@ export class CardSightAI {
           params: { path: { collectionId, cardId } }
         }),
 
-      update: (collectionId: string, cardId: string, data: PutBody<'/v1/collection/{collectionId}/cards/{cardId}'>) =>
+      update: (collectionId: string, cardId: string, data?: PutBody<'/v1/collection/{collectionId}/cards/{cardId}'>) =>
         this.client.PUT('/v1/collection/{collectionId}/cards/{cardId}', {
           params: { path: { collectionId, cardId } },
-          body: data
+          body: data || {}
         }),
 
       delete: (collectionId: string, cardId: string) =>
