@@ -119,38 +119,24 @@ export interface paths {
                         "application/json": {
                             success: boolean;
                             requestId: string;
-                            data?: {
-                                /** @description UUID of identified card (if found in database) */
-                                cardId?: string;
-                                confidence: number;
-                                detectionConfidence?: number;
-                                classificationConfidence?: number;
-                                aiIdentification: {
-                                    year: string;
-                                    release: string;
-                                    set?: string;
-                                    name: string;
-                                    number?: string;
-                                };
+                            detections?: {
+                                /**
+                                 * @description Confidence level of the card identification
+                                 * @enum {string}
+                                 */
+                                confidence: "High" | "Medium" | "Low";
                                 card?: {
                                     /** @description UUID of the card */
                                     id: string;
                                     year: string;
                                     manufacturer: string;
-                                    release: string;
-                                    set?: string;
-                                    playerName: string;
-                                    cardNumber?: string;
-                                    variant?: string;
-                                    frontImageUrl?: string;
-                                    backImageUrl?: string;
+                                    releaseName: string;
+                                    setName?: string;
+                                    name: string;
+                                    number?: string;
                                 };
-                                processingTime: number;
-                            };
-                            error?: {
-                                code: string;
-                                message: string;
-                            };
+                            }[];
+                            processingTime?: number;
                         };
                     };
                 };
@@ -161,12 +147,10 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @enum {boolean} */
-                            success: false;
-                            error: {
-                                code: string;
-                                message: string;
-                            };
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
                         };
                     };
                 };
@@ -177,12 +161,24 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @enum {boolean} */
-                            success: false;
-                            error: {
-                                code: string;
-                                message: string;
-                            };
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                408: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
                         };
                     };
                 };
@@ -193,12 +189,24 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @enum {boolean} */
-                            success: false;
-                            error: {
-                                code: string;
-                                message: string;
-                            };
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
                         };
                     };
                 };

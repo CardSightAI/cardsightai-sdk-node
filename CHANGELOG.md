@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-10-20
+
+### Changed
+- **BREAKING CHANGE: Multi-Card Detection Support** - The card identification endpoint now supports detecting multiple cards in a single image:
+  - Response structure changed from single card to array of detections
+  - Old: `result.data.card` contained a single card object
+  - New: `result.data.detections[]` contains an array of detection objects
+  - Each detection includes:
+    - `confidence`: Confidence level ("High", "Medium", or "Low")
+    - `card`: Detected card details (id, year, manufacturer, name, etc.)
+  - The first detection in the array is typically the highest confidence match
+  - Response includes `requestId` for feedback and `processingTime` for performance metrics
+
+### Added
+- **Type Definitions for Card Identification** - New TypeScript types for better developer experience:
+  - `CardIdentificationResponse` - Full response type from the identification endpoint
+  - `CardDetection` - Individual card detection with confidence level
+  - `DetectedCard` - Detailed card information structure
+  - `IdentifyResult` - Simplified result interface for easier access
+- **Utility Functions** - Helper functions to simplify working with multi-card responses:
+  - `getHighestConfidenceDetection()` - Get the best match based on confidence
+  - `filterByConfidence()` - Filter detections by minimum confidence level
+  - `getDetectedCards()` - Extract all detected card objects
+  - `hasDetections()` - Check if any cards were detected
+  - `isSuccessful()` - Check if identification was successful
+  - `getFirstDetection()` - Get first detection (migration helper for v1.x behavior)
+  - `countByConfidence()` - Count detections by confidence level
+  - `formatCardDisplay()` - Format card details for display
+- **Migration Guide** - Comprehensive documentation for upgrading from v1.x to v2.0
+- **Enhanced Examples** - Updated README with:
+  - Multi-card detection examples
+  - Response structure documentation
+  - Confidence level filtering examples
+  - TypeScript usage with new types
+
+### Migration from v1.x
+To migrate from v1.x to v2.0, update your code to handle the array response:
+
+```typescript
+// Old (v1.x)
+if (result.data?.card) {
+  console.log(result.data.card.name);
+}
+
+// New (v2.0)
+if (result.data?.detections?.[0]?.card) {
+  console.log(result.data.detections[0].card.name);
+}
+
+// Or use utility functions for easier migration
+import { getFirstDetection } from 'cardsightai-sdk';
+const detection = getFirstDetection(result.data);
+if (detection?.card) {
+  console.log(detection.card.name);
+}
+```
+
 ## [1.1.6] - 2025-10-15
 
 ### Changed

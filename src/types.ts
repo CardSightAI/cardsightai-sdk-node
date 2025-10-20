@@ -141,5 +141,31 @@ export interface AIQueryRequest {
   maxResults?: number;
 }
 
+// Card Identification types
+export type CardIdentificationResponse = GetResponseData<'/v1/identify/card', 'post'>;
+
+export interface CardDetection {
+  confidence: 'High' | 'Medium' | 'Low';
+  card?: DetectedCard;
+}
+
+export interface DetectedCard {
+  id: string;
+  year: string;
+  manufacturer: string;
+  releaseName: string;
+  setName?: string;
+  name: string;
+  number?: string;
+}
+
+// Utility type for easier access to the identification result
+export interface IdentifyResult {
+  success: boolean;
+  requestId: string;
+  detections?: CardDetection[];
+  processingTime?: number;
+}
+
 // Export all generated types
 export type { paths, components } from './generated/types.js';
