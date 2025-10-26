@@ -227,8 +227,7 @@ export interface paths {
         };
         /**
          * Get comprehensive catalog statistics
-         * @description
-         *     # Catalog Statistics
+         * @description # Catalog Statistics
          *
          *     This endpoint provides comprehensive statistics about the entire card catalog database.
          *
@@ -276,7 +275,6 @@ export interface paths {
          *     - Identifying which manufacturers have the most complete data
          *     - Seeing historical trends in releases by year
          *     - Gauging AI identification capabilities for specific sets
-         *
          */
         get: {
             parameters: {
