@@ -1185,6 +1185,163 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/catalog/releases/random": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get random releases matching filters
+         * @description Returns random releases instead of paginated sorted results. Useful for discovery features, random browsing, or showcasing variety in the catalog. Supports all standard release filters including year, manufacturer, segment, and name search. If count exceeds available matching releases, returns all available releases.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter releases by segment. Accepts either a UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") or exact segment name (e.g., "Sports"). Case-insensitive for names. */
+                    segment?: string;
+                    /** @description Filter releases by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Case-insensitive for names. */
+                    manufacturer?: string;
+                    /** @description Filter by exact year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                    year?: string;
+                    /** @description Filter releases from this year onwards (inclusive). Example: "2020" returns releases from 2020, 2021, 2022, etc. Ignored if "year" is specified. */
+                    min_year?: string;
+                    /** @description Filter releases up to this year (inclusive). Example: "2022" returns releases from 2022 and earlier. Ignored if "year" is specified. */
+                    max_year?: string;
+                    /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
+                    name?: string;
+                    /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
+                    sort?: "year" | "name";
+                    /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
+                    order?: "asc" | "desc";
+                    /** @description Number of random releases to return. Minimum: 1, Maximum: 200, Default: 1. If fewer releases match filters, returns all available. */
+                    count?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random releases matching the specified filters */
+                            releases: {
+                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+                                manufacturerId: string;
+                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+                                segmentId: string;
+                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+                                id: string;
+                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+                                year: string;
+                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+                                name: string;
+                                description?: string;
+                            }[];
+                            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
+                            count: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random releases matching the specified filters */
+                            releases: {
+                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+                                manufacturerId: string;
+                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+                                segmentId: string;
+                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+                                id: string;
+                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+                                year: string;
+                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+                                name: string;
+                                description?: string;
+                            }[];
+                            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
+                            count: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog/sets": {
         parameters: {
             query?: never;
@@ -1725,6 +1882,173 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/catalog/sets/random": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get random sets matching filters
+         * @description Returns random sets instead of paginated sorted results. Useful for discovery features or showcasing catalog variety. Supports all standard set filters including release, year range, manufacturer, and name search. Each set includes its release context and card/parallel counts. If count exceeds available matching sets, returns all available sets.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter sets to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                    releaseId?: string;
+                    /** @description Search sets by name using partial string matching. Case-insensitive. Example: "base" matches "Base Set", "Base Chrome", etc. */
+                    name?: string;
+                    /** @description Filter sets by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                    year?: string;
+                    /** @description Filter sets from releases in this year onwards (inclusive). Example: "2020" returns sets from 2020, 2021, 2022 releases, etc. */
+                    min_year?: string;
+                    /** @description Filter sets from releases up to this year (inclusive). Example: "2022" returns sets from 2022 and earlier releases. */
+                    max_year?: string;
+                    /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                    manufacturer?: string;
+                    /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
+                    sort?: "name" | "year";
+                    /** @description Sort direction. "asc" for ascending, "desc" for descending. */
+                    order?: "asc" | "desc";
+                    /** @description Number of random sets to return. Minimum: 1, Maximum: 200, Default: 1. If fewer sets match filters, returns all available. */
+                    count?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random sets matching the specified filters */
+                            sets: {
+                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                                id: string;
+                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                                name: string;
+                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                                description?: string;
+                                /** @description Number of base cards in this set */
+                                cardCount: number;
+                                /** @description Number of parallel types in this set */
+                                parallelCount: number;
+                                /** @description Release UUID */
+                                releaseId: string;
+                                /** @description Release name */
+                                releaseName: string;
+                                /** @description Release year */
+                                releaseYear: string;
+                            }[];
+                            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
+                            count: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random sets matching the specified filters */
+                            sets: {
+                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                                id: string;
+                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                                name: string;
+                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                                description?: string;
+                                /** @description Number of base cards in this set */
+                                cardCount: number;
+                                /** @description Number of parallel types in this set */
+                                parallelCount: number;
+                                /** @description Release UUID */
+                                releaseId: string;
+                                /** @description Release name */
+                                releaseName: string;
+                                /** @description Release year */
+                                releaseYear: string;
+                            }[];
+                            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
+                            count: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog/cards": {
         parameters: {
             query?: never;
@@ -2078,6 +2402,229 @@ export interface paths {
                                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                                 "psa-9"?: string;
                             };
+                        };
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Error message */
+                            error: string;
+                            /** @description Error code for programmatic handling */
+                            code: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog/cards/random": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get random cards with optional parallel conversion
+         * @description Simulates pack opening experience by returning random cards from the catalog. When includeParallels=true, each card has a weighted probability of converting to a parallel based on the parallel's numberedTo value. Parallels are checked from rarest to most common using a cascading algorithm where lower numbered parallels (e.g., 1/1) are significantly rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. Supports comprehensive filtering by set, release, player name, year, manufacturer, and card attributes. Note: setId and releaseId filters are mutually exclusive.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "lebron" matches "LeBron James", "LeBron James Jr.", etc. */
+                    name?: string;
+                    /** @description Filter by exact card number. Example: "23" returns all cards numbered 23 across all sets. */
+                    number?: string;
+                    /** @description Filter cards to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                    releaseId?: string;
+                    /** @description Filter cards by release name using partial string matching. Case-insensitive. Example: "chrome" matches cards from "Topps Chrome", "Bowman Chrome", etc. */
+                    releaseName?: string;
+                    /** @description Filter cards by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                    year?: string;
+                    /** @description Filter cards from releases in this year onwards (inclusive). Example: "2020" returns cards from 2020, 2021, 2022 releases, etc. */
+                    min_year?: string;
+                    /** @description Filter cards from releases up to this year (inclusive). Example: "2022" returns cards from 2022 and earlier releases. */
+                    max_year?: string;
+                    /** @description Filter cards to a specific set. Must be a valid UUID. More specific than releaseId filter. */
+                    setId?: string;
+                    /** @description Filter cards by set name using partial string matching. Case-insensitive. Example: "rookie" matches cards from "Rated Rookies", "Rookie Stars", etc. */
+                    setName?: string;
+                    /** @description Filter cards by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                    manufacturer?: string;
+                    /** @description Filter cards by attribute UUID. Returns only cards tagged with this specific attribute (e.g., Rookie Card, Autograph, etc.) */
+                    attributeId?: string;
+                    /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
+                    attributeShortName?: string;
+                    /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
+                    sort?: "name" | "release" | "set" | "year" | "price-raw";
+                    /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
+                    order?: "asc" | "desc";
+                    /** @description Number of random cards to return. Minimum: 1, Maximum: 200, Default: 1. If fewer cards match filters, returns all available. */
+                    count?: number;
+                    /** @description Enable parallel odds system. When true, each card has a weighted chance to convert to a parallel based on the parallel's numberedTo value. Lower numbered parallels (e.g., 1/1) are rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. */
+                    includeParallels?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
+                            cards: {
+                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+                                releaseId: string;
+                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+                                setId: string;
+                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+                                id: string;
+                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+                                number?: string;
+                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+                                name: string;
+                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+                                description?: string;
+                                /** @description Name of the set this card belongs to */
+                                setName: string;
+                                /** @description Name of the release */
+                                releaseName?: string;
+                                /** @description Year of the release */
+                                releaseYear?: string;
+                                /** @description Array of attribute short names */
+                                attributes?: string[];
+                                /** @description Average pricing data for the base card. Only included when price data is available. */
+                                prices?: {
+                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                                    raw?: string;
+                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                                    "psa-10"?: string;
+                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                                    "psa-9"?: string;
+                                };
+                                /** @description True if this card was converted to a parallel variant through the random odds system */
+                                isParallel?: boolean;
+                                /** @description UUID of the parallel type if this card is a parallel variant */
+                                parallelId?: string;
+                                /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
+                                parallelName?: string;
+                                /** @description Limited print run number for this parallel. Null for unlimited parallels. */
+                                numberedTo?: number | null;
+                            }[];
+                            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
+                            count: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
+                            cards: {
+                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+                                releaseId: string;
+                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+                                setId: string;
+                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+                                id: string;
+                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+                                number?: string;
+                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+                                name: string;
+                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+                                description?: string;
+                                /** @description Name of the set this card belongs to */
+                                setName: string;
+                                /** @description Name of the release */
+                                releaseName?: string;
+                                /** @description Year of the release */
+                                releaseYear?: string;
+                                /** @description Array of attribute short names */
+                                attributes?: string[];
+                                /** @description Average pricing data for the base card. Only included when price data is available. */
+                                prices?: {
+                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                                    raw?: string;
+                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                                    "psa-10"?: string;
+                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                                    "psa-9"?: string;
+                                };
+                                /** @description True if this card was converted to a parallel variant through the random odds system */
+                                isParallel?: boolean;
+                                /** @description UUID of the parallel type if this card is a parallel variant */
+                                parallelId?: string;
+                                /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
+                                parallelName?: string;
+                                /** @description Limited print run number for this parallel. Null for unlimited parallels. */
+                                numberedTo?: number | null;
+                            }[];
+                            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
+                            count: number;
                         };
                     };
                 };

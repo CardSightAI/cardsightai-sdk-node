@@ -30,6 +30,7 @@ The most comprehensive baseball card identification and collection management pl
 |---------|-------------|-----------------|
 | **Card Identification** | Identify multiple cards from images using AI | `identify.card()` |
 | **Catalog Search** | Search 2M+ baseball cards database | `catalog.cards.list()`, `catalog.sets.list()` |
+| **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
 | **Collections** | Manage owned card collections with analytics | `collections.create()`, `collections.cards.add()` |
 | **Collectors** | Manage collector profiles with names | `collectors.create()`, `collectors.update()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `lists.cards.add()` |
@@ -280,6 +281,74 @@ const stats = await client.catalog.statistics.get();
 console.log(`Total cards: ${stats.data?.totalCards}`);
 console.log(`Total sets: ${stats.data?.totalSets}`);
 ```
+
+### Random Catalog (Pack Opening & Discovery)
+
+The random endpoints enable pack opening simulations and discovery features by returning random results instead of paginated sorted results:
+
+```typescript
+// Pack opening simulation - Get 10 random cards from a set with parallel odds
+const pack = await client.catalog.random.cards({
+  setId: 'set_uuid',
+  count: 10,
+  includeParallels: true  // Enable parallel conversion odds
+});
+
+// Process the pack
+if (pack.data?.cards) {
+  pack.data.cards.forEach(card => {
+    if (card.isParallel) {
+      console.log(`🌟 PARALLEL: ${card.name} - ${card.parallelName}`);
+      if (card.numberedTo) {
+        console.log(`   Numbered to ${card.numberedTo}!`);
+      }
+    } else {
+      console.log(`Base: ${card.name} #${card.number}`);
+    }
+  });
+}
+
+// Discovery feature - Get 5 random releases from 2023
+const randomReleases = await client.catalog.random.releases({
+  count: 5,
+  year: 2023
+});
+
+// Get random sets from a specific release
+const randomSets = await client.catalog.random.sets({
+  releaseId: 'release_uuid',
+  count: 6
+});
+
+// Player collection building - Get random player cards
+const randomPlayerCards = await client.catalog.random.cards({
+  playerName: 'Mike Trout',
+  count: 3
+});
+
+// Random cards with filters (no parallels)
+const randomCards = await client.catalog.random.cards({
+  year: 2024,
+  manufacturerId: 'manufacturer_uuid',
+  count: 20
+});
+```
+
+#### Parallel Odds System
+
+When `includeParallels: true` is set on `catalog.random.cards()`, each card has a weighted probability of converting to a parallel variant:
+
+1. **Numbered Parallels** (e.g., /1, /10, /50): Individual rolls with boosted odds, rarest to most common
+2. **Unlimited Parallels** (e.g., Refractor, Rainbow): One collective roll, then random selection if successful
+3. **Base Cards**: Returned if no parallel rolls succeed
+
+Parallel cards include additional fields:
+- `isParallel: true`
+- `parallelId: string` - UUID of the parallel
+- `parallelName: string` - Name like "Gold Refractor"
+- `numberedTo: number | null` - Serial number limit (e.g., 50 for /50)
+
+**Note**: `setId` and `releaseId` are mutually exclusive on the cards endpoint.
 
 ### Collection Management
 
@@ -602,7 +671,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 |----------|-----------|------------|
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
 | **Identification** | 1 | `identify.card()` |
-| **Catalog** | 14 | `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*` |
+| **Catalog** | 17 | `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |

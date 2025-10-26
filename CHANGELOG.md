@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-10-26
+
+### Added
+- **Random Catalog Endpoints** - New endpoints for pack opening simulations and discovery features:
+  - `catalog.random.cards()` - Get random cards with optional parallel conversion odds
+  - `catalog.random.sets()` - Get random sets matching specified filters
+  - `catalog.random.releases()` - Get random releases matching specified filters
+- **Pack Opening Simulation** - The `catalog.random.cards()` endpoint supports a parallel odds system:
+  - Set `includeParallels: true` to enable weighted probability for parallel variants
+  - Numbered parallels (e.g., /1, /10, /50) have individual boosted odds from rarest to most common
+  - Unlimited parallels (e.g., Refractor, Rainbow) have collective odds with random selection
+  - Parallel cards include `isParallel`, `parallelId`, `parallelName`, and `numberedTo` fields
+- **Flexible Filtering** - All random endpoints support standard catalog filters:
+  - Cards: `setId`, `releaseId`, `playerName`, `year`, `manufacturerId`, `attributeIds`
+  - Sets: `releaseId`, `year`, `manufacturerId`
+  - Releases: `year`, `manufacturerId`, `segmentId`
+- **Count Parameter** - All endpoints support `count` parameter (1-200) for batch requests
+
+### Notes
+- If `count` exceeds available records, returns all matching records without duplicates
+- `setId` and `releaseId` are mutually exclusive on the cards endpoint
+
 ## [2.0.0] - 2025-10-20
 
 ### Changed
@@ -39,28 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Response structure documentation
   - Confidence level filtering examples
   - TypeScript usage with new types
-
-### Migration from v1.x
-To migrate from v1.x to v2.0, update your code to handle the array response:
-
-```typescript
-// Old (v1.x)
-if (result.data?.card) {
-  console.log(result.data.card.name);
-}
-
-// New (v2.0)
-if (result.data?.detections?.[0]?.card) {
-  console.log(result.data.detections[0].card.name);
-}
-
-// Or use utility functions for easier migration
-import { getFirstDetection } from 'cardsightai-sdk';
-const detection = getFirstDetection(result.data);
-if (detection?.card) {
-  console.log(detection.card.name);
-}
-```
 
 ## [1.1.6] - 2025-10-15
 

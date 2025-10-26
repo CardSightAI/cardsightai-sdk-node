@@ -313,7 +313,33 @@ export class CardSightAI {
     /**
      * Get catalog statistics
      */
-    statistics: () => this.client.GET('/v1/catalog/statistics')
+    statistics: () => this.client.GET('/v1/catalog/statistics'),
+
+    /**
+     * Random catalog endpoints for pack opening simulations and discovery
+     */
+    random: {
+      /**
+       * Get random cards with optional parallel conversion odds
+       * @param params - Query parameters including count, includeParallels, filters
+       */
+      cards: (params?: GetQueryParams<'/v1/catalog/cards/random'>) =>
+        this.client.GET('/v1/catalog/cards/random', { params: { query: params } }),
+
+      /**
+       * Get random sets matching specified filters
+       * @param params - Query parameters including count and filters
+       */
+      sets: (params?: GetQueryParams<'/v1/catalog/sets/random'>) =>
+        this.client.GET('/v1/catalog/sets/random', { params: { query: params } }),
+
+      /**
+       * Get random releases matching specified filters
+       * @param params - Query parameters including count and filters
+       */
+      releases: (params?: GetQueryParams<'/v1/catalog/releases/random'>) =>
+        this.client.GET('/v1/catalog/releases/random', { params: { query: params } })
+    }
   };
 
   /**
