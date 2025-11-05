@@ -15,29 +15,7 @@ export interface paths {
          * Basic health check
          * @description Returns the current health status of the service
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: string;
-                            timestamp: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getHealth"];
         put?: never;
         post?: never;
         delete?: never;
@@ -57,29 +35,7 @@ export interface paths {
          * Authenticated health check
          * @description Returns the current health status of the service. Requires a valid API key to access. Use this endpoint to validate that your API key is configured correctly.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            status: string;
-                            timestamp: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getHealthAuthenticated"];
         put?: never;
         post?: never;
         delete?: never;
@@ -99,119 +55,9 @@ export interface paths {
         put?: never;
         /**
          * Identifies a baseball card from the submitted image
-         * @description Identify a baseball card from an image. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, etc.)
+         * @description Identify a baseball card from an image. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 10MB. Supported formats: JPEG, PNG, WebP.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            requestId: string;
-                            detections?: {
-                                /**
-                                 * @description Confidence level of the card identification
-                                 * @enum {string}
-                                 */
-                                confidence: "High" | "Medium" | "Low";
-                                card?: {
-                                    /** @description UUID of the card */
-                                    id: string;
-                                    year: string;
-                                    manufacturer: string;
-                                    releaseName: string;
-                                    setName?: string;
-                                    name: string;
-                                    number?: string;
-                                };
-                            }[];
-                            processingTime?: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["identifyCard"];
         delete?: never;
         options?: never;
         head?: never;
@@ -276,123 +122,7 @@ export interface paths {
          *     - Seeing historical trends in releases by year
          *     - Gauging AI identification capabilities for specific sets
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Segment statistics */
-                            segments: {
-                                /** @description Total number of segments */
-                                total: number;
-                                /** @description Breakdown of segments with release counts */
-                                breakdown: {
-                                    /** @description Segment name */
-                                    name: string;
-                                    /** @description Number of releases in this segment */
-                                    count: number;
-                                }[];
-                            };
-                            /** @description Manufacturer statistics */
-                            manufacturers: {
-                                /** @description Total number of manufacturers */
-                                total: number;
-                                /** @description All manufacturers with their release counts */
-                                breakdown: {
-                                    /** @description Manufacturer name */
-                                    name: string;
-                                    /** @description Number of releases by this manufacturer */
-                                    releaseCount: number;
-                                }[];
-                            };
-                            /** @description Release statistics */
-                            releases: {
-                                /** @description Total number of releases across all years */
-                                total: number;
-                                /** @description Breakdown by segment, then by year */
-                                bySegment: {
-                                    /** @description Segment name */
-                                    segmentName: string;
-                                    /** @description Total releases in this segment across all years */
-                                    total: number;
-                                    /** @description Year-by-year breakdown for this segment */
-                                    byYear: {
-                                        /** @description Release year */
-                                        year: string;
-                                        /** @description Number of releases in this year for this segment */
-                                        count: number;
-                                    }[];
-                                }[];
-                            };
-                            /** @description Set statistics */
-                            sets: {
-                                /** @description Total number of card sets */
-                                total: number;
-                                /** @description Number of sets that can be recognized by AI */
-                                identifiable: number;
-                            };
-                            /** @description Card statistics */
-                            cards: {
-                                /** @description Total number of all cards in catalog */
-                                total: number;
-                                /** @description Count of base cards (original cards) */
-                                base: number;
-                                /** @description Count of card variations */
-                                variations: number;
-                            };
-                            /** @description Parallel statistics */
-                            parallels: {
-                                /** @description Total number of parallel types */
-                                total: number;
-                                /** @description Count of full set parallels (apply to entire set) */
-                                fullSet: number;
-                                /** @description Count of partial parallels (apply to specific cards only) */
-                                partial: number;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getStatistics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -412,122 +142,7 @@ export interface paths {
          * List market segments
          * @description Retrieve a paginated list of market segments (categories) for trading cards. Segments are the highest level of organization, representing markets like Baseball, Pokemon, Magic The Gathering, etc. Use this endpoint to get available segments for filtering releases or building category navigation. Segments can be searched by name and sorted alphabetically. Each segment may contain multiple manufacturers and releases.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter segments by name using partial string matching. Case-insensitive. Example: "sport" matches "Sports", "Motorsports", etc. */
-                    name?: string;
-                    /** @description Field to sort results by. Currently only supports sorting by segment name. */
-                    sort?: "name";
-                    /** @description Sort direction. "asc" for ascending (A-Z), "desc" for descending (Z-A). Defaults to ascending. */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            segments: {
-                                /** @description Unique identifier for the segment. Format: UUID v4. This ID is permanent and used for all API operations involving this segment. */
-                                id: string;
-                                /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
-                                name: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            segments: {
-                                /** @description Unique identifier for the segment. Format: UUID v4. This ID is permanent and used for all API operations involving this segment. */
-                                id: string;
-                                /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
-                                name: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSegments"];
         put?: never;
         post?: never;
         delete?: never;
@@ -547,126 +162,7 @@ export interface paths {
          * List card manufacturers
          * @description Retrieve a paginated list of trading card manufacturers/companies. Manufacturers are companies that produce trading cards (e.g., Topps, Panini, Upper Deck). Use this endpoint to get available manufacturers for filtering releases or understanding the card market landscape. Manufacturers can be searched by name and sorted alphabetically. Each manufacturer may have releases across multiple segments and years.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter manufacturers by name using partial string matching. Case-insensitive. Example: "top" matches "Topps", "Topps Chrome", etc. */
-                    name?: string;
-                    /** @description Field to sort results by. Currently only supports sorting by manufacturer name. */
-                    sort?: "name";
-                    /** @description Sort direction. "asc" for ascending (A-Z), "desc" for descending (Z-A). Defaults to ascending. */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            manufacturers: {
-                                /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
-                                id: string;
-                                /** @description Official name of the manufacturer. Examples: "Topps", "Panini America", "Upper Deck". This is the primary display name. */
-                                name: string;
-                                /** @description Additional information about the manufacturer, such as founding year, headquarters, or notable product lines. May be null if not provided. */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            manufacturers: {
-                                /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
-                                id: string;
-                                /** @description Official name of the manufacturer. Examples: "Topps", "Panini America", "Upper Deck". This is the primary display name. */
-                                name: string;
-                                /** @description Additional information about the manufacturer, such as founding year, headquarters, or notable product lines. May be null if not provided. */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getManufacturers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -686,146 +182,7 @@ export interface paths {
          * Browse and search Releases with pagination
          * @description Browse and search Releases with pagination
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter releases by segment. Accepts either a UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") or exact segment name (e.g., "Sports"). Case-insensitive for names. */
-                    segment?: string;
-                    /** @description Filter releases by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Case-insensitive for names. */
-                    manufacturer?: string;
-                    /** @description Filter by exact year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter releases from this year onwards (inclusive). Example: "2020" returns releases from 2020, 2021, 2022, etc. Ignored if "year" is specified. */
-                    min_year?: string;
-                    /** @description Filter releases up to this year (inclusive). Example: "2022" returns releases from 2022 and earlier. Ignored if "year" is specified. */
-                    max_year?: string;
-                    /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
-                    name?: string;
-                    /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
-                    sort?: "year" | "name";
-                    /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            releases: {
-                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                                manufacturerId: string;
-                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                                segmentId: string;
-                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                                id: string;
-                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                                year: string;
-                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                                name: string;
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            releases: {
-                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                                manufacturerId: string;
-                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                                segmentId: string;
-                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                                id: string;
-                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                                year: string;
-                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                                name: string;
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getReleases"];
         put?: never;
         post?: never;
         delete?: never;
@@ -845,146 +202,7 @@ export interface paths {
          * Get detailed information about a specific Release
          * @description Get detailed information about a specific Release including Sets and Card counts
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Unique identifier for the release. Must be a valid UUID format. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                            id: string;
-                            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                            segmentId: string;
-                            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                            manufacturerId: string;
-                            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                            year: string;
-                            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                            name: string;
-                            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
-                            description?: string;
-                            /** @description Sets within this release */
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                            id: string;
-                            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                            segmentId: string;
-                            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                            manufacturerId: string;
-                            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                            year: string;
-                            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                            name: string;
-                            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
-                            description?: string;
-                            /** @description Sets within this release */
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getRelease"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1004,177 +222,7 @@ export interface paths {
          * List all cards in a release
          * @description Retrieve a paginated list of all base cards (not parallels) within a specific release across all its sets. Use the optional setId parameter to filter to a specific set within the release. Cards can be searched by player name and sorted by card number or name. This endpoint is ideal for building complete checklists, player searches within a release, or browsing all cards in a product.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter cards to a specific set within the release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    setId?: string;
-                    /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "jordan" matches "Michael Jordan", "Jordan Love", etc. */
-                    name?: string;
-                    /** @description Field to sort results by. "number" sorts by card number in set, "name" sorts alphabetically by player/subject name. */
-                    sort?: "number" | "name";
-                    /** @description Sort direction. "asc" for ascending (1-999 for number, A-Z for name), "desc" for descending (999-1 for number, Z-A for name). */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path: {
-                    /** @description Unique identifier for the release. Must be a valid UUID format. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getReleaseCards"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1194,144 +242,7 @@ export interface paths {
          * Get random releases matching filters
          * @description Returns random releases instead of paginated sorted results. Useful for discovery features, random browsing, or showcasing variety in the catalog. Supports all standard release filters including year, manufacturer, segment, and name search. If count exceeds available matching releases, returns all available releases.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter releases by segment. Accepts either a UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") or exact segment name (e.g., "Sports"). Case-insensitive for names. */
-                    segment?: string;
-                    /** @description Filter releases by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Case-insensitive for names. */
-                    manufacturer?: string;
-                    /** @description Filter by exact year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter releases from this year onwards (inclusive). Example: "2020" returns releases from 2020, 2021, 2022, etc. Ignored if "year" is specified. */
-                    min_year?: string;
-                    /** @description Filter releases up to this year (inclusive). Example: "2022" returns releases from 2022 and earlier. Ignored if "year" is specified. */
-                    max_year?: string;
-                    /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
-                    name?: string;
-                    /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
-                    sort?: "year" | "name";
-                    /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
-                    order?: "asc" | "desc";
-                    /** @description Number of random releases to return. Minimum: 1, Maximum: 200, Default: 1. If fewer releases match filters, returns all available. */
-                    count?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random releases matching the specified filters */
-                            releases: {
-                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                                manufacturerId: string;
-                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                                segmentId: string;
-                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                                id: string;
-                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                                year: string;
-                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                                name: string;
-                                description?: string;
-                            }[];
-                            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random releases matching the specified filters */
-                            releases: {
-                                /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
-                                manufacturerId: string;
-                                /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
-                                segmentId: string;
-                                /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
-                                id: string;
-                                /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
-                                year: string;
-                                /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
-                                name: string;
-                                description?: string;
-                            }[];
-                            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getRandomReleases"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1351,156 +262,7 @@ export interface paths {
          * List and search card sets
          * @description Retrieve a paginated list of card sets across all releases. Sets represent collections within releases (e.g., "Base Set", "Rookie Autographs"). Filter by release, year range, manufacturer, or search by name. Results include card and parallel counts for each set. Use this endpoint to explore available sets, build set checklists, or filter sets by specific criteria. Each set belongs to exactly one release.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter sets to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    releaseId?: string;
-                    /** @description Search sets by name using partial string matching. Case-insensitive. Example: "base" matches "Base Set", "Base Chrome", etc. */
-                    name?: string;
-                    /** @description Filter sets by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter sets from releases in this year onwards (inclusive). Example: "2020" returns sets from 2020, 2021, 2022 releases, etc. */
-                    min_year?: string;
-                    /** @description Filter sets from releases up to this year (inclusive). Example: "2022" returns sets from 2022 and earlier releases. */
-                    max_year?: string;
-                    /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
-                    manufacturer?: string;
-                    /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
-                    sort?: "name" | "year";
-                    /** @description Sort direction. "asc" for ascending, "desc" for descending. */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1520,168 +282,7 @@ export interface paths {
          * Get complete set details
          * @description Retrieve comprehensive information about a specific set including its release context, card count, and all parallel variants. Returns the set details along with release information (name, year) and a complete list of parallel types available for cards in this set. Use this endpoint for detailed set views, understanding set composition, or displaying complete set information with all variants.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Set UUID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                            id: string;
-                            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
-                            releaseId: string;
-                            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                            name: string;
-                            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                            description?: string;
-                            /** @description Name of the release */
-                            releaseName: string;
-                            /** @description Year of the release */
-                            releaseYear: string;
-                            /** @description Number of base cards */
-                            cardCount: number;
-                            /** @description Number of parallel types */
-                            parallelCount: number;
-                            /** @description List of parallel variants in this set */
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                            id: string;
-                            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
-                            releaseId: string;
-                            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                            name: string;
-                            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                            description?: string;
-                            /** @description Name of the release */
-                            releaseName: string;
-                            /** @description Year of the release */
-                            releaseYear: string;
-                            /** @description Number of base cards */
-                            cardCount: number;
-                            /** @description Number of parallel types */
-                            parallelCount: number;
-                            /** @description List of parallel variants in this set */
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSet"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1701,177 +302,7 @@ export interface paths {
          * List cards within a set
          * @description Retrieve a paginated list of all base cards within a specific set. Cards can be filtered by player name or card number, and sorted by number or name. This endpoint returns only the base versions of cards, not their parallel variants. Use this for building set checklists, finding specific cards within a set, or displaying complete set contents. Each card includes its number, name, and basic information.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Search by card name (partial match) */
-                    name?: string;
-                    /** @description Filter by card number */
-                    number?: string;
-                    /** @description Field to sort by */
-                    sort?: "number" | "name";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path: {
-                    /** @description Set UUID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSetCards"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1891,154 +322,7 @@ export interface paths {
          * Get random sets matching filters
          * @description Returns random sets instead of paginated sorted results. Useful for discovery features or showcasing catalog variety. Supports all standard set filters including release, year range, manufacturer, and name search. Each set includes its release context and card/parallel counts. If count exceeds available matching sets, returns all available sets.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter sets to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    releaseId?: string;
-                    /** @description Search sets by name using partial string matching. Case-insensitive. Example: "base" matches "Base Set", "Base Chrome", etc. */
-                    name?: string;
-                    /** @description Filter sets by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter sets from releases in this year onwards (inclusive). Example: "2020" returns sets from 2020, 2021, 2022 releases, etc. */
-                    min_year?: string;
-                    /** @description Filter sets from releases up to this year (inclusive). Example: "2022" returns sets from 2022 and earlier releases. */
-                    max_year?: string;
-                    /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
-                    manufacturer?: string;
-                    /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
-                    sort?: "name" | "year";
-                    /** @description Sort direction. "asc" for ascending, "desc" for descending. */
-                    order?: "asc" | "desc";
-                    /** @description Number of random sets to return. Minimum: 1, Maximum: 200, Default: 1. If fewer sets match filters, returns all available. */
-                    count?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random sets matching the specified filters */
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                            }[];
-                            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random sets matching the specified filters */
-                            sets: {
-                                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
-                                id: string;
-                                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
-                                name: string;
-                                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
-                                description?: string;
-                                /** @description Number of base cards in this set */
-                                cardCount: number;
-                                /** @description Number of parallel types in this set */
-                                parallelCount: number;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                            }[];
-                            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getRandomSets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2058,194 +342,7 @@ export interface paths {
          * Search cards across entire catalog
          * @description Global search endpoint for finding base cards across all releases, sets, and manufacturers. Supports complex filtering by player name, card number, release, set, year range, manufacturer, and attributes. Results include card details with release and set information. This is the primary endpoint for card discovery, player collections, and cross-product searches. Use specific release or set endpoints for more focused searches.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "lebron" matches "LeBron James", "LeBron James Jr.", etc. */
-                    name?: string;
-                    /** @description Filter by exact card number. Example: "23" returns all cards numbered 23 across all sets. */
-                    number?: string;
-                    /** @description Filter cards to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    releaseId?: string;
-                    /** @description Filter cards by release name using partial string matching. Case-insensitive. Example: "chrome" matches cards from "Topps Chrome", "Bowman Chrome", etc. */
-                    releaseName?: string;
-                    /** @description Filter cards by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter cards from releases in this year onwards (inclusive). Example: "2020" returns cards from 2020, 2021, 2022 releases, etc. */
-                    min_year?: string;
-                    /** @description Filter cards from releases up to this year (inclusive). Example: "2022" returns cards from 2022 and earlier releases. */
-                    max_year?: string;
-                    /** @description Filter cards to a specific set. Must be a valid UUID. More specific than releaseId filter. */
-                    setId?: string;
-                    /** @description Filter cards by set name using partial string matching. Case-insensitive. Example: "rookie" matches cards from "Rated Rookies", "Rookie Stars", etc. */
-                    setName?: string;
-                    /** @description Filter cards by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
-                    manufacturer?: string;
-                    /** @description Filter cards by attribute UUID. Returns only cards tagged with this specific attribute (e.g., Rookie Card, Autograph, etc.) */
-                    attributeId?: string;
-                    /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
-                    attributeShortName?: string;
-                    /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
-                    sort?: "name" | "release" | "set" | "year" | "price-raw";
-                    /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCards"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2265,202 +362,7 @@ export interface paths {
          * Get complete card details
          * @description Retrieve comprehensive information about a specific card including its release, set, attributes, and available parallel variants. Returns full card details with contextual information about where it belongs in the catalog hierarchy. Includes a count of parallel versions available and all attributes (Rookie, Autograph, etc.) associated with the card. Use this endpoint for detailed card views, collection management, or when you need complete card information.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Card UUID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                            releaseId: string;
-                            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                            setId: string;
-                            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                            id: string;
-                            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                            number?: string;
-                            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                            name: string;
-                            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                            description?: string;
-                            /** @description Name of the release */
-                            releaseName?: string;
-                            /** @description Year of the release */
-                            releaseYear?: string;
-                            /** @description Name of the set */
-                            setName: string;
-                            /** @description Limited print run number for this specific card */
-                            numberedTo?: number;
-                            /** @description Number of parallel variants for this card */
-                            parallelCount: number;
-                            /** @description List of parallel variants available for this card */
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            /** @description Array of attribute short names */
-                            attributes?: string[];
-                            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-                            prices?: {
-                                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                raw?: string;
-                                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                "psa-10"?: string;
-                                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                "psa-9"?: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                            releaseId: string;
-                            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                            setId: string;
-                            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                            id: string;
-                            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                            number?: string;
-                            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                            name: string;
-                            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                            description?: string;
-                            /** @description Name of the release */
-                            releaseName?: string;
-                            /** @description Year of the release */
-                            releaseYear?: string;
-                            /** @description Name of the set */
-                            setName: string;
-                            /** @description Limited print run number for this specific card */
-                            numberedTo?: number;
-                            /** @description Number of parallel variants for this card */
-                            parallelCount: number;
-                            /** @description List of parallel variants available for this card */
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                            }[];
-                            /** @description Array of attribute short names */
-                            attributes?: string[];
-                            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-                            prices?: {
-                                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                raw?: string;
-                                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                "psa-10"?: string;
-                                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                "psa-9"?: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCard"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2480,210 +382,7 @@ export interface paths {
          * Get random cards with optional parallel conversion
          * @description Simulates pack opening experience by returning random cards from the catalog. When includeParallels=true, each card has a weighted probability of converting to a parallel based on the parallel's numberedTo value. Parallels are checked from rarest to most common using a cascading algorithm where lower numbered parallels (e.g., 1/1) are significantly rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. Supports comprehensive filtering by set, release, player name, year, manufacturer, and card attributes. Note: setId and releaseId filters are mutually exclusive.
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "lebron" matches "LeBron James", "LeBron James Jr.", etc. */
-                    name?: string;
-                    /** @description Filter by exact card number. Example: "23" returns all cards numbered 23 across all sets. */
-                    number?: string;
-                    /** @description Filter cards to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
-                    releaseId?: string;
-                    /** @description Filter cards by release name using partial string matching. Case-insensitive. Example: "chrome" matches cards from "Topps Chrome", "Bowman Chrome", etc. */
-                    releaseName?: string;
-                    /** @description Filter cards by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter cards from releases in this year onwards (inclusive). Example: "2020" returns cards from 2020, 2021, 2022 releases, etc. */
-                    min_year?: string;
-                    /** @description Filter cards from releases up to this year (inclusive). Example: "2022" returns cards from 2022 and earlier releases. */
-                    max_year?: string;
-                    /** @description Filter cards to a specific set. Must be a valid UUID. More specific than releaseId filter. */
-                    setId?: string;
-                    /** @description Filter cards by set name using partial string matching. Case-insensitive. Example: "rookie" matches cards from "Rated Rookies", "Rookie Stars", etc. */
-                    setName?: string;
-                    /** @description Filter cards by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
-                    manufacturer?: string;
-                    /** @description Filter cards by attribute UUID. Returns only cards tagged with this specific attribute (e.g., Rookie Card, Autograph, etc.) */
-                    attributeId?: string;
-                    /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
-                    attributeShortName?: string;
-                    /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
-                    sort?: "name" | "release" | "set" | "year" | "price-raw";
-                    /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
-                    order?: "asc" | "desc";
-                    /** @description Number of random cards to return. Minimum: 1, Maximum: 200, Default: 1. If fewer cards match filters, returns all available. */
-                    count?: number;
-                    /** @description Enable parallel odds system. When true, each card has a weighted chance to convert to a parallel based on the parallel's numberedTo value. Lower numbered parallels (e.g., 1/1) are rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. */
-                    includeParallels?: boolean;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                                /** @description True if this card was converted to a parallel variant through the random odds system */
-                                isParallel?: boolean;
-                                /** @description UUID of the parallel type if this card is a parallel variant */
-                                parallelId?: string;
-                                /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
-                                parallelName?: string;
-                                /** @description Limited print run number for this parallel. Null for unlimited parallels. */
-                                numberedTo?: number | null;
-                            }[];
-                            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
-                            cards: {
-                                /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
-                                releaseId: string;
-                                /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
-                                setId: string;
-                                /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
-                                id: string;
-                                /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
-                                number?: string;
-                                /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
-                                name: string;
-                                /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
-                                description?: string;
-                                /** @description Name of the set this card belongs to */
-                                setName: string;
-                                /** @description Name of the release */
-                                releaseName?: string;
-                                /** @description Year of the release */
-                                releaseYear?: string;
-                                /** @description Array of attribute short names */
-                                attributes?: string[];
-                                /** @description Average pricing data for the base card. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                                /** @description True if this card was converted to a parallel variant through the random odds system */
-                                isParallel?: boolean;
-                                /** @description UUID of the parallel type if this card is a parallel variant */
-                                parallelId?: string;
-                                /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
-                                parallelName?: string;
-                                /** @description Limited print run number for this parallel. Null for unlimited parallels. */
-                                numberedTo?: number | null;
-                            }[];
-                            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
-                            count: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getRandomCards"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2703,136 +402,7 @@ export interface paths {
          * Browse and search Attributes with card counts
          * @description Browse and search Attributes with pagination and card count information
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Search attributes by full name using partial string matching. Case-insensitive. Example: "rookie" matches "Rookie Card", "Rookie Year", etc. */
-                    name?: string;
-                    /** @description Search attributes by short name/code using partial string matching. Case-insensitive. Example: "R" matches "RC" (Rookie Card), "RPA" (Rookie Patch Auto), etc. */
-                    shortName?: string;
-                    /** @description Field to sort results by. "name" = full name, "shortName" = abbreviation, "cardCount" = number of cards with this attribute. */
-                    sort?: "name" | "shortName" | "cardCount";
-                    /** @description Sort direction. "asc" for ascending (A-Z, lowest count first), "desc" for descending (Z-A, highest count first). */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            attributes: {
-                                /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
-                                id: string;
-                                /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
-                                name: string;
-                                /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
-                                shortName: string;
-                                /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
-                                description?: string;
-                                /** @description Number of cards with this attribute */
-                                cardCount: number;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            attributes: {
-                                /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
-                                id: string;
-                                /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
-                                name: string;
-                                /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
-                                shortName: string;
-                                /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
-                                description?: string;
-                                /** @description Number of cards with this attribute */
-                                cardCount: number;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getAttributes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2852,116 +422,7 @@ export interface paths {
          * Get detailed information about a specific Attribute
          * @description Get detailed information about a specific Attribute including card count
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Attribute UUID */
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
-                            id: string;
-                            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
-                            name: string;
-                            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
-                            shortName: string;
-                            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
-                            description?: string;
-                            /** @description Number of cards with this attribute */
-                            cardCount: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
-                            id: string;
-                            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
-                            name: string;
-                            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
-                            shortName: string;
-                            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
-                            description?: string;
-                            /** @description Number of cards with this attribute */
-                            cardCount: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getAttributeById"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2981,182 +442,7 @@ export interface paths {
          * Search for parallels across sets and releases
          * @description Search for parallels by name and filter by release. Returns all sets containing the parallel with release information
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Search parallels by name using partial string matching. Case-insensitive. Example: "gold" matches "Gold Refractor", "Gold Prizm", etc. */
-                    name?: string;
-                    /** @description Filter parallels to a specific release. Must be a valid UUID. Returns all parallel types across all sets in the release. */
-                    releaseId?: string;
-                    /** @description Filter parallels by release name using partial string matching. Case-insensitive. Example: "prizm" matches parallels from "Prizm Basketball", "Prizm Football", etc. */
-                    releaseName?: string;
-                    /** @description Filter parallels by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
-                    year?: string;
-                    /** @description Filter parallels from releases in this year onwards (inclusive). Example: "2020" returns parallels from 2020, 2021, 2022 releases, etc. */
-                    min_year?: string;
-                    /** @description Filter parallels from releases up to this year (inclusive). Example: "2022" returns parallels from 2022 and earlier releases. */
-                    max_year?: string;
-                    /** @description Field to sort results by. "name" = parallel name, "release" = release name, "set" = set name, "year" = release year. */
-                    sort?: "name" | "release" | "set" | "year";
-                    /** @description Sort direction. "asc" for ascending, "desc" for descending. */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                                /** @description Set UUID */
-                                setId: string;
-                                /** @description Set name */
-                                setName: string;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                                /** @description Number of base cards in the set */
-                                cardCount: number;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            parallels: {
-                                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                                id: string;
-                                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                                name: string;
-                                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                                description?: string;
-                                /** @description Limited print run number for this parallel */
-                                numberedTo?: number;
-                                /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-                                prices?: {
-                                    /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                                    raw?: string;
-                                    /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                                    "psa-10"?: string;
-                                    /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                                    "psa-9"?: string;
-                                };
-                                /** @description Set UUID */
-                                setId: string;
-                                /** @description Set name */
-                                setName: string;
-                                /** @description Release UUID */
-                                releaseId: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                                /** @description Number of base cards in the set */
-                                cardCount: number;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getParallels"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3176,100 +462,7 @@ export interface paths {
          * Segment name autocomplete
          * @description Get segment name suggestions for autocomplete. Returns up to 10 matching segment names sorted alphabetically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteSegments"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3289,102 +482,7 @@ export interface paths {
          * Manufacturer name autocomplete
          * @description Get manufacturer name suggestions for autocomplete. Can filter by segment. Returns up to 10 matching manufacturer names sorted alphabetically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                    /** @description Filter manufacturers by segment UUID */
-                    segmentId?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteManufacturers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3404,104 +502,7 @@ export interface paths {
          * Year autocomplete
          * @description Get year suggestions for autocomplete. Can filter by segment and/or manufacturer. Returns up to 10 matching years sorted chronologically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                    /** @description Filter years by segment UUID */
-                    segmentId?: string;
-                    /** @description Filter years by manufacturer UUID */
-                    manufacturerId?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteYears"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3521,106 +522,7 @@ export interface paths {
          * Release name autocomplete
          * @description Get release name suggestions for autocomplete. Can filter by segment, manufacturer, and/or year. Returns up to 10 matching release names sorted alphabetically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                    /** @description Filter releases by segment UUID */
-                    segmentId?: string;
-                    /** @description Filter releases by manufacturer UUID */
-                    manufacturerId?: string;
-                    /** @description Filter releases by year (e.g., "2023") */
-                    year?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteReleases"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3640,108 +542,7 @@ export interface paths {
          * Set name autocomplete
          * @description Get set name suggestions for autocomplete. Can filter by release, or broader filters like segment, manufacturer, and year. Returns up to 10 matching set names sorted alphabetically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                    /** @description Filter sets by release UUID */
-                    releaseId?: string;
-                    /** @description Filter sets by segment UUID (when releaseId not provided) */
-                    segmentId?: string;
-                    /** @description Filter sets by manufacturer UUID (when releaseId not provided) */
-                    manufacturerId?: string;
-                    /** @description Filter sets by year (when releaseId not provided) */
-                    year?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteSets"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3761,110 +562,7 @@ export interface paths {
          * Card name autocomplete
          * @description Get card name suggestions for autocomplete. Can filter by set, release, or broader filters. Returns up to 10 unique card names sorted alphabetically.
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
-                    q: string;
-                    /** @description Filter cards by set UUID */
-                    setId?: string;
-                    /** @description Filter cards by release UUID (when setId not provided) */
-                    releaseId?: string;
-                    /** @description Filter cards by segment UUID (for broader search) */
-                    segmentId?: string;
-                    /** @description Filter cards by manufacturer UUID (for broader search) */
-                    manufacturerId?: string;
-                    /** @description Filter cards by year (for broader search) */
-                    year?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
-                            suggestions: string[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["autocompleteCards"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3884,223 +582,13 @@ export interface paths {
          * Get all collectors
          * @description Get all collectors for the authenticated client with pagination
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            collectors: {
-                                /** @description Unique identifier for the collector */
-                                id: string;
-                                /** @description Name of the collector (e.g., "Mike", "Eric") */
-                                name?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            collectors: {
-                                /** @description Unique identifier for the collector */
-                                id: string;
-                                /** @description Name of the collector (e.g., "Mike", "Eric") */
-                                name?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectors"];
         put?: never;
         /**
          * Create a new collector
          * @description Create a new collector for the authenticated client
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the collector (e.g., "Mike", "Eric") */
-                        name?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["createCollector"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4118,295 +606,18 @@ export interface paths {
          * Get a specific collector
          * @description Get details of a specific collector by ID
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collector UUID */
-                    collectorId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollector"];
         /**
          * Update a collector
          * @description Update a specific collector by ID
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collector UUID */
-                    collectorId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the collector (e.g., "Mike", "Eric") */
-                        name?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collector */
-                            id: string;
-                            /** @description Name of the collector (e.g., "Mike", "Eric") */
-                            name?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        put: operations["updateCollector"];
         post?: never;
         /**
          * Delete a collector
          * @description Delete a specific collector by ID. This will also delete all associated collections.
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collector UUID */
-                    collectorId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["deleteCollector"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4448,132 +659,7 @@ export interface paths {
          *     - Large result sets are automatically paginated
          *     - Only returns collections owned by your API key
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter by collector UUID */
-                    collectorId?: string;
-                    /** @description Search by collection name (partial match) */
-                    name?: string;
-                    /** @description Field to sort by */
-                    sort?: "name";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            collections: {
-                                /** @description Unique identifier for the collection */
-                                id: string;
-                                /** @description ID of the collector who owns this collection */
-                                collectorId: string;
-                                /** @description Name of the collection */
-                                name?: string;
-                                /** @description Description of the collection */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            collections: {
-                                /** @description Unique identifier for the collection */
-                                id: string;
-                                /** @description ID of the collector who owns this collection */
-                                collectorId: string;
-                                /** @description Name of the collection */
-                                name?: string;
-                                /** @description Description of the collection */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollections"];
         put?: never;
         /**
          * Create a new collection
@@ -4596,123 +682,7 @@ export interface paths {
          *     - Each collector can have multiple collections
          *     - Collection names must be unique per collector
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description UUID of the collector who will own this collection
-                         */
-                        collectorId: string;
-                        /** @description Name of the collection */
-                        name?: string;
-                        /** @description Description of the collection */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["createCollection"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4750,112 +720,7 @@ export interface paths {
          *     - Verify collection settings
          *     - Get collection statistics
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollection"];
         /**
          * Update collection
          * @description Update an existing collection's properties.
@@ -4881,121 +746,7 @@ export interface paths {
          *     - Update collection purpose (e.g., personal to for_sale)
          *     - Add or modify description
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the collection */
-                        name?: string;
-                        /** @description Description of the collection */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the collection */
-                            id: string;
-                            /** @description ID of the collector who owns this collection */
-                            collectorId: string;
-                            /** @description Name of the collection */
-                            name?: string;
-                            /** @description Description of the collection */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        put: operations["updateCollection"];
         post?: never;
         /**
          * Delete collection
@@ -5024,83 +775,7 @@ export interface paths {
          *     - Consolidate multiple collections
          *     - Account cleanup before deletion
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["deleteCollection"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5155,271 +830,7 @@ export interface paths {
          *     - Discover diversification opportunities
          *     - Portfolio risk assessment
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Dimension to group the collection by */
-                    groupBy: "release" | "year" | "grade" | "player" | "manufacturer";
-                    /** @description Metric to sort groups by */
-                    sortBy?: "count" | "value" | "roi" | "percentage";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                    /** @description Minimum card count to include in results */
-                    minCount?: number;
-                    /** @description Minimum total value to include in results */
-                    minValue?: string;
-                };
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            summary: {
-                                /** @description Total number of groups */
-                                totalGroups: number;
-                                /** @description Total number of cards in collection */
-                                totalCards: number;
-                                /** @description Total quantity including duplicates */
-                                totalQuantity: number;
-                                /** @description Total collection value */
-                                totalValue?: string;
-                                /** @description Total amount invested */
-                                totalInvested?: string;
-                                /** @description Overall ROI percentage */
-                                overallRoi?: number;
-                                /** @description The dimension used for grouping */
-                                groupedBy: string;
-                                mostValuableGroup?: {
-                                    /** @description Name of most valuable group */
-                                    name: string;
-                                    /** @description Total value of the group */
-                                    value: string;
-                                };
-                                bestPerformingGroup?: {
-                                    /** @description Name of best performing group */
-                                    name: string;
-                                    /** @description ROI percentage */
-                                    roi: number;
-                                };
-                            };
-                            groups: {
-                                /** @description The grouping key (e.g., set name, year, grade) */
-                                groupKey: string;
-                                /** @description The UUID of the group entity if applicable */
-                                groupId?: string;
-                                /** @description Number of cards in this group */
-                                cardCount: number;
-                                /** @description Number of unique cards (ignoring duplicates) */
-                                uniqueCardCount: number;
-                                /** @description Total quantity including duplicates */
-                                totalQuantity: number;
-                                /** @description Total purchase price for cards in group */
-                                totalBuyPrice?: string;
-                                /** @description Total current market value */
-                                totalCurrentValue?: string;
-                                /** @description Total sold price for sold cards */
-                                totalSoldPrice?: string;
-                                /** @description Average purchase price per card */
-                                averageBuyPrice?: string;
-                                /** @description Average current value per card */
-                                averageCurrentValue?: string;
-                                /** @description Return on investment percentage */
-                                roi?: number;
-                                /** @description Percentage this group represents of total collection */
-                                percentageOfCollection: number;
-                                /** @description Top 5 most valuable cards in this group */
-                                topCards?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Set name */
-                                    setName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Purchase price per card */
-                                    buyPrice?: string;
-                                    /** @description Current market value per card */
-                                    currentValue?: string;
-                                    /** @description Quantity in collection */
-                                    quantity: number;
-                                }[];
-                            }[];
-                            pagination: {
-                                total_count: number;
-                                skip: number;
-                                take: number;
-                                page: number;
-                                pages: number;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            summary: {
-                                /** @description Total number of groups */
-                                totalGroups: number;
-                                /** @description Total number of cards in collection */
-                                totalCards: number;
-                                /** @description Total quantity including duplicates */
-                                totalQuantity: number;
-                                /** @description Total collection value */
-                                totalValue?: string;
-                                /** @description Total amount invested */
-                                totalInvested?: string;
-                                /** @description Overall ROI percentage */
-                                overallRoi?: number;
-                                /** @description The dimension used for grouping */
-                                groupedBy: string;
-                                mostValuableGroup?: {
-                                    /** @description Name of most valuable group */
-                                    name: string;
-                                    /** @description Total value of the group */
-                                    value: string;
-                                };
-                                bestPerformingGroup?: {
-                                    /** @description Name of best performing group */
-                                    name: string;
-                                    /** @description ROI percentage */
-                                    roi: number;
-                                };
-                            };
-                            groups: {
-                                /** @description The grouping key (e.g., set name, year, grade) */
-                                groupKey: string;
-                                /** @description The UUID of the group entity if applicable */
-                                groupId?: string;
-                                /** @description Number of cards in this group */
-                                cardCount: number;
-                                /** @description Number of unique cards (ignoring duplicates) */
-                                uniqueCardCount: number;
-                                /** @description Total quantity including duplicates */
-                                totalQuantity: number;
-                                /** @description Total purchase price for cards in group */
-                                totalBuyPrice?: string;
-                                /** @description Total current market value */
-                                totalCurrentValue?: string;
-                                /** @description Total sold price for sold cards */
-                                totalSoldPrice?: string;
-                                /** @description Average purchase price per card */
-                                averageBuyPrice?: string;
-                                /** @description Average current value per card */
-                                averageCurrentValue?: string;
-                                /** @description Return on investment percentage */
-                                roi?: number;
-                                /** @description Percentage this group represents of total collection */
-                                percentageOfCollection: number;
-                                /** @description Top 5 most valuable cards in this group */
-                                topCards?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Set name */
-                                    setName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Purchase price per card */
-                                    buyPrice?: string;
-                                    /** @description Current market value per card */
-                                    currentValue?: string;
-                                    /** @description Quantity in collection */
-                                    quantity: number;
-                                }[];
-                            }[];
-                            pagination: {
-                                total_count: number;
-                                skip: number;
-                                take: number;
-                                page: number;
-                                pages: number;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectionBreakdown"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5474,244 +885,7 @@ export interface paths {
          *     - Collection valuation
          *     - Performance benchmarking
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            overview: {
-                                /** @description Total number of card entries in collection */
-                                totalCards: number;
-                                /** @description Number of unique cards (ignoring duplicates) */
-                                uniqueCards: number;
-                                /** @description Total quantity including all duplicates */
-                                totalQuantity: number;
-                            };
-                            financials: {
-                                /** @description Total amount invested (sum of buy prices) */
-                                totalInvested?: string;
-                                /** @description Current total market value */
-                                currentMarketValue?: string;
-                                /** @description Total gains from sold cards */
-                                totalRealizedGains?: string;
-                                /** @description Unrealized gains on unsold cards */
-                                totalUnrealizedGains?: string;
-                                /** @description Overall return on investment percentage */
-                                overallROI?: number;
-                                /** @description ROI on sold cards only */
-                                realizedROI?: number;
-                            };
-                            composition: {
-                                /** @description Number of graded cards */
-                                gradedCount: number;
-                                /** @description Number of raw (ungraded) cards */
-                                rawCount: number;
-                                /** @description Percentage of collection that is graded */
-                                gradedPercentage: number;
-                                /** @description Number of cards listed for sale */
-                                forSaleCount: number;
-                                /** @description Number of cards that have been sold */
-                                soldCount: number;
-                            };
-                            performance: {
-                                /** @description Average current value per card */
-                                averageCardValue?: string;
-                                /** @description Average ROI across all cards with buy prices */
-                                averageROI?: number;
-                                /** @description Card with highest percentage gain */
-                                topGainer?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Purchase price */
-                                    buyPrice: string;
-                                    /** @description Current market value */
-                                    currentValue: string;
-                                    /** @description Dollar gain amount */
-                                    gain: string;
-                                    /** @description Percentage gain */
-                                    gainPercentage: number;
-                                };
-                                /** @description Most valuable card by current market price */
-                                topValue?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Current market value */
-                                    currentValue: string;
-                                    /** @description Quantity owned */
-                                    quantity: number;
-                                };
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            overview: {
-                                /** @description Total number of card entries in collection */
-                                totalCards: number;
-                                /** @description Number of unique cards (ignoring duplicates) */
-                                uniqueCards: number;
-                                /** @description Total quantity including all duplicates */
-                                totalQuantity: number;
-                            };
-                            financials: {
-                                /** @description Total amount invested (sum of buy prices) */
-                                totalInvested?: string;
-                                /** @description Current total market value */
-                                currentMarketValue?: string;
-                                /** @description Total gains from sold cards */
-                                totalRealizedGains?: string;
-                                /** @description Unrealized gains on unsold cards */
-                                totalUnrealizedGains?: string;
-                                /** @description Overall return on investment percentage */
-                                overallROI?: number;
-                                /** @description ROI on sold cards only */
-                                realizedROI?: number;
-                            };
-                            composition: {
-                                /** @description Number of graded cards */
-                                gradedCount: number;
-                                /** @description Number of raw (ungraded) cards */
-                                rawCount: number;
-                                /** @description Percentage of collection that is graded */
-                                gradedPercentage: number;
-                                /** @description Number of cards listed for sale */
-                                forSaleCount: number;
-                                /** @description Number of cards that have been sold */
-                                soldCount: number;
-                            };
-                            performance: {
-                                /** @description Average current value per card */
-                                averageCardValue?: string;
-                                /** @description Average ROI across all cards with buy prices */
-                                averageROI?: number;
-                                /** @description Card with highest percentage gain */
-                                topGainer?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Purchase price */
-                                    buyPrice: string;
-                                    /** @description Current market value */
-                                    currentValue: string;
-                                    /** @description Dollar gain amount */
-                                    gain: string;
-                                    /** @description Percentage gain */
-                                    gainPercentage: number;
-                                };
-                                /** @description Most valuable card by current market price */
-                                topValue?: {
-                                    /** @description Card UUID */
-                                    cardId: string;
-                                    /** @description Card name */
-                                    cardName: string;
-                                    /** @description Release name */
-                                    releaseName: string;
-                                    /** @description Release year */
-                                    releaseYear: string;
-                                    /** @description Current market value */
-                                    currentValue: string;
-                                    /** @description Quantity owned */
-                                    quantity: number;
-                                };
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectionAnalytics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5772,189 +946,7 @@ export interface paths {
          *     - For sets < 85% complete, use totalCards - ownedCards to get missing count
          *     - Sorted by completion percentage (highest first) by default
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Metric to sort sets by */
-                    sortBy?: "completion" | "missing" | "cost" | "difficulty";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                    /** @description Filter sets with minimum completion percentage */
-                    minCompletion?: number;
-                    /** @description Filter for sets >80% complete */
-                    nearComplete?: boolean;
-                };
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            summary: {
-                                /** @description Total number of sets represented in collection */
-                                totalSets: number;
-                                /** @description Number of sets >80% complete */
-                                nearCompleteSets: number;
-                                /** @description Number of fully complete sets */
-                                fullyCompleteSets: number;
-                                /** @description Total cost to complete all sets */
-                                totalEstimatedCost?: string;
-                            };
-                            sets: {
-                                /** @description Set UUID */
-                                setId: string;
-                                /** @description Set name */
-                                setName: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                                /** @description Total number of cards in set */
-                                totalCards: number;
-                                /** @description Number of unique cards owned */
-                                ownedCards: number;
-                                /** @description Array of missing card UUIDs */
-                                missingCards: string[];
-                                /** @description Percentage complete (0-100) */
-                                completionPercentage: number;
-                                /** @description Estimated cost to acquire missing cards */
-                                estimatedCostToComplete?: string;
-                                /** @description Difficulty score based on card availability (0-100) */
-                                difficultyScore?: number;
-                                /** @description Average value per card in set */
-                                averageCardValue?: string;
-                            }[];
-                            /** @description Total number of sets matching filters */
-                            total_count: number;
-                            /** @description Number of records skipped */
-                            skip: number;
-                            /** @description Number of records returned */
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            summary: {
-                                /** @description Total number of sets represented in collection */
-                                totalSets: number;
-                                /** @description Number of sets >80% complete */
-                                nearCompleteSets: number;
-                                /** @description Number of fully complete sets */
-                                fullyCompleteSets: number;
-                                /** @description Total cost to complete all sets */
-                                totalEstimatedCost?: string;
-                            };
-                            sets: {
-                                /** @description Set UUID */
-                                setId: string;
-                                /** @description Set name */
-                                setName: string;
-                                /** @description Release name */
-                                releaseName: string;
-                                /** @description Release year */
-                                releaseYear: string;
-                                /** @description Total number of cards in set */
-                                totalCards: number;
-                                /** @description Number of unique cards owned */
-                                ownedCards: number;
-                                /** @description Array of missing card UUIDs */
-                                missingCards: string[];
-                                /** @description Percentage complete (0-100) */
-                                completionPercentage: number;
-                                /** @description Estimated cost to acquire missing cards */
-                                estimatedCostToComplete?: string;
-                                /** @description Difficulty score based on card availability (0-100) */
-                                difficultyScore?: number;
-                                /** @description Average value per card in set */
-                                averageCardValue?: string;
-                            }[];
-                            /** @description Total number of sets matching filters */
-                            total_count: number;
-                            /** @description Number of records skipped */
-                            skip: number;
-                            /** @description Number of records returned */
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectionSetProgress"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6000,140 +992,7 @@ export interface paths {
          *     - Missing cards returned as UUIDs for easy card lookup
          *     - Returns 404 if set is not represented in collection
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    collectionId: string;
-                    setId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Set UUID */
-                            setId: string;
-                            /** @description Set name */
-                            setName: string;
-                            /** @description Release name */
-                            releaseName: string;
-                            /** @description Release year */
-                            releaseYear: string;
-                            /** @description Total number of cards in set */
-                            totalCards: number;
-                            /** @description Number of unique cards owned */
-                            ownedCards: number;
-                            /** @description Array of missing card UUIDs */
-                            missingCards: string[];
-                            /** @description Percentage complete (0-100) */
-                            completionPercentage: number;
-                            /** @description Estimated cost to acquire missing cards */
-                            estimatedCostToComplete?: string;
-                            /** @description Difficulty score based on card availability (0-100) */
-                            difficultyScore?: number;
-                            /** @description Average value per card in set */
-                            averageCardValue?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Set UUID */
-                            setId: string;
-                            /** @description Set name */
-                            setName: string;
-                            /** @description Release name */
-                            releaseName: string;
-                            /** @description Release year */
-                            releaseYear: string;
-                            /** @description Total number of cards in set */
-                            totalCards: number;
-                            /** @description Number of unique cards owned */
-                            ownedCards: number;
-                            /** @description Array of missing card UUIDs */
-                            missingCards: string[];
-                            /** @description Percentage complete (0-100) */
-                            completionPercentage: number;
-                            /** @description Estimated cost to acquire missing cards */
-                            estimatedCostToComplete?: string;
-                            /** @description Difficulty score based on card availability (0-100) */
-                            difficultyScore?: number;
-                            /** @description Average value per card in set */
-                            averageCardValue?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSetProgress"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6194,145 +1053,7 @@ export interface paths {
          *     - Returns 404 if parallel doesn't belong to the specified set
          *     - Missing cards are returned as UUIDs for easy lookup via the catalog API
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    collectionId: string;
-                    setId: string;
-                    parallelId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Set UUID */
-                            setId: string;
-                            /** @description Set name */
-                            setName: string;
-                            /** @description Release name */
-                            releaseName: string;
-                            /** @description Release year */
-                            releaseYear: string;
-                            /** @description Parallel UUID */
-                            parallelId: string;
-                            /** @description Parallel name (e.g., Refractor, Gold) */
-                            parallelName: string;
-                            /** @description Total number of cards in set */
-                            totalCards: number;
-                            /** @description Number of this parallel owned */
-                            ownedCards: number;
-                            /** @description Array of missing card UUIDs for this parallel */
-                            missingCards: string[];
-                            /** @description Percentage complete for this parallel (0-100) */
-                            completionPercentage: number;
-                            /** @description Estimated cost to acquire missing cards of this parallel */
-                            estimatedCostToComplete?: string;
-                            /** @description Average value per card for this parallel */
-                            averageCardValue?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Set UUID */
-                            setId: string;
-                            /** @description Set name */
-                            setName: string;
-                            /** @description Release name */
-                            releaseName: string;
-                            /** @description Release year */
-                            releaseYear: string;
-                            /** @description Parallel UUID */
-                            parallelId: string;
-                            /** @description Parallel name (e.g., Refractor, Gold) */
-                            parallelName: string;
-                            /** @description Total number of cards in set */
-                            totalCards: number;
-                            /** @description Number of this parallel owned */
-                            ownedCards: number;
-                            /** @description Array of missing card UUIDs for this parallel */
-                            missingCards: string[];
-                            /** @description Percentage complete for this parallel (0-100) */
-                            completionPercentage: number;
-                            /** @description Estimated cost to acquire missing cards of this parallel */
-                            estimatedCostToComplete?: string;
-                            /** @description Average value per card for this parallel */
-                            averageCardValue?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getParallelSetProgress"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6378,203 +1099,7 @@ export interface paths {
          *     - Export collection data
          *     - Generate collection reports
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter by card UUID */
-                    cardId?: string;
-                    /** @description Filter by parallel UUID */
-                    parallelId?: string;
-                    /** @description Filter by grade UUID */
-                    gradeId?: string;
-                    /** @description Filter by sold status (true for sold, false for not sold) */
-                    hasSold?: boolean;
-                    /** @description Field to sort by */
-                    sort?: "buyDate" | "soldDate" | "buyPrice" | "soldPrice";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the collection card
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection this card belongs to
-                                 */
-                                collectionId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card
-                                 */
-                                cardId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card parallel if applicable
-                                 */
-                                parallelId?: string;
-                                /**
-                                 * Format: uuid
-                                 * @description UUID of the grade if card is graded
-                                 */
-                                gradeId?: string;
-                                /**
-                                 * @description Quantity of this card in the collection
-                                 * @default 1
-                                 */
-                                quantity: number;
-                                /** @description Purchase price of the card */
-                                buyPrice?: string;
-                                /** @description Date the card was purchased (YYYY-MM-DD) */
-                                buyDate?: string;
-                                /** @description Listed selling price of the card */
-                                sellPrice?: string;
-                                /** @description Actual sold price of the card */
-                                soldPrice?: string;
-                                /** @description Date the card was sold (YYYY-MM-DD) */
-                                soldDate?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the collection card
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection this card belongs to
-                                 */
-                                collectionId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card
-                                 */
-                                cardId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card parallel if applicable
-                                 */
-                                parallelId?: string;
-                                /**
-                                 * Format: uuid
-                                 * @description UUID of the grade if card is graded
-                                 */
-                                gradeId?: string;
-                                /**
-                                 * @description Quantity of this card in the collection
-                                 * @default 1
-                                 */
-                                quantity: number;
-                                /** @description Purchase price of the card */
-                                buyPrice?: string;
-                                /** @description Date the card was purchased (YYYY-MM-DD) */
-                                buyDate?: string;
-                                /** @description Listed selling price of the card */
-                                sellPrice?: string;
-                                /** @description Actual sold price of the card */
-                                soldPrice?: string;
-                                /** @description Date the card was sold (YYYY-MM-DD) */
-                                soldDate?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectionCards"];
         put?: never;
         /**
          * Add cards to collection
@@ -6609,248 +1134,7 @@ export interface paths {
          *     - Build want lists
          *     - Track investment portfolio
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description UUID of the card to add to the collection
-                         */
-                        cardId: string;
-                        /**
-                         * Format: uuid
-                         * @description UUID of the card parallel if applicable
-                         */
-                        parallelId?: string;
-                        /**
-                         * Format: uuid
-                         * @description UUID of the grade if card is graded
-                         */
-                        gradeId?: string;
-                        /**
-                         * @description Quantity of this card to add
-                         * @default 1
-                         */
-                        quantity?: number;
-                        /** @description Purchase price (numeric string with up to 2 decimal places) */
-                        buyPrice?: string;
-                        /** @description Purchase date in YYYY-MM-DD format */
-                        buyDate?: string;
-                        /** @description Listed selling price (numeric string with up to 2 decimal places) */
-                        sellPrice?: string;
-                        /** @description Actual sold price (numeric string with up to 2 decimal places) */
-                        soldPrice?: string;
-                        /** @description Sale date in YYYY-MM-DD format */
-                        soldDate?: string;
-                    } | {
-                        /**
-                         * Format: uuid
-                         * @description UUID of the card to add to the collection
-                         */
-                        cardId: string;
-                        /**
-                         * Format: uuid
-                         * @description UUID of the card parallel if applicable
-                         */
-                        parallelId?: string;
-                        /**
-                         * Format: uuid
-                         * @description UUID of the grade if card is graded
-                         */
-                        gradeId?: string;
-                        /**
-                         * @description Quantity of this card to add
-                         * @default 1
-                         */
-                        quantity?: number;
-                        /** @description Purchase price (numeric string with up to 2 decimal places) */
-                        buyPrice?: string;
-                        /** @description Purchase date in YYYY-MM-DD format */
-                        buyDate?: string;
-                        /** @description Listed selling price (numeric string with up to 2 decimal places) */
-                        sellPrice?: string;
-                        /** @description Actual sold price (numeric string with up to 2 decimal places) */
-                        soldPrice?: string;
-                        /** @description Sale date in YYYY-MM-DD format */
-                        soldDate?: string;
-                    }[];
-                };
-            };
-            responses: {
-                /** @description Single card or batch response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the collection card
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this card belongs to
-                             */
-                            collectionId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card
-                             */
-                            cardId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card parallel if applicable
-                             */
-                            parallelId?: string;
-                            /**
-                             * Format: uuid
-                             * @description UUID of the grade if card is graded
-                             */
-                            gradeId?: string;
-                            /**
-                             * @description Quantity of this card in the collection
-                             * @default 1
-                             */
-                            quantity: number;
-                            /** @description Purchase price of the card */
-                            buyPrice?: string;
-                            /** @description Date the card was purchased (YYYY-MM-DD) */
-                            buyDate?: string;
-                            /** @description Listed selling price of the card */
-                            sellPrice?: string;
-                            /** @description Actual sold price of the card */
-                            soldPrice?: string;
-                            /** @description Date the card was sold (YYYY-MM-DD) */
-                            soldDate?: string;
-                        } | {
-                            /** @description Successfully created cards */
-                            cards: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the collection card
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection this card belongs to
-                                 */
-                                collectionId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card
-                                 */
-                                cardId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the card parallel if applicable
-                                 */
-                                parallelId?: string;
-                                /**
-                                 * Format: uuid
-                                 * @description UUID of the grade if card is graded
-                                 */
-                                gradeId?: string;
-                                /**
-                                 * @description Quantity of this card in the collection
-                                 * @default 1
-                                 */
-                                quantity: number;
-                                /** @description Purchase price of the card */
-                                buyPrice?: string;
-                                /** @description Date the card was purchased (YYYY-MM-DD) */
-                                buyDate?: string;
-                                /** @description Listed selling price of the card */
-                                sellPrice?: string;
-                                /** @description Actual sold price of the card */
-                                soldPrice?: string;
-                                /** @description Date the card was sold (YYYY-MM-DD) */
-                                soldDate?: string;
-                            }[];
-                            /** @description Any errors that occurred during batch creation */
-                            errors?: {
-                                /** @description Index of the failed item in the request array */
-                                index: number;
-                                /**
-                                 * Format: uuid
-                                 * @description Card ID that failed
-                                 */
-                                cardId: string;
-                                /** @description Error message */
-                                error: string;
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["addCollectionCards"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6887,178 +1171,7 @@ export interface paths {
          *     - Review purchase history
          *     - Prepare for sale listing
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the collection card
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this card belongs to
-                             */
-                            collectionId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card
-                             */
-                            cardId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card parallel if applicable
-                             */
-                            parallelId?: string;
-                            /**
-                             * Format: uuid
-                             * @description UUID of the grade if card is graded
-                             */
-                            gradeId?: string;
-                            /**
-                             * @description Quantity of this card in the collection
-                             * @default 1
-                             */
-                            quantity: number;
-                            /** @description Purchase price of the card */
-                            buyPrice?: string;
-                            /** @description Date the card was purchased (YYYY-MM-DD) */
-                            buyDate?: string;
-                            /** @description Listed selling price of the card */
-                            sellPrice?: string;
-                            /** @description Actual sold price of the card */
-                            soldPrice?: string;
-                            /** @description Date the card was sold (YYYY-MM-DD) */
-                            soldDate?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the collection card
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this card belongs to
-                             */
-                            collectionId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card
-                             */
-                            cardId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card parallel if applicable
-                             */
-                            parallelId?: string;
-                            /**
-                             * Format: uuid
-                             * @description UUID of the grade if card is graded
-                             */
-                            gradeId?: string;
-                            /**
-                             * @description Quantity of this card in the collection
-                             * @default 1
-                             */
-                            quantity: number;
-                            /** @description Purchase price of the card */
-                            buyPrice?: string;
-                            /** @description Date the card was purchased (YYYY-MM-DD) */
-                            buyDate?: string;
-                            /** @description Listed selling price of the card */
-                            sellPrice?: string;
-                            /** @description Actual sold price of the card */
-                            soldPrice?: string;
-                            /** @description Date the card was sold (YYYY-MM-DD) */
-                            soldDate?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getCollectionCard"];
         /**
          * Update card metadata
          * @description Update collection-specific metadata for a card.
@@ -7094,205 +1207,7 @@ export interface paths {
          *     - Add or modify notes
          *     - Change sale status
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description UUID of the card parallel (null to remove)
-                         */
-                        parallelId?: string | null;
-                        /**
-                         * Format: uuid
-                         * @description UUID of the grade (null to remove)
-                         */
-                        gradeId?: string | null;
-                        /** @description Updated quantity */
-                        quantity?: number;
-                        /** @description Purchase price (null to remove) */
-                        buyPrice?: string | null;
-                        /** @description Purchase date (null to remove) */
-                        buyDate?: string | null;
-                        /** @description Listed selling price (null to remove) */
-                        sellPrice?: string | null;
-                        /** @description Actual sold price (null to remove) */
-                        soldPrice?: string | null;
-                        /** @description Sale date (null to remove) */
-                        soldDate?: string | null;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the collection card
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this card belongs to
-                             */
-                            collectionId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card
-                             */
-                            cardId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card parallel if applicable
-                             */
-                            parallelId?: string;
-                            /**
-                             * Format: uuid
-                             * @description UUID of the grade if card is graded
-                             */
-                            gradeId?: string;
-                            /**
-                             * @description Quantity of this card in the collection
-                             * @default 1
-                             */
-                            quantity: number;
-                            /** @description Purchase price of the card */
-                            buyPrice?: string;
-                            /** @description Date the card was purchased (YYYY-MM-DD) */
-                            buyDate?: string;
-                            /** @description Listed selling price of the card */
-                            sellPrice?: string;
-                            /** @description Actual sold price of the card */
-                            soldPrice?: string;
-                            /** @description Date the card was sold (YYYY-MM-DD) */
-                            soldDate?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the collection card
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this card belongs to
-                             */
-                            collectionId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card
-                             */
-                            cardId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the card parallel if applicable
-                             */
-                            parallelId?: string;
-                            /**
-                             * Format: uuid
-                             * @description UUID of the grade if card is graded
-                             */
-                            gradeId?: string;
-                            /**
-                             * @description Quantity of this card in the collection
-                             * @default 1
-                             */
-                            quantity: number;
-                            /** @description Purchase price of the card */
-                            buyPrice?: string;
-                            /** @description Date the card was purchased (YYYY-MM-DD) */
-                            buyDate?: string;
-                            /** @description Listed selling price of the card */
-                            sellPrice?: string;
-                            /** @description Actual sold price of the card */
-                            soldPrice?: string;
-                            /** @description Date the card was sold (YYYY-MM-DD) */
-                            soldDate?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        put: operations["updateCollectionCard"];
         post?: never;
         /**
          * Remove card from collection
@@ -7323,85 +1238,7 @@ export interface paths {
          *     - To reduce quantity, use PUT to update quantity field
          *     - To move to another collection, add to new collection first
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["deleteCollectionCard"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7442,145 +1279,7 @@ export interface paths {
          *     - Find specific binder types
          *     - Generate binder statistics
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Search by binder name (partial match) */
-                    name?: string;
-                    /** @description Field to sort by */
-                    sort?: "name";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            binders: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the binder
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection this binder belongs to
-                                 */
-                                collectionId: string;
-                                /** @description Name of the binder */
-                                name?: string;
-                                /** @description Description of the binder */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            binders: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the binder
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection this binder belongs to
-                                 */
-                                collectionId: string;
-                                /** @description Name of the binder */
-                                name?: string;
-                                /** @description Description of the binder */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getBinders"];
         put?: never;
         /**
          * Create a binder
@@ -7611,133 +1310,7 @@ export interface paths {
          *     - Build trade packages
          *     - Separate graded from raw cards
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the binder */
-                        name?: string;
-                        /** @description Description of the binder */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["createBinder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7776,126 +1349,7 @@ export interface paths {
          *     - Share binder details
          *     - Prepare for trade or sale
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getBinder"];
         /**
          * Update binder
          * @description Update an existing binder's properties.
@@ -7923,135 +1377,7 @@ export interface paths {
          *     - Update description
          *     - Adjust privacy settings
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the binder */
-                        name?: string;
-                        /** @description Description of the binder */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection this binder belongs to
-                             */
-                            collectionId: string;
-                            /** @description Name of the binder */
-                            name?: string;
-                            /** @description Description of the binder */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        put: operations["updateBinder"];
         post?: never;
         /**
          * Delete binder
@@ -8078,85 +1404,7 @@ export interface paths {
          *     - Delete test binders
          *     - Consolidate binders
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["deleteBinder"];
         options?: never;
         head?: never;
         patch?: never;
@@ -8197,143 +1445,7 @@ export interface paths {
          *     - Calculate binder value
          *     - Export binder inventory
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the binder card link
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the binder
-                                 */
-                                binderId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection card
-                                 */
-                                collectionCardId: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /**
-                                 * Format: uuid
-                                 * @description Unique identifier for the binder card link
-                                 */
-                                id: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the binder
-                                 */
-                                binderId: string;
-                                /**
-                                 * Format: uuid
-                                 * @description ID of the collection card
-                                 */
-                                collectionCardId: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getBinderCards"];
         put?: never;
         /**
          * Add card to binder
@@ -8360,127 +1472,7 @@ export interface paths {
          *     - Build showcases
          *     - Group cards for specific purposes
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description UUID of the collection card to add to the binder
-                         */
-                        collectionCardId: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the binder card link
-                             */
-                            id: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the binder
-                             */
-                            binderId: string;
-                            /**
-                             * Format: uuid
-                             * @description ID of the collection card
-                             */
-                            collectionCardId: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["addCardToBinder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8522,87 +1514,7 @@ export interface paths {
          *     - 204 No Content on success
          *     - No response body
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Binder UUID */
-                    binderId: string;
-                    /** @description Binder Card UUID (the link ID, not the collection card ID) */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["removeCardFromBinder"];
         options?: never;
         head?: never;
         patch?: never;
@@ -8619,71 +1531,13 @@ export interface paths {
          * Get collection card image
          * @description Retrieve the full-resolution image added for the specified card within the collection.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getCollectionCardImage"];
         put?: never;
         /**
          * Upload collection card image
          * @description Upload a photo of a card in your collection. Maximum file size: 2MB. Accepts JPEG, PNG, WebP, and HEIC formats.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * Format: uuid
-                             * @description Unique identifier for the image record
-                             */
-                            imageId: string;
-                            /** @description Timestamp when the image was uploaded */
-                            uploadedAt: string;
-                            /** @description URL to retrieve the full-resolution image */
-                            fullImageUrl: string;
-                            /** @description URL to retrieve the thumbnail image */
-                            thumbnailUrl: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["uploadCollectionCardImage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8701,29 +1555,7 @@ export interface paths {
          * Get collection card image thumbnail
          * @description Retrieve the thumbnail image added for the specified card within the collection.
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Collection UUID */
-                    collectionId: string;
-                    /** @description Collection Card UUID */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getCollectionCardImageThumbnail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -8743,251 +1575,13 @@ export interface paths {
          * Get all lists
          * @description Get all lists for the authenticated client with pagination
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                    /** @description Filter by collector UUID */
-                    collectorId?: string;
-                    /** @description Search by list name (partial match) */
-                    name?: string;
-                    /** @description Field to sort by */
-                    sort?: "name";
-                    /** @description Sort order */
-                    order?: "asc" | "desc";
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            lists: {
-                                /** @description Unique identifier for the list */
-                                id: string;
-                                /** @description ID of the collector who owns this list */
-                                collectorId: string;
-                                /** @description Name of the list */
-                                name?: string;
-                                /** @description Description of the list */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            lists: {
-                                /** @description Unique identifier for the list */
-                                id: string;
-                                /** @description ID of the collector who owns this list */
-                                collectorId: string;
-                                /** @description Name of the list */
-                                name?: string;
-                                /** @description Description of the list */
-                                description?: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getLists"];
         put?: never;
         /**
          * Create a new list
          * @description Create a new list of cards (want list, collection goals, etc.)
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description UUID of the collector who will own this list */
-                        collectorId: string;
-                        /** @description Name of the list */
-                        name?: string;
-                        /** @description Description of the list */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["createList"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9005,313 +1599,18 @@ export interface paths {
          * Get a specific list
          * @description Get details of a specific list by ID
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getList"];
         /**
          * Update a list
          * @description Update a specific list by ID
          */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description Name of the list */
-                        name?: string;
-                        /** @description Description of the list */
-                        description?: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Unique identifier for the list */
-                            id: string;
-                            /** @description ID of the collector who owns this list */
-                            collectorId: string;
-                            /** @description Name of the list */
-                            name?: string;
-                            /** @description Description of the list */
-                            description?: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        put: operations["updateList"];
         post?: never;
         /**
          * Delete a list
          * @description Delete a specific list by ID. This will also remove all card associations.
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["deleteList"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9328,257 +1627,13 @@ export interface paths {
          * Get all cards in a list
          * @description Get all cards in a specific list with pagination
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
-                    take?: number;
-                    /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
-                    skip?: number;
-                };
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description Internal ID for the list card */
-                                id: string;
-                                /** @description ID of the list */
-                                listId: string;
-                                /** @description ID of the card */
-                                cardId: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            cards: {
-                                /** @description Internal ID for the list card */
-                                id: string;
-                                /** @description ID of the list */
-                                listId: string;
-                                /** @description ID of the card */
-                                cardId: string;
-                            }[];
-                            total_count: number;
-                            skip: number;
-                            take: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getListCards"];
         put?: never;
         /**
          * Add card(s) to a list
          * @description Add one or multiple cards to a specific list. Supports both single card and batch (up to 100 cards) operations.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @description UUID of the card to add to the list */
-                        cardId: string;
-                    } | {
-                        /** @description UUID of the card to add to the list */
-                        cardId: string;
-                    }[];
-                };
-            };
-            responses: {
-                /** @description Single card or batch response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Internal ID for the list card */
-                            id: string;
-                            /** @description ID of the list */
-                            listId: string;
-                            /** @description ID of the card */
-                            cardId: string;
-                        } | {
-                            /** @description Successfully created cards */
-                            cards: {
-                                /** @description Internal ID for the list card */
-                                id: string;
-                                /** @description ID of the list */
-                                listId: string;
-                                /** @description ID of the card */
-                                cardId: string;
-                            }[];
-                            /** @description Any errors that occurred during batch creation */
-                            errors?: {
-                                /** @description Index of the failed item in the request array */
-                                index: number;
-                                /** @description Card ID that failed */
-                                cardId: string;
-                                /** @description Error message */
-                                error: string;
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["addCardsToList"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9599,85 +1654,7 @@ export interface paths {
          * Remove a card from a list
          * @description Remove a specific card from a list
          */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description List UUID */
-                    listId: string;
-                    /** @description Card UUID to remove from list */
-                    cardId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        delete: operations["removeCardFromList"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9694,28 +1671,7 @@ export interface paths {
          * Get card image
          * @description Retrieve a card image by ID. Returns either raw JPEG (format=raw) or JSON with base64 data (format=json).
          */
-        get: {
-            parameters: {
-                query?: {
-                    format?: "raw" | "json";
-                };
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["getCardImage"];
         put?: never;
         post?: never;
         delete?: never;
@@ -9737,99 +1693,7 @@ export interface paths {
          * Process a natural language query
          * @description Submit a plaintext natural language question via REST API and receive an AI-generated response.
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description Natural language query */
-                        query: string;
-                        /** @description Optional context for the query */
-                        context?: {
-                            /** Format: uuid */
-                            collectionId?: string;
-                            userId?: string;
-                        } & {
-                            [key: string]: unknown;
-                        };
-                        /** @description Optional conversation history (max 50 messages). Messages should alternate between user and assistant roles. */
-                        conversationHistory?: {
-                            /**
-                             * @description The role of the message sender
-                             * @enum {string}
-                             */
-                            role: "user" | "assistant";
-                            /** @description The message content */
-                            content: string;
-                        }[];
-                        /** @description Maximum tool use iterations (default: 5) */
-                        maxIterations?: number;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description AI-generated response to the query */
-                            answer: string;
-                            /** @description List of MCP tools used to answer the query */
-                            toolsUsed?: string[];
-                            /** @description Time taken to process the query in milliseconds */
-                            processingTime: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            error: string;
-                            code: string;
-                            details?: unknown;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            error: string;
-                            code: string;
-                            details?: unknown;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            error: string;
-                            code: string;
-                            details?: unknown;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["processAIQuery"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9858,124 +1722,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitReleaseFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10004,124 +1751,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitSetFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10152,124 +1782,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitCardFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10298,124 +1811,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitManufacturerFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10444,124 +1840,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitSegmentFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10593,124 +1872,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message for the same entity within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitIdentifyFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10743,108 +1905,7 @@ export interface paths {
          *     **Rate Limiting**: Maximum 50 feedback submissions per day per API key
          *     **Duplicate Detection**: Same feedback message within 1 hour will be rejected
          */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @enum {string} */
-                        feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
-                        message: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        post: operations["submitGeneralFeedback"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10878,102 +1939,7 @@ export interface paths {
          *     - 403: Feedback exists but belongs to another client
          *     - 404: Feedback ID not found
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            success: boolean;
-                            message: string;
-                            data: {
-                                /** Format: uuid */
-                                unique_id: string;
-                                /** @enum {string} */
-                                entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
-                                /** Format: uuid */
-                                entity_id: string | null;
-                                /** @enum {string|null} */
-                                feedback_type: "data_error" | "missing_data" | "suggestion" | "bug" | "other" | null;
-                                message: string;
-                                /** @enum {string} */
-                                status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
-                                created_at: string;
-                                updated_at: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getFeedback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11027,78 +1993,7 @@ export interface paths {
          *     - Identify which keys are making the most requests
          *     - Billing and cost tracking
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Total aggregate number of API calls made across all API keys for the current billing period */
-                            calls: number;
-                            /** @description Array containing usage information for the current API key only */
-                            api_keys: {
-                                /** @description The API key (masked or full depending on context) */
-                                key: string;
-                                /** @description Total number of API calls made using this key for the current billing period */
-                                calls: number;
-                            }[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSubscription"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11142,117 +2037,7 @@ export interface paths {
          *     - Companies are sorted alphabetically by name
          *     - No authentication required (public reference data)
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            companies: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            companies: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getGradingCompanies"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11302,147 +2087,7 @@ export interface paths {
          *     - Returns 404 if company ID doesn't exist
          *     - Types are sorted alphabetically by name
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    companyId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            types: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                            gradingCompany: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            types: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                            gradingCompany: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getGradingTypes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11496,178 +2141,7 @@ export interface paths {
          *     - Validates that the type belongs to the specified company
          *     - Grades are sorted by their grade value
          */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    companyId: string;
-                    typeId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            grades: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingTypeId: string;
-                                gradingTypeName: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                grade: string;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                            gradingType: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                            gradingCompany: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            grades: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingTypeId: string;
-                                gradingTypeName: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                grade: string;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            }[];
-                            total: number;
-                            gradingType: {
-                                /** Format: uuid */
-                                id: string;
-                                /** Format: uuid */
-                                gradingCompanyId: string;
-                                gradingCompanyName: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                            gradingCompany: {
-                                /** Format: uuid */
-                                id: string;
-                                name: string;
-                                description: string | null;
-                                note: string | null;
-                                /** Format: date-time */
-                                createdAt: string;
-                                /** Format: date-time */
-                                updatedAt: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Error message */
-                            error: string;
-                            /** @description Error code for programmatic handling */
-                            code: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getGrades"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11679,7 +2153,2750 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        ErrorResponseInput: {
+            /** @description Error message */
+            error: string;
+            /** @description Error code for programmatic handling */
+            code: string;
+        };
+        BatchOperationErrorInput: {
+            /** @description Index of the failed item in the request array */
+            index: number;
+            /** @description Card UUID that failed to process */
+            cardId: string;
+            /** @description Error message describing why the operation failed */
+            error: string;
+        };
+        CreateListInput: {
+            /** @description UUID of the collector who will own this list */
+            collectorId: string;
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        UpdateListInput: {
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        ListCardItemInput: {
+            /** @description UUID of the card to add to the list */
+            cardId: string;
+        };
+        AddCardToListInput: components["schemas"]["ListCardItemInput"] | components["schemas"]["ListCardItemInput"][];
+        ListInput: {
+            /** @description Unique identifier for the list */
+            id: string;
+            /** @description ID of the collector who owns this list */
+            collectorId: string;
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        ListCardInput: {
+            /** @description Internal ID for the list card */
+            id: string;
+            /** @description ID of the list */
+            listId: string;
+            /** @description ID of the card */
+            cardId: string;
+        };
+        PaginatedListsResponseInput: {
+            /** @description Array of list entities (want lists, collection goals, etc.) */
+            lists: components["schemas"]["ListInput"][];
+            /** @description Total number of lists matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedListCardsResponseInput: {
+            /** @description Array of cards in this list with minimal metadata */
+            cards: components["schemas"]["ListCardInput"][];
+            /** @description Total number of cards in this list */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        BatchListCardsResponseInput: {
+            /** @description Successfully created cards */
+            cards: components["schemas"]["ListCardInput"][];
+            /** @description Any errors that occurred during batch creation */
+            errors?: components["schemas"]["BatchOperationErrorInput"][];
+        };
+        AddCardsToListResponseInput: components["schemas"]["ListCardInput"] | components["schemas"]["BatchListCardsResponseInput"];
+        CreateCollectorInput: {
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        UpdateCollectorInput: {
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        CollectorInput: {
+            /** @description Unique identifier for the collector */
+            id: string;
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        PaginatedCollectorsResponseInput: {
+            collectors: components["schemas"]["CollectorInput"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        CreateCollectionInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the collector who will own this collection
+             */
+            collectorId: string;
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        UpdateCollectionInput: {
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        CollectionCardItemInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the card to add to the collection
+             */
+            cardId: string;
+            /**
+             * Format: uuid
+             * @description UUID of the card parallel if applicable
+             */
+            parallelId?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the grade if card is graded
+             */
+            gradeId?: string;
+            /**
+             * @description Quantity of this card to add
+             * @default 1
+             */
+            quantity: number;
+            /** @description Purchase price (numeric string with up to 2 decimal places) */
+            buyPrice?: string;
+            /** @description Purchase date in YYYY-MM-DD format */
+            buyDate?: string;
+            /** @description Listed selling price (numeric string with up to 2 decimal places) */
+            sellPrice?: string;
+            /** @description Actual sold price (numeric string with up to 2 decimal places) */
+            soldPrice?: string;
+            /** @description Sale date in YYYY-MM-DD format */
+            soldDate?: string;
+        };
+        CreateCollectionCardInput: components["schemas"]["CollectionCardItemInput"] | components["schemas"]["CollectionCardItemInput"][];
+        UpdateCollectionCardInput: {
+            /** @description UUID of the card parallel (null to remove) */
+            parallelId?: string | null;
+            /** @description UUID of the grade (null to remove) */
+            gradeId?: string | null;
+            /** @description Updated quantity */
+            quantity?: number;
+            /** @description Purchase price (null to remove) */
+            buyPrice?: string | null;
+            /** @description Purchase date (null to remove) */
+            buyDate?: string | null;
+            /** @description Listed selling price (null to remove) */
+            sellPrice?: string | null;
+            /** @description Actual sold price (null to remove) */
+            soldPrice?: string | null;
+            /** @description Sale date (null to remove) */
+            soldDate?: string | null;
+        };
+        CollectionInput: {
+            /** @description Unique identifier for the collection */
+            id: string;
+            /** @description ID of the collector who owns this collection */
+            collectorId: string;
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        CollectionCardInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the collection card
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection this card belongs to
+             */
+            collectionId: string;
+            /**
+             * Format: uuid
+             * @description ID of the card
+             */
+            cardId: string;
+            /**
+             * Format: uuid
+             * @description ID of the card parallel if applicable
+             */
+            parallelId?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the grade if card is graded
+             */
+            gradeId?: string;
+            /**
+             * @description Quantity of this card in the collection
+             * @default 1
+             */
+            quantity: number;
+            /** @description Purchase price of the card */
+            buyPrice?: string;
+            /** @description Date the card was purchased (YYYY-MM-DD) */
+            buyDate?: string;
+            /** @description Listed selling price of the card */
+            sellPrice?: string;
+            /** @description Actual sold price of the card */
+            soldPrice?: string;
+            /** @description Date the card was sold (YYYY-MM-DD) */
+            soldDate?: string;
+        };
+        PaginatedCollectionsResponseInput: {
+            collections: components["schemas"]["CollectionInput"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        PaginatedCollectionCardsResponseInput: {
+            cards: components["schemas"]["CollectionCardInput"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        BatchCollectionCardsResponseInput: {
+            /** @description Successfully created cards */
+            cards: components["schemas"]["CollectionCardInput"][];
+            /** @description Any errors that occurred during batch creation */
+            errors?: components["schemas"]["BatchOperationErrorInput"][];
+        };
+        AddCollectionCardsResponseInput: components["schemas"]["CollectionCardInput"] | components["schemas"]["BatchCollectionCardsResponseInput"];
+        TopCardInGroupInput: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Purchase price per card */
+            buyPrice?: string;
+            /** @description Current market value per card */
+            currentValue?: string;
+            /** @description Quantity in collection */
+            quantity: number;
+        };
+        MostValuableGroupInput: {
+            /** @description Name of most valuable group */
+            name: string;
+            /** @description Total value of the group */
+            value: string;
+        };
+        BestPerformingGroupInput: {
+            /** @description Name of best performing group */
+            name: string;
+            /** @description ROI percentage */
+            roi: number;
+        };
+        CollectionBreakdownSummaryInput: {
+            /** @description Total number of groups */
+            totalGroups: number;
+            /** @description Total number of cards in collection */
+            totalCards: number;
+            /** @description Total quantity including duplicates */
+            totalQuantity: number;
+            /** @description Total collection value */
+            totalValue?: string;
+            /** @description Total amount invested */
+            totalInvested?: string;
+            /** @description Overall ROI percentage */
+            overallRoi?: number;
+            /** @description The dimension used for grouping */
+            groupedBy: string;
+            /** @description Group with highest total value */
+            mostValuableGroup?: components["schemas"]["MostValuableGroupInput"];
+            /** @description Group with highest ROI */
+            bestPerformingGroup?: components["schemas"]["BestPerformingGroupInput"];
+        };
+        BreakdownPaginationInput: {
+            /** @description Total number of groups */
+            total_count: number;
+            /** @description Number of groups skipped */
+            skip: number;
+            /** @description Number of groups included */
+            take: number;
+            /** @description Current page number */
+            page: number;
+            /** @description Total number of pages */
+            pages: number;
+        };
+        BreakdownGroupInput: {
+            /** @description The grouping key (e.g., set name, year, grade) */
+            groupKey: string;
+            /** @description The UUID of the group entity if applicable */
+            groupId?: string;
+            /** @description Number of cards in this group */
+            cardCount: number;
+            /** @description Number of unique cards (ignoring duplicates) */
+            uniqueCardCount: number;
+            /** @description Total quantity including duplicates */
+            totalQuantity: number;
+            /** @description Total purchase price for cards in group */
+            totalBuyPrice?: string;
+            /** @description Total current market value */
+            totalCurrentValue?: string;
+            /** @description Total sold price for sold cards */
+            totalSoldPrice?: string;
+            /** @description Average purchase price per card */
+            averageBuyPrice?: string;
+            /** @description Average current value per card */
+            averageCurrentValue?: string;
+            /** @description Return on investment percentage */
+            roi?: number;
+            /** @description Percentage this group represents of total collection */
+            percentageOfCollection: number;
+            /** @description Top 5 most valuable cards in this group */
+            topCards?: components["schemas"]["TopCardInGroupInput"][];
+        };
+        CollectionBreakdownResponseInput: {
+            /** @description Aggregate statistics across all groups */
+            summary: components["schemas"]["CollectionBreakdownSummaryInput"];
+            /** @description Array of breakdown groups */
+            groups: components["schemas"]["BreakdownGroupInput"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["BreakdownPaginationInput"];
+        };
+        SetProgressInput: {
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Total number of cards in set */
+            totalCards: number;
+            /** @description Number of unique cards owned */
+            ownedCards: number;
+            /** @description Array of missing card UUIDs */
+            missingCards: string[];
+            /** @description Percentage complete (0-100) */
+            completionPercentage: number;
+            /** @description Estimated cost to acquire missing cards */
+            estimatedCostToComplete?: string;
+            /** @description Difficulty score based on card availability (0-100) */
+            difficultyScore?: number;
+            /** @description Average value per card in set */
+            averageCardValue?: string;
+        };
+        SetProgressSummaryInput: {
+            /** @description Total number of sets represented in collection */
+            totalSets: number;
+            /** @description Number of sets >80% complete */
+            nearCompleteSets: number;
+            /** @description Number of fully complete sets */
+            fullyCompleteSets: number;
+            /** @description Total cost to complete all sets */
+            totalEstimatedCost?: string;
+        };
+        SetProgressListResponseInput: {
+            /** @description Aggregate statistics across all sets */
+            summary: components["schemas"]["SetProgressSummaryInput"];
+            /** @description Array of set progress entries */
+            sets: components["schemas"]["SetProgressInput"][];
+            /** @description Total number of sets matching filters */
+            total_count: number;
+            /** @description Number of records skipped */
+            skip: number;
+            /** @description Number of records returned */
+            take: number;
+        };
+        ParallelSetProgressInput: {
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Parallel UUID */
+            parallelId: string;
+            /** @description Parallel name (e.g., Refractor, Gold) */
+            parallelName: string;
+            /** @description Total number of cards in set */
+            totalCards: number;
+            /** @description Number of this parallel owned */
+            ownedCards: number;
+            /** @description Array of missing card UUIDs for this parallel */
+            missingCards: string[];
+            /** @description Percentage complete for this parallel (0-100) */
+            completionPercentage: number;
+            /** @description Estimated cost to acquire missing cards of this parallel */
+            estimatedCostToComplete?: string;
+            /** @description Average value per card for this parallel */
+            averageCardValue?: string;
+        };
+        CollectionOverviewInput: {
+            /** @description Total number of card entries in collection */
+            totalCards: number;
+            /** @description Number of unique cards (ignoring duplicates) */
+            uniqueCards: number;
+            /** @description Total quantity including all duplicates */
+            totalQuantity: number;
+        };
+        CollectionFinancialsInput: {
+            /** @description Total amount invested (sum of buy prices) */
+            totalInvested?: string;
+            /** @description Current total market value */
+            currentMarketValue?: string;
+            /** @description Total gains from sold cards */
+            totalRealizedGains?: string;
+            /** @description Unrealized gains on unsold cards */
+            totalUnrealizedGains?: string;
+            /** @description Overall return on investment percentage */
+            overallROI?: number;
+            /** @description ROI on sold cards only */
+            realizedROI?: number;
+        };
+        CollectionCompositionInput: {
+            /** @description Number of graded cards */
+            gradedCount: number;
+            /** @description Number of raw (ungraded) cards */
+            rawCount: number;
+            /** @description Percentage of collection that is graded */
+            gradedPercentage: number;
+            /** @description Number of cards listed for sale */
+            forSaleCount: number;
+            /** @description Number of cards that have been sold */
+            soldCount: number;
+        };
+        TopGainerCardInput: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Purchase price */
+            buyPrice: string;
+            /** @description Current market value */
+            currentValue: string;
+            /** @description Dollar gain amount */
+            gain: string;
+            /** @description Percentage gain */
+            gainPercentage: number;
+        };
+        TopValueCardInput: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Current market value */
+            currentValue: string;
+            /** @description Quantity owned */
+            quantity: number;
+        };
+        CollectionPerformanceInput: {
+            /** @description Average current value per card */
+            averageCardValue?: string;
+            /** @description Average ROI across all cards with buy prices */
+            averageROI?: number;
+            /** @description Card with highest percentage gain */
+            topGainer?: components["schemas"]["TopGainerCardInput"];
+            /** @description Most valuable card by current market price */
+            topValue?: components["schemas"]["TopValueCardInput"];
+        };
+        CollectionAnalyticsResponseInput: {
+            /** @description Collection overview with basic counts */
+            overview: components["schemas"]["CollectionOverviewInput"];
+            /** @description Investment and return metrics */
+            financials: components["schemas"]["CollectionFinancialsInput"];
+            /** @description Breakdown of collection by type and status */
+            composition: components["schemas"]["CollectionCompositionInput"];
+            /** @description Performance metrics including averages and top performers */
+            performance: components["schemas"]["CollectionPerformanceInput"];
+        };
+        UploadCollectionCardImageResponseInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the image record
+             */
+            imageId: string;
+            /** @description Timestamp when the image was uploaded */
+            uploadedAt: string;
+            /** @description URL to retrieve the full-resolution image */
+            fullImageUrl: string;
+            /** @description URL to retrieve the thumbnail image */
+            thumbnailUrl: string;
+        };
+        CreateBinderInput: {
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        UpdateBinderInput: {
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        AddCardToBinderInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the collection card to add to the binder
+             */
+            collectionCardId: string;
+        };
+        BinderInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the binder
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection this binder belongs to
+             */
+            collectionId: string;
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        BinderCardInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the binder card link
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the binder
+             */
+            binderId: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection card
+             */
+            collectionCardId: string;
+        };
+        PaginatedBindersResponseInput: {
+            binders: components["schemas"]["BinderInput"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        PaginatedBinderCardsResponseInput: {
+            cards: components["schemas"]["BinderCardInput"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        FeedbackInputInput: {
+            /**
+             * @description FeedbackType
+             * @enum {string}
+             */
+            feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
+            message: string;
+        };
+        FeedbackResponseInput: {
+            /** Format: uuid */
+            unique_id: string;
+            /**
+             * @description EntityType
+             * @enum {string}
+             */
+            entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
+            entity_id: string | null;
+            feedback_type: ("data_error" | "missing_data" | "suggestion" | "bug" | "other") | null;
+            message: string;
+            /**
+             * @description FeedbackStatus
+             * @enum {string}
+             */
+            status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            created_at: string;
+            updated_at: string;
+        };
+        FeedbackSubmitResponseInput: {
+            success: boolean;
+            message: string;
+            data: components["schemas"]["FeedbackResponseInput"];
+        };
+        FileUploadInput: {
+            /** @description The image file to analyze */
+            image: unknown;
+        };
+        AIIdentificationInput: {
+            /** @description Release year identified by AI (e.g., "2023", "1989") */
+            year: string;
+            /** @description Release/product name identified by AI (e.g., "Topps Chrome", "Upper Deck Series 1") */
+            release: string;
+            /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
+            set?: string;
+            /** @description Player or subject name on the card (e.g., "Michael Jordan", "Tom Brady") */
+            name: string;
+            /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
+            number?: string;
+        };
+        CardDetailsInput: {
+            /** @description Unique UUID of the identified card from the CardSightAI catalog */
+            id: string;
+            /** @description Release year from catalog (e.g., "2023", "1989") */
+            year: string;
+            /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
+            manufacturer: string;
+            /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
+            releaseName: string;
+            /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
+            setName?: string;
+            /** @description Player or subject name from catalog (e.g., "Michael Jordan", "Tom Brady") */
+            name: string;
+            /** @description Card number from catalog (e.g., "#23", "RC-1") */
+            number?: string;
+        };
+        IdentificationDataInput: {
+            /**
+             * @description AI confidence level for this detection (High: 90-100%, Medium: 70-89%, Low: <70%)
+             * @enum {string}
+             */
+            confidence: "High" | "Medium" | "Low";
+            /** @description Matched card details from catalog. Null if no match found or confidence too low. */
+            card?: components["schemas"]["CardDetailsInput"];
+        };
+        IdentifyCardResponseInput: {
+            /** @description Whether the identification process completed successfully */
+            success: boolean;
+            /** @description Unique identifier for tracking this identification request */
+            requestId: string;
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Empty if no cards found. */
+            detections?: components["schemas"]["IdentificationDataInput"][];
+            /** @description Total processing time in milliseconds for AI analysis and catalog matching */
+            processingTime?: number;
+        };
+        AIQueryRequestInput: {
+            /** @description Natural language query */
+            query: string;
+            /** @description Optional context for the query */
+            context?: components["schemas"]["AIContextInput"];
+            /** @description Optional conversation history (max 50 messages). Messages should alternate between user and assistant roles. */
+            conversationHistory?: components["schemas"]["ConversationMessageInput"][];
+            /** @description Maximum tool use iterations (default: 5) */
+            maxIterations?: number;
+        };
+        AIContextInput: {
+            /** Format: uuid */
+            collectionId?: string;
+            userId?: string;
+        } & {
+            [key: string]: unknown;
+        };
+        ConversationMessageInput: {
+            /**
+             * @description The role of the message sender
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** @description The message content */
+            content: string;
+        };
+        AIQueryResponseInput: {
+            /** @description AI-generated response to the query */
+            answer: string;
+            /** @description List of MCP tools used to answer the query */
+            toolsUsed?: string[];
+            /** @description Time taken to process the query in milliseconds */
+            processingTime: number;
+        };
+        AIErrorInput: {
+            error: string;
+            code: string;
+            details?: unknown;
+        };
+        ApiKeyUsageInput: {
+            /** @description The API key (masked or full depending on context) */
+            key: string;
+            /** @description Total number of API calls made using this key for the current billing period */
+            calls: number;
+        };
+        SubscriptionInfoInput: {
+            /** @description Total aggregate number of API calls made across all API keys for the current billing period */
+            calls: number;
+            /** @description Array containing usage information for the current API key only */
+            api_keys: components["schemas"]["ApiKeyUsageInput"][];
+        };
+        ImageJsonResponseInput: {
+            /** @description Base64 data URI (ready for use in HTML img src) */
+            data: string;
+            /** @description MIME type of the image */
+            contentType: string;
+            /** @description Size of the image in bytes */
+            size?: number;
+        };
+        SegmentInput: {
+            /** @description Unique identifier for the segment. Format: UUID v4. This ID is permanent and used for all API operations involving this segment. */
+            id: string;
+            /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
+            name: string;
+        };
+        ManufacturerInput: {
+            /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
+            id: string;
+            /** @description Official name of the manufacturer. Examples: "Topps", "Panini America", "Upper Deck". This is the primary display name. */
+            name: string;
+            /** @description Additional information about the manufacturer, such as founding year, headquarters, or notable product lines. May be null if not provided. */
+            description?: string;
+        };
+        ReleaseInput: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+        };
+        SetInput: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
+            releaseId: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+        };
+        CardInput: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+        };
+        ParallelInput: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description UUID of the set this parallel belongs to. Links to the set entity. Each set can have multiple parallel types. */
+            setId: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+        };
+        AttributeInput: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+        };
+        ParallelSummaryInput: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        AttributeSummaryInput: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+            /** @description Number of cards with this attribute */
+            cardCount: number;
+        };
+        ReleaseSummaryInput: {
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            description?: string;
+        };
+        SetSummaryWithCountsInput: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+            /** @description Number of base cards in this set */
+            cardCount: number;
+            /** @description Number of parallel types in this set */
+            parallelCount: number;
+        };
+        CardSummaryInput: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the set this card belongs to */
+            setName: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        DetailedCardInput: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Name of the set */
+            setName: string;
+            /** @description Limited print run number for this specific card */
+            numberedTo?: number;
+            /** @description Number of parallel variants for this card */
+            parallelCount: number;
+            /** @description List of parallel variants available for this card */
+            parallels: components["schemas"]["ParallelSummaryInput"][];
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        ReleaseWithSetsInput: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+            /** @description Sets within this release */
+            sets: components["schemas"]["SetSummaryWithCountsInput"][];
+        };
+        ParallelWithSetInput: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release UUID */
+            releaseId: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Number of base cards in the set */
+            cardCount: number;
+        };
+        PaginatedSegmentsResponseInput: {
+            /** @description Array of market segment entities (e.g., Sports, Entertainment, Gaming) */
+            segments: components["schemas"]["SegmentInput"][];
+            /** @description Total number of segments matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedManufacturersResponseInput: {
+            /** @description Array of card manufacturer entities (e.g., Topps, Panini, Upper Deck) */
+            manufacturers: components["schemas"]["ManufacturerInput"][];
+            /** @description Total number of manufacturers matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedReleasesResponseInput: {
+            /** @description Array of release entities with summary information (e.g., "2023 Topps Chrome Baseball") */
+            releases: components["schemas"]["ReleaseSummaryInput"][];
+            /** @description Total number of releases matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedReleaseResponseInput: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+            /** @description Sets within this release */
+            sets: components["schemas"]["SetSummaryWithCountsInput"][];
+        };
+        PaginatedCardsResponseInput: {
+            /** @description Array of card entities with summary information */
+            cards: components["schemas"]["CardSummaryInput"][];
+            /** @description Total number of cards matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedSetsResponseInput: {
+            /** @description Array of set entities with card counts and release information */
+            sets: {
+                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                id: string;
+                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                name: string;
+                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                description?: string;
+                /** @description Number of base cards in this set */
+                cardCount: number;
+                /** @description Number of parallel types in this set */
+                parallelCount: number;
+                /** @description Release UUID */
+                releaseId: string;
+                /** @description Release name */
+                releaseName: string;
+                /** @description Release year */
+                releaseYear: string;
+            }[];
+            /** @description Total number of sets matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedSetResponseInput: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
+            releaseId: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName: string;
+            /** @description Year of the release */
+            releaseYear: string;
+            /** @description Number of base cards */
+            cardCount: number;
+            /** @description Number of parallel types */
+            parallelCount: number;
+            /** @description List of parallel variants in this set */
+            parallels: components["schemas"]["ParallelSummaryInput"][];
+        };
+        DetailedCardResponseInput: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Name of the set */
+            setName: string;
+            /** @description Limited print run number for this specific card */
+            numberedTo?: number;
+            /** @description Number of parallel variants for this card */
+            parallelCount: number;
+            /** @description List of parallel variants available for this card */
+            parallels: components["schemas"]["ParallelSummaryInput"][];
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        PaginatedAttributesResponseInput: {
+            /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
+            attributes: components["schemas"]["DetailedAttributeResponseInput"][];
+            /** @description Total number of attributes matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedAttributeResponseInput: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+            /** @description Number of cards with this attribute */
+            cardCount: number;
+        };
+        PaginatedParallelsResponseInput: {
+            /** @description Array of parallel variants with associated set information (e.g., Refractor, Prizm, numbered parallels) */
+            parallels: components["schemas"]["ParallelWithSetInput"][];
+            /** @description Total number of parallels matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        CatalogSegmentBreakdownItemInput: {
+            /** @description Segment name */
+            name: string;
+            /** @description Number of releases in this segment */
+            count: number;
+        };
+        CatalogSegmentStatsInput: {
+            /** @description Total number of segments */
+            total: number;
+            /** @description Breakdown of segments with release counts */
+            breakdown: components["schemas"]["CatalogSegmentBreakdownItemInput"][];
+        };
+        CatalogManufacturerBreakdownItemInput: {
+            /** @description Manufacturer name */
+            name: string;
+            /** @description Number of releases by this manufacturer */
+            releaseCount: number;
+        };
+        CatalogManufacturerStatsInput: {
+            /** @description Total number of manufacturers */
+            total: number;
+            /** @description All manufacturers with their release counts */
+            breakdown: components["schemas"]["CatalogManufacturerBreakdownItemInput"][];
+        };
+        CatalogReleaseYearBreakdownInput: {
+            /** @description Release year */
+            year: string;
+            /** @description Number of releases in this year for this segment */
+            count: number;
+        };
+        CatalogReleaseBySegmentInput: {
+            /** @description Segment name */
+            segmentName: string;
+            /** @description Total releases in this segment across all years */
+            total: number;
+            /** @description Year-by-year breakdown for this segment */
+            byYear: components["schemas"]["CatalogReleaseYearBreakdownInput"][];
+        };
+        CatalogReleaseStatsInput: {
+            /** @description Total number of releases across all years */
+            total: number;
+            /** @description Breakdown by segment, then by year */
+            bySegment: components["schemas"]["CatalogReleaseBySegmentInput"][];
+        };
+        CatalogSetStatsInput: {
+            /** @description Total number of card sets */
+            total: number;
+            /** @description Number of sets that can be recognized by AI */
+            identifiable: number;
+        };
+        CatalogCardStatsInput: {
+            /** @description Total number of all cards in catalog */
+            total: number;
+            /** @description Count of base cards (original cards) */
+            base: number;
+            /** @description Count of card variations */
+            variations: number;
+        };
+        CatalogParallelStatsInput: {
+            /** @description Total number of parallel types */
+            total: number;
+            /** @description Count of full set parallels (apply to entire set) */
+            fullSet: number;
+            /** @description Count of partial parallels (apply to specific cards only) */
+            partial: number;
+        };
+        CatalogStatisticsResponseInput: {
+            /** @description Segment statistics */
+            segments: components["schemas"]["CatalogSegmentStatsInput"];
+            /** @description Manufacturer statistics */
+            manufacturers: components["schemas"]["CatalogManufacturerStatsInput"];
+            /** @description Release statistics */
+            releases: components["schemas"]["CatalogReleaseStatsInput"];
+            /** @description Set statistics */
+            sets: components["schemas"]["CatalogSetStatsInput"];
+            /** @description Card statistics */
+            cards: components["schemas"]["CatalogCardStatsInput"];
+            /** @description Parallel statistics */
+            parallels: components["schemas"]["CatalogParallelStatsInput"];
+        };
+        CardWithOptionalParallelInput: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the set this card belongs to */
+            setName: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+            /** @description True if this card was converted to a parallel variant through the random odds system */
+            isParallel?: boolean;
+            /** @description UUID of the parallel type if this card is a parallel variant */
+            parallelId?: string;
+            /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
+            parallelName?: string;
+            /** @description Limited print run number for this parallel. Null for unlimited parallels. */
+            numberedTo?: number | null;
+        };
+        RandomReleasesResponseInput: {
+            /** @description Array of random releases matching the specified filters */
+            releases: components["schemas"]["ReleaseSummaryInput"][];
+            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        RandomSetsResponseInput: {
+            /** @description Array of random sets matching the specified filters */
+            sets: {
+                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                id: string;
+                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                name: string;
+                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                description?: string;
+                /** @description Number of base cards in this set */
+                cardCount: number;
+                /** @description Number of parallel types in this set */
+                parallelCount: number;
+                /** @description Release UUID */
+                releaseId: string;
+                /** @description Release name */
+                releaseName: string;
+                /** @description Release year */
+                releaseYear: string;
+            }[];
+            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        RandomCardsResponseInput: {
+            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
+            cards: components["schemas"]["CardWithOptionalParallelInput"][];
+            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        AutocompleteResponseInput: {
+            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
+            suggestions: string[];
+        };
+        GradingCompanyInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grading company
+             */
+            id: string;
+            /** @description Name of the grading company (e.g., PSA, BGS, SGC, CGC) */
+            name: string;
+            /** @description Detailed description of the grading company and its services */
+            description: string | null;
+            /** @description Additional notes or important information about this grading company */
+            note: string | null;
+        };
+        GradingTypeInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grading type
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the parent grading company offering this grading type
+             */
+            gradingCompanyId: string;
+            /** @description Name of the parent grading company (denormalized for convenience) */
+            gradingCompanyName: string;
+            /** @description Name of the grading type (e.g., Regular, Crossover, Black Label) */
+            name: string;
+            /** @description Detailed description of what this grading type offers or represents */
+            description: string | null;
+            /** @description Additional notes about this grading type */
+            note: string | null;
+        };
+        GradeInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grade
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the parent grading type that this grade belongs to
+             */
+            gradingTypeId: string;
+            /** @description Name of the parent grading type (denormalized for convenience) */
+            gradingTypeName: string;
+            /**
+             * Format: uuid
+             * @description ID of the grading company (denormalized for convenience)
+             */
+            gradingCompanyId: string;
+            /** @description Name of the grading company (denormalized for convenience) */
+            gradingCompanyName: string;
+            /** @description The grade value as a string (e.g., "10", "9.5", "8") to support decimal and "Authentic" grades */
+            grade: string;
+        };
+        GradingCompaniesResponseInput: {
+            /** @description List of grading companies */
+            companies: components["schemas"]["GradingCompanyInput"][];
+            /** @description Total number of grading companies available */
+            total: number;
+        };
+        GradingTypesResponseInput: {
+            /** @description List of grading types offered by this company */
+            types: components["schemas"]["GradingTypeInput"][];
+            /** @description Total number of grading types for this company */
+            total: number;
+            /** @description Parent grading company information for context */
+            gradingCompany: components["schemas"]["GradingCompanyInput"];
+        };
+        GradesResponseInput: {
+            /** @description List of specific grade values available for this grading type */
+            grades: components["schemas"]["GradeInput"][];
+            /** @description Total number of grades for this grading type */
+            total: number;
+            /** @description Parent grading type information for context */
+            gradingType: components["schemas"]["GradingTypeInput"];
+            /** @description Grandparent grading company information for context */
+            gradingCompany: components["schemas"]["GradingCompanyInput"];
+        };
+        BasicHealthResponseInput: {
+            /** @description Overall health status of the API (e.g., "healthy") */
+            status: string;
+            /** @description ISO 8601 timestamp when the health check was performed */
+            timestamp: string;
+        };
+        ErrorResponse: {
+            /** @description Error message */
+            error: string;
+            /** @description Error code for programmatic handling */
+            code: string;
+        };
+        BatchOperationError: {
+            /** @description Index of the failed item in the request array */
+            index: number;
+            /** @description Card UUID that failed to process */
+            cardId: string;
+            /** @description Error message describing why the operation failed */
+            error: string;
+        };
+        CreateList: {
+            /** @description UUID of the collector who will own this list */
+            collectorId: string;
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        UpdateList: {
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        ListCardItem: {
+            /** @description UUID of the card to add to the list */
+            cardId: string;
+        };
+        AddCardToList: components["schemas"]["ListCardItem"] | components["schemas"]["ListCardItem"][];
+        List: {
+            /** @description Unique identifier for the list */
+            id: string;
+            /** @description ID of the collector who owns this list */
+            collectorId: string;
+            /** @description Name of the list */
+            name?: string;
+            /** @description Description of the list */
+            description?: string;
+        };
+        ListCard: {
+            /** @description Internal ID for the list card */
+            id: string;
+            /** @description ID of the list */
+            listId: string;
+            /** @description ID of the card */
+            cardId: string;
+        };
+        PaginatedListsResponse: {
+            /** @description Array of list entities (want lists, collection goals, etc.) */
+            lists: components["schemas"]["List"][];
+            /** @description Total number of lists matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedListCardsResponse: {
+            /** @description Array of cards in this list with minimal metadata */
+            cards: components["schemas"]["ListCard"][];
+            /** @description Total number of cards in this list */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        BatchListCardsResponse: {
+            /** @description Successfully created cards */
+            cards: components["schemas"]["ListCard"][];
+            /** @description Any errors that occurred during batch creation */
+            errors?: components["schemas"]["BatchOperationError"][];
+        };
+        AddCardsToListResponse: components["schemas"]["ListCard"] | components["schemas"]["BatchListCardsResponse"];
+        CreateCollector: {
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        UpdateCollector: {
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        Collector: {
+            /** @description Unique identifier for the collector */
+            id: string;
+            /** @description Name of the collector (e.g., "Mike", "Eric") */
+            name?: string;
+        };
+        PaginatedCollectorsResponse: {
+            collectors: components["schemas"]["Collector"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        CreateCollection: {
+            /**
+             * Format: uuid
+             * @description UUID of the collector who will own this collection
+             */
+            collectorId: string;
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        UpdateCollection: {
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        CollectionCardItem: {
+            /**
+             * Format: uuid
+             * @description UUID of the card to add to the collection
+             */
+            cardId: string;
+            /**
+             * Format: uuid
+             * @description UUID of the card parallel if applicable
+             */
+            parallelId?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the grade if card is graded
+             */
+            gradeId?: string;
+            /**
+             * @description Quantity of this card to add
+             * @default 1
+             */
+            quantity: number;
+            /** @description Purchase price (numeric string with up to 2 decimal places) */
+            buyPrice?: string;
+            /** @description Purchase date in YYYY-MM-DD format */
+            buyDate?: string;
+            /** @description Listed selling price (numeric string with up to 2 decimal places) */
+            sellPrice?: string;
+            /** @description Actual sold price (numeric string with up to 2 decimal places) */
+            soldPrice?: string;
+            /** @description Sale date in YYYY-MM-DD format */
+            soldDate?: string;
+        };
+        CreateCollectionCard: components["schemas"]["CollectionCardItem"] | components["schemas"]["CollectionCardItem"][];
+        UpdateCollectionCard: {
+            /** @description UUID of the card parallel (null to remove) */
+            parallelId?: string | null;
+            /** @description UUID of the grade (null to remove) */
+            gradeId?: string | null;
+            /** @description Updated quantity */
+            quantity?: number;
+            /** @description Purchase price (null to remove) */
+            buyPrice?: string | null;
+            /** @description Purchase date (null to remove) */
+            buyDate?: string | null;
+            /** @description Listed selling price (null to remove) */
+            sellPrice?: string | null;
+            /** @description Actual sold price (null to remove) */
+            soldPrice?: string | null;
+            /** @description Sale date (null to remove) */
+            soldDate?: string | null;
+        };
+        Collection: {
+            /** @description Unique identifier for the collection */
+            id: string;
+            /** @description ID of the collector who owns this collection */
+            collectorId: string;
+            /** @description Name of the collection */
+            name?: string;
+            /** @description Description of the collection */
+            description?: string;
+        };
+        CollectionCard: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the collection card
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection this card belongs to
+             */
+            collectionId: string;
+            /**
+             * Format: uuid
+             * @description ID of the card
+             */
+            cardId: string;
+            /**
+             * Format: uuid
+             * @description ID of the card parallel if applicable
+             */
+            parallelId?: string;
+            /**
+             * Format: uuid
+             * @description UUID of the grade if card is graded
+             */
+            gradeId?: string;
+            /**
+             * @description Quantity of this card in the collection
+             * @default 1
+             */
+            quantity: number;
+            /** @description Purchase price of the card */
+            buyPrice?: string;
+            /** @description Date the card was purchased (YYYY-MM-DD) */
+            buyDate?: string;
+            /** @description Listed selling price of the card */
+            sellPrice?: string;
+            /** @description Actual sold price of the card */
+            soldPrice?: string;
+            /** @description Date the card was sold (YYYY-MM-DD) */
+            soldDate?: string;
+        };
+        PaginatedCollectionsResponse: {
+            collections: components["schemas"]["Collection"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        PaginatedCollectionCardsResponse: {
+            cards: components["schemas"]["CollectionCard"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        BatchCollectionCardsResponse: {
+            /** @description Successfully created cards */
+            cards: components["schemas"]["CollectionCard"][];
+            /** @description Any errors that occurred during batch creation */
+            errors?: components["schemas"]["BatchOperationError"][];
+        };
+        AddCollectionCardsResponse: components["schemas"]["CollectionCard"] | components["schemas"]["BatchCollectionCardsResponse"];
+        TopCardInGroup: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Purchase price per card */
+            buyPrice?: string;
+            /** @description Current market value per card */
+            currentValue?: string;
+            /** @description Quantity in collection */
+            quantity: number;
+        };
+        MostValuableGroup: {
+            /** @description Name of most valuable group */
+            name: string;
+            /** @description Total value of the group */
+            value: string;
+        };
+        BestPerformingGroup: {
+            /** @description Name of best performing group */
+            name: string;
+            /** @description ROI percentage */
+            roi: number;
+        };
+        CollectionBreakdownSummary: {
+            /** @description Total number of groups */
+            totalGroups: number;
+            /** @description Total number of cards in collection */
+            totalCards: number;
+            /** @description Total quantity including duplicates */
+            totalQuantity: number;
+            /** @description Total collection value */
+            totalValue?: string;
+            /** @description Total amount invested */
+            totalInvested?: string;
+            /** @description Overall ROI percentage */
+            overallRoi?: number;
+            /** @description The dimension used for grouping */
+            groupedBy: string;
+            /** @description Group with highest total value */
+            mostValuableGroup?: components["schemas"]["MostValuableGroup"];
+            /** @description Group with highest ROI */
+            bestPerformingGroup?: components["schemas"]["BestPerformingGroup"];
+        };
+        BreakdownPagination: {
+            /** @description Total number of groups */
+            total_count: number;
+            /** @description Number of groups skipped */
+            skip: number;
+            /** @description Number of groups included */
+            take: number;
+            /** @description Current page number */
+            page: number;
+            /** @description Total number of pages */
+            pages: number;
+        };
+        BreakdownGroup: {
+            /** @description The grouping key (e.g., set name, year, grade) */
+            groupKey: string;
+            /** @description The UUID of the group entity if applicable */
+            groupId?: string;
+            /** @description Number of cards in this group */
+            cardCount: number;
+            /** @description Number of unique cards (ignoring duplicates) */
+            uniqueCardCount: number;
+            /** @description Total quantity including duplicates */
+            totalQuantity: number;
+            /** @description Total purchase price for cards in group */
+            totalBuyPrice?: string;
+            /** @description Total current market value */
+            totalCurrentValue?: string;
+            /** @description Total sold price for sold cards */
+            totalSoldPrice?: string;
+            /** @description Average purchase price per card */
+            averageBuyPrice?: string;
+            /** @description Average current value per card */
+            averageCurrentValue?: string;
+            /** @description Return on investment percentage */
+            roi?: number;
+            /** @description Percentage this group represents of total collection */
+            percentageOfCollection: number;
+            /** @description Top 5 most valuable cards in this group */
+            topCards?: components["schemas"]["TopCardInGroup"][];
+        };
+        CollectionBreakdownResponse: {
+            /** @description Aggregate statistics across all groups */
+            summary: components["schemas"]["CollectionBreakdownSummary"];
+            /** @description Array of breakdown groups */
+            groups: components["schemas"]["BreakdownGroup"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["BreakdownPagination"];
+        };
+        SetProgress: {
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Total number of cards in set */
+            totalCards: number;
+            /** @description Number of unique cards owned */
+            ownedCards: number;
+            /** @description Array of missing card UUIDs */
+            missingCards: string[];
+            /** @description Percentage complete (0-100) */
+            completionPercentage: number;
+            /** @description Estimated cost to acquire missing cards */
+            estimatedCostToComplete?: string;
+            /** @description Difficulty score based on card availability (0-100) */
+            difficultyScore?: number;
+            /** @description Average value per card in set */
+            averageCardValue?: string;
+        };
+        SetProgressSummary: {
+            /** @description Total number of sets represented in collection */
+            totalSets: number;
+            /** @description Number of sets >80% complete */
+            nearCompleteSets: number;
+            /** @description Number of fully complete sets */
+            fullyCompleteSets: number;
+            /** @description Total cost to complete all sets */
+            totalEstimatedCost?: string;
+        };
+        SetProgressListResponse: {
+            /** @description Aggregate statistics across all sets */
+            summary: components["schemas"]["SetProgressSummary"];
+            /** @description Array of set progress entries */
+            sets: components["schemas"]["SetProgress"][];
+            /** @description Total number of sets matching filters */
+            total_count: number;
+            /** @description Number of records skipped */
+            skip: number;
+            /** @description Number of records returned */
+            take: number;
+        };
+        ParallelSetProgress: {
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Parallel UUID */
+            parallelId: string;
+            /** @description Parallel name (e.g., Refractor, Gold) */
+            parallelName: string;
+            /** @description Total number of cards in set */
+            totalCards: number;
+            /** @description Number of this parallel owned */
+            ownedCards: number;
+            /** @description Array of missing card UUIDs for this parallel */
+            missingCards: string[];
+            /** @description Percentage complete for this parallel (0-100) */
+            completionPercentage: number;
+            /** @description Estimated cost to acquire missing cards of this parallel */
+            estimatedCostToComplete?: string;
+            /** @description Average value per card for this parallel */
+            averageCardValue?: string;
+        };
+        CollectionOverview: {
+            /** @description Total number of card entries in collection */
+            totalCards: number;
+            /** @description Number of unique cards (ignoring duplicates) */
+            uniqueCards: number;
+            /** @description Total quantity including all duplicates */
+            totalQuantity: number;
+        };
+        CollectionFinancials: {
+            /** @description Total amount invested (sum of buy prices) */
+            totalInvested?: string;
+            /** @description Current total market value */
+            currentMarketValue?: string;
+            /** @description Total gains from sold cards */
+            totalRealizedGains?: string;
+            /** @description Unrealized gains on unsold cards */
+            totalUnrealizedGains?: string;
+            /** @description Overall return on investment percentage */
+            overallROI?: number;
+            /** @description ROI on sold cards only */
+            realizedROI?: number;
+        };
+        CollectionComposition: {
+            /** @description Number of graded cards */
+            gradedCount: number;
+            /** @description Number of raw (ungraded) cards */
+            rawCount: number;
+            /** @description Percentage of collection that is graded */
+            gradedPercentage: number;
+            /** @description Number of cards listed for sale */
+            forSaleCount: number;
+            /** @description Number of cards that have been sold */
+            soldCount: number;
+        };
+        TopGainerCard: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Purchase price */
+            buyPrice: string;
+            /** @description Current market value */
+            currentValue: string;
+            /** @description Dollar gain amount */
+            gain: string;
+            /** @description Percentage gain */
+            gainPercentage: number;
+        };
+        TopValueCard: {
+            /** @description Card UUID */
+            cardId: string;
+            /** @description Card name */
+            cardName: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Current market value */
+            currentValue: string;
+            /** @description Quantity owned */
+            quantity: number;
+        };
+        CollectionPerformance: {
+            /** @description Average current value per card */
+            averageCardValue?: string;
+            /** @description Average ROI across all cards with buy prices */
+            averageROI?: number;
+            /** @description Card with highest percentage gain */
+            topGainer?: components["schemas"]["TopGainerCard"];
+            /** @description Most valuable card by current market price */
+            topValue?: components["schemas"]["TopValueCard"];
+        };
+        CollectionAnalyticsResponse: {
+            /** @description Collection overview with basic counts */
+            overview: components["schemas"]["CollectionOverview"];
+            /** @description Investment and return metrics */
+            financials: components["schemas"]["CollectionFinancials"];
+            /** @description Breakdown of collection by type and status */
+            composition: components["schemas"]["CollectionComposition"];
+            /** @description Performance metrics including averages and top performers */
+            performance: components["schemas"]["CollectionPerformance"];
+        };
+        UploadCollectionCardImageResponse: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the image record
+             */
+            imageId: string;
+            /** @description Timestamp when the image was uploaded */
+            uploadedAt: string;
+            /** @description URL to retrieve the full-resolution image */
+            fullImageUrl: string;
+            /** @description URL to retrieve the thumbnail image */
+            thumbnailUrl: string;
+        };
+        CreateBinder: {
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        UpdateBinder: {
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        AddCardToBinder: {
+            /**
+             * Format: uuid
+             * @description UUID of the collection card to add to the binder
+             */
+            collectionCardId: string;
+        };
+        Binder: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the binder
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection this binder belongs to
+             */
+            collectionId: string;
+            /** @description Name of the binder */
+            name?: string;
+            /** @description Description of the binder */
+            description?: string;
+        };
+        BinderCard: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the binder card link
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the binder
+             */
+            binderId: string;
+            /**
+             * Format: uuid
+             * @description ID of the collection card
+             */
+            collectionCardId: string;
+        };
+        PaginatedBindersResponse: {
+            binders: components["schemas"]["Binder"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        PaginatedBinderCardsResponse: {
+            cards: components["schemas"]["BinderCard"][];
+            total_count: number;
+            skip: number;
+            take: number;
+        };
+        FeedbackInput: {
+            /**
+             * @description FeedbackType
+             * @enum {string}
+             */
+            feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
+            message: string;
+        };
+        FeedbackResponse: {
+            /** Format: uuid */
+            unique_id: string;
+            /**
+             * @description EntityType
+             * @enum {string}
+             */
+            entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
+            entity_id: string | null;
+            feedback_type: ("data_error" | "missing_data" | "suggestion" | "bug" | "other") | null;
+            message: string;
+            /**
+             * @description FeedbackStatus
+             * @enum {string}
+             */
+            status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            created_at: string;
+            updated_at: string;
+        };
+        FeedbackSubmitResponse: {
+            success: boolean;
+            message: string;
+            data: components["schemas"]["FeedbackResponse"];
+        };
+        FileUpload: {
+            /** @description The image file to analyze */
+            image: unknown;
+        };
+        AIIdentification: {
+            /** @description Release year identified by AI (e.g., "2023", "1989") */
+            year: string;
+            /** @description Release/product name identified by AI (e.g., "Topps Chrome", "Upper Deck Series 1") */
+            release: string;
+            /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
+            set?: string;
+            /** @description Player or subject name on the card (e.g., "Michael Jordan", "Tom Brady") */
+            name: string;
+            /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
+            number?: string;
+        };
+        CardDetails: {
+            /** @description Unique UUID of the identified card from the CardSightAI catalog */
+            id: string;
+            /** @description Release year from catalog (e.g., "2023", "1989") */
+            year: string;
+            /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
+            manufacturer: string;
+            /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
+            releaseName: string;
+            /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
+            setName?: string;
+            /** @description Player or subject name from catalog (e.g., "Michael Jordan", "Tom Brady") */
+            name: string;
+            /** @description Card number from catalog (e.g., "#23", "RC-1") */
+            number?: string;
+        };
+        IdentificationData: {
+            /**
+             * @description AI confidence level for this detection (High: 90-100%, Medium: 70-89%, Low: <70%)
+             * @enum {string}
+             */
+            confidence: "High" | "Medium" | "Low";
+            /** @description Matched card details from catalog. Null if no match found or confidence too low. */
+            card?: components["schemas"]["CardDetails"];
+        };
+        IdentifyCardResponse: {
+            /** @description Whether the identification process completed successfully */
+            success: boolean;
+            /** @description Unique identifier for tracking this identification request */
+            requestId: string;
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Empty if no cards found. */
+            detections?: components["schemas"]["IdentificationData"][];
+            /** @description Total processing time in milliseconds for AI analysis and catalog matching */
+            processingTime?: number;
+        };
+        AIQueryRequest: {
+            /** @description Natural language query */
+            query: string;
+            /** @description Optional context for the query */
+            context?: components["schemas"]["AIContext"];
+            /** @description Optional conversation history (max 50 messages). Messages should alternate between user and assistant roles. */
+            conversationHistory?: components["schemas"]["ConversationMessage"][];
+            /** @description Maximum tool use iterations (default: 5) */
+            maxIterations?: number;
+        };
+        AIContext: {
+            /** Format: uuid */
+            collectionId?: string;
+            userId?: string;
+        } & {
+            [key: string]: unknown;
+        };
+        ConversationMessage: {
+            /**
+             * @description The role of the message sender
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** @description The message content */
+            content: string;
+        };
+        AIQueryResponse: {
+            /** @description AI-generated response to the query */
+            answer: string;
+            /** @description List of MCP tools used to answer the query */
+            toolsUsed?: string[];
+            /** @description Time taken to process the query in milliseconds */
+            processingTime: number;
+        };
+        AIError: {
+            error: string;
+            code: string;
+            details?: unknown;
+        };
+        ApiKeyUsage: {
+            /** @description The API key (masked or full depending on context) */
+            key: string;
+            /** @description Total number of API calls made using this key for the current billing period */
+            calls: number;
+        };
+        SubscriptionInfo: {
+            /** @description Total aggregate number of API calls made across all API keys for the current billing period */
+            calls: number;
+            /** @description Array containing usage information for the current API key only */
+            api_keys: components["schemas"]["ApiKeyUsage"][];
+        };
+        ImageJsonResponse: {
+            /** @description Base64 data URI (ready for use in HTML img src) */
+            data: string;
+            /** @description MIME type of the image */
+            contentType: string;
+            /** @description Size of the image in bytes */
+            size?: number;
+        };
+        Segment: {
+            /** @description Unique identifier for the segment. Format: UUID v4. This ID is permanent and used for all API operations involving this segment. */
+            id: string;
+            /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
+            name: string;
+        };
+        Manufacturer: {
+            /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
+            id: string;
+            /** @description Official name of the manufacturer. Examples: "Topps", "Panini America", "Upper Deck". This is the primary display name. */
+            name: string;
+            /** @description Additional information about the manufacturer, such as founding year, headquarters, or notable product lines. May be null if not provided. */
+            description?: string;
+        };
+        Release: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+        };
+        Set: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
+            releaseId: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+        };
+        Card: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+        };
+        Parallel: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description UUID of the set this parallel belongs to. Links to the set entity. Each set can have multiple parallel types. */
+            setId: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+        };
+        Attribute: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+        };
+        ParallelSummary: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        AttributeSummary: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+            /** @description Number of cards with this attribute */
+            cardCount: number;
+        };
+        ReleaseSummary: {
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            description?: string;
+        };
+        SetSummaryWithCounts: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+            /** @description Number of base cards in this set */
+            cardCount: number;
+            /** @description Number of parallel types in this set */
+            parallelCount: number;
+        };
+        CardSummary: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the set this card belongs to */
+            setName: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        DetailedCard: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Name of the set */
+            setName: string;
+            /** @description Limited print run number for this specific card */
+            numberedTo?: number;
+            /** @description Number of parallel variants for this card */
+            parallelCount: number;
+            /** @description List of parallel variants available for this card */
+            parallels: components["schemas"]["ParallelSummary"][];
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        ReleaseWithSets: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+            /** @description Sets within this release */
+            sets: components["schemas"]["SetSummaryWithCounts"][];
+        };
+        ParallelWithSet: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+            /** @description Set UUID */
+            setId: string;
+            /** @description Set name */
+            setName: string;
+            /** @description Release UUID */
+            releaseId: string;
+            /** @description Release name */
+            releaseName: string;
+            /** @description Release year */
+            releaseYear: string;
+            /** @description Number of base cards in the set */
+            cardCount: number;
+        };
+        PaginatedSegmentsResponse: {
+            /** @description Array of market segment entities (e.g., Sports, Entertainment, Gaming) */
+            segments: components["schemas"]["Segment"][];
+            /** @description Total number of segments matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedManufacturersResponse: {
+            /** @description Array of card manufacturer entities (e.g., Topps, Panini, Upper Deck) */
+            manufacturers: components["schemas"]["Manufacturer"][];
+            /** @description Total number of manufacturers matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedReleasesResponse: {
+            /** @description Array of release entities with summary information (e.g., "2023 Topps Chrome Baseball") */
+            releases: components["schemas"]["ReleaseSummary"][];
+            /** @description Total number of releases matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedReleaseResponse: {
+            /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
+            id: string;
+            /** @description UUID of the segment this release belongs to. Links to the segment entity. Determines the market category (Sports, Entertainment, etc.). */
+            segmentId: string;
+            /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
+            manufacturerId: string;
+            /** @description Year the release was issued. Format: YYYY (e.g., "2023"). Used for chronological filtering and sorting. */
+            year: string;
+            /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
+            name: string;
+            /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
+            description?: string;
+            /** @description Sets within this release */
+            sets: components["schemas"]["SetSummaryWithCounts"][];
+        };
+        PaginatedCardsResponse: {
+            /** @description Array of card entities with summary information */
+            cards: components["schemas"]["CardSummary"][];
+            /** @description Total number of cards matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        PaginatedSetsResponse: {
+            /** @description Array of set entities with card counts and release information */
+            sets: {
+                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                id: string;
+                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                name: string;
+                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                description?: string;
+                /** @description Number of base cards in this set */
+                cardCount: number;
+                /** @description Number of parallel types in this set */
+                parallelCount: number;
+                /** @description Release UUID */
+                releaseId: string;
+                /** @description Release name */
+                releaseName: string;
+                /** @description Release year */
+                releaseYear: string;
+            }[];
+            /** @description Total number of sets matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedSetResponse: {
+            /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+            id: string;
+            /** @description UUID of the release this set belongs to. Links to the release entity. A release typically contains multiple sets. */
+            releaseId: string;
+            /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+            name: string;
+            /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName: string;
+            /** @description Year of the release */
+            releaseYear: string;
+            /** @description Number of base cards */
+            cardCount: number;
+            /** @description Number of parallel types */
+            parallelCount: number;
+            /** @description List of parallel variants in this set */
+            parallels: components["schemas"]["ParallelSummary"][];
+        };
+        DetailedCardResponse: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Name of the set */
+            setName: string;
+            /** @description Limited print run number for this specific card */
+            numberedTo?: number;
+            /** @description Number of parallel variants for this card */
+            parallelCount: number;
+            /** @description List of parallel variants available for this card */
+            parallels: components["schemas"]["ParallelSummary"][];
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+        };
+        PaginatedAttributesResponse: {
+            /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
+            attributes: components["schemas"]["DetailedAttributeResponse"][];
+            /** @description Total number of attributes matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedAttributeResponse: {
+            /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
+            id: string;
+            /** @description Full descriptive name of the attribute. Examples: "Rookie Card", "Autograph", "Game-Used Memorabilia". Used for display purposes. */
+            name: string;
+            /** @description Abbreviated code for the attribute. Examples: "RC" (Rookie Card), "AU" (Autograph), "GU" (Game-Used). Used for compact display and filtering. */
+            shortName: string;
+            /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
+            description?: string;
+            /** @description Number of cards with this attribute */
+            cardCount: number;
+        };
+        PaginatedParallelsResponse: {
+            /** @description Array of parallel variants with associated set information (e.g., Refractor, Prizm, numbered parallels) */
+            parallels: components["schemas"]["ParallelWithSet"][];
+            /** @description Total number of parallels matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        CatalogSegmentBreakdownItem: {
+            /** @description Segment name */
+            name: string;
+            /** @description Number of releases in this segment */
+            count: number;
+        };
+        CatalogSegmentStats: {
+            /** @description Total number of segments */
+            total: number;
+            /** @description Breakdown of segments with release counts */
+            breakdown: components["schemas"]["CatalogSegmentBreakdownItem"][];
+        };
+        CatalogManufacturerBreakdownItem: {
+            /** @description Manufacturer name */
+            name: string;
+            /** @description Number of releases by this manufacturer */
+            releaseCount: number;
+        };
+        CatalogManufacturerStats: {
+            /** @description Total number of manufacturers */
+            total: number;
+            /** @description All manufacturers with their release counts */
+            breakdown: components["schemas"]["CatalogManufacturerBreakdownItem"][];
+        };
+        CatalogReleaseYearBreakdown: {
+            /** @description Release year */
+            year: string;
+            /** @description Number of releases in this year for this segment */
+            count: number;
+        };
+        CatalogReleaseBySegment: {
+            /** @description Segment name */
+            segmentName: string;
+            /** @description Total releases in this segment across all years */
+            total: number;
+            /** @description Year-by-year breakdown for this segment */
+            byYear: components["schemas"]["CatalogReleaseYearBreakdown"][];
+        };
+        CatalogReleaseStats: {
+            /** @description Total number of releases across all years */
+            total: number;
+            /** @description Breakdown by segment, then by year */
+            bySegment: components["schemas"]["CatalogReleaseBySegment"][];
+        };
+        CatalogSetStats: {
+            /** @description Total number of card sets */
+            total: number;
+            /** @description Number of sets that can be recognized by AI */
+            identifiable: number;
+        };
+        CatalogCardStats: {
+            /** @description Total number of all cards in catalog */
+            total: number;
+            /** @description Count of base cards (original cards) */
+            base: number;
+            /** @description Count of card variations */
+            variations: number;
+        };
+        CatalogParallelStats: {
+            /** @description Total number of parallel types */
+            total: number;
+            /** @description Count of full set parallels (apply to entire set) */
+            fullSet: number;
+            /** @description Count of partial parallels (apply to specific cards only) */
+            partial: number;
+        };
+        CatalogStatisticsResponse: {
+            /** @description Segment statistics */
+            segments: components["schemas"]["CatalogSegmentStats"];
+            /** @description Manufacturer statistics */
+            manufacturers: components["schemas"]["CatalogManufacturerStats"];
+            /** @description Release statistics */
+            releases: components["schemas"]["CatalogReleaseStats"];
+            /** @description Set statistics */
+            sets: components["schemas"]["CatalogSetStats"];
+            /** @description Card statistics */
+            cards: components["schemas"]["CatalogCardStats"];
+            /** @description Parallel statistics */
+            parallels: components["schemas"]["CatalogParallelStats"];
+        };
+        CardWithOptionalParallel: {
+            /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
+            releaseId: string;
+            /** @description UUID of the set this card belongs to. Links to the set entity. Determines which collection within the release contains this card. */
+            setId: string;
+            /** @description Unique identifier for the card. Format: UUID v4. This ID is permanent and used for all API operations involving this card. */
+            id: string;
+            /** @description Card number within the set. Examples: "23", "RC-15", "L-5". May include letters for special subsets. Null for unnumbered cards. */
+            number?: string;
+            /** @description Primary subject of the card. Usually a player name for sports cards (e.g., "Michael Jordan") or character/subject for non-sports. */
+            name: string;
+            /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
+            description?: string;
+            /** @description Name of the set this card belongs to */
+            setName: string;
+            /** @description Name of the release */
+            releaseName?: string;
+            /** @description Year of the release */
+            releaseYear?: string;
+            /** @description Array of attribute short names */
+            attributes?: string[];
+            /** @description Average pricing data for the base card. Only included when price data is available. */
+            prices?: {
+                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
+                raw?: string;
+                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
+                "psa-10"?: string;
+                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
+                "psa-9"?: string;
+            };
+            /** @description True if this card was converted to a parallel variant through the random odds system */
+            isParallel?: boolean;
+            /** @description UUID of the parallel type if this card is a parallel variant */
+            parallelId?: string;
+            /** @description Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm 1/1") */
+            parallelName?: string;
+            /** @description Limited print run number for this parallel. Null for unlimited parallels. */
+            numberedTo?: number | null;
+        };
+        RandomReleasesResponse: {
+            /** @description Array of random releases matching the specified filters */
+            releases: components["schemas"]["ReleaseSummary"][];
+            /** @description Actual number of releases returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        RandomSetsResponse: {
+            /** @description Array of random sets matching the specified filters */
+            sets: {
+                /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
+                id: string;
+                /** @description Name of the set within the release. Examples: "Base Set", "Rookie Autographs", "Legends". Describes the theme or type of cards in this set. */
+                name: string;
+                /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
+                description?: string;
+                /** @description Number of base cards in this set */
+                cardCount: number;
+                /** @description Number of parallel types in this set */
+                parallelCount: number;
+                /** @description Release UUID */
+                releaseId: string;
+                /** @description Release name */
+                releaseName: string;
+                /** @description Release year */
+                releaseYear: string;
+            }[];
+            /** @description Actual number of sets returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        RandomCardsResponse: {
+            /** @description Array of random cards. When includeParallels=true, some cards may be converted to parallels based on weighted probability. */
+            cards: components["schemas"]["CardWithOptionalParallel"][];
+            /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
+            count: number;
+        };
+        AutocompleteResponse: {
+            /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
+            suggestions: string[];
+        };
+        GradingCompany: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grading company
+             */
+            id: string;
+            /** @description Name of the grading company (e.g., PSA, BGS, SGC, CGC) */
+            name: string;
+            /** @description Detailed description of the grading company and its services */
+            description: string | null;
+            /** @description Additional notes or important information about this grading company */
+            note: string | null;
+        };
+        GradingType: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grading type
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the parent grading company offering this grading type
+             */
+            gradingCompanyId: string;
+            /** @description Name of the parent grading company (denormalized for convenience) */
+            gradingCompanyName: string;
+            /** @description Name of the grading type (e.g., Regular, Crossover, Black Label) */
+            name: string;
+            /** @description Detailed description of what this grading type offers or represents */
+            description: string | null;
+            /** @description Additional notes about this grading type */
+            note: string | null;
+        };
+        Grade: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the grade
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description ID of the parent grading type that this grade belongs to
+             */
+            gradingTypeId: string;
+            /** @description Name of the parent grading type (denormalized for convenience) */
+            gradingTypeName: string;
+            /**
+             * Format: uuid
+             * @description ID of the grading company (denormalized for convenience)
+             */
+            gradingCompanyId: string;
+            /** @description Name of the grading company (denormalized for convenience) */
+            gradingCompanyName: string;
+            /** @description The grade value as a string (e.g., "10", "9.5", "8") to support decimal and "Authentic" grades */
+            grade: string;
+        };
+        GradingCompaniesResponse: {
+            /** @description List of grading companies */
+            companies: components["schemas"]["GradingCompany"][];
+            /** @description Total number of grading companies available */
+            total: number;
+        };
+        GradingTypesResponse: {
+            /** @description List of grading types offered by this company */
+            types: components["schemas"]["GradingType"][];
+            /** @description Total number of grading types for this company */
+            total: number;
+            /** @description Parent grading company information for context */
+            gradingCompany: components["schemas"]["GradingCompany"];
+        };
+        GradesResponse: {
+            /** @description List of specific grade values available for this grading type */
+            grades: components["schemas"]["Grade"][];
+            /** @description Total number of grades for this grading type */
+            total: number;
+            /** @description Parent grading type information for context */
+            gradingType: components["schemas"]["GradingType"];
+            /** @description Grandparent grading company information for context */
+            gradingCompany: components["schemas"]["GradingCompany"];
+        };
+        BasicHealthResponse: {
+            /** @description Overall health status of the API (e.g., "healthy") */
+            status: string;
+            /** @description ISO 8601 timestamp when the health check was performed */
+            timestamp: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -11687,4 +4904,5328 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BasicHealthResponse"];
+                };
+            };
+        };
+    };
+    getHealthAuthenticated: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BasicHealthResponse"];
+                };
+            };
+        };
+    };
+    identifyCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+                "image/jpeg": components["schemas"]["FileUploadInput"];
+                "image/png": components["schemas"]["FileUploadInput"];
+                "image/webp": components["schemas"]["FileUploadInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentifyCardResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getStatistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogStatisticsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSegments: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter segments by name using partial string matching. Case-insensitive. Example: "sport" matches "Sports", "Motorsports", etc. */
+                name?: string;
+                /** @description Field to sort results by. Currently only supports sorting by segment name. */
+                sort?: "name";
+                /** @description Sort direction. "asc" for ascending (A-Z), "desc" for descending (Z-A). Defaults to ascending. */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSegmentsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSegmentsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getManufacturers: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter manufacturers by name using partial string matching. Case-insensitive. Example: "top" matches "Topps", "Topps Chrome", etc. */
+                name?: string;
+                /** @description Field to sort results by. Currently only supports sorting by manufacturer name. */
+                sort?: "name";
+                /** @description Sort direction. "asc" for ascending (A-Z), "desc" for descending (Z-A). Defaults to ascending. */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedManufacturersResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedManufacturersResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getReleases: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter releases by segment. Accepts either a UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") or exact segment name (e.g., "Sports"). Case-insensitive for names. */
+                segment?: string;
+                /** @description Filter releases by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Case-insensitive for names. */
+                manufacturer?: string;
+                /** @description Filter by exact year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter releases from this year onwards (inclusive). Example: "2020" returns releases from 2020, 2021, 2022, etc. Ignored if "year" is specified. */
+                min_year?: string;
+                /** @description Filter releases up to this year (inclusive). Example: "2022" returns releases from 2022 and earlier. Ignored if "year" is specified. */
+                max_year?: string;
+                /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
+                name?: string;
+                /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
+                sort?: "year" | "name";
+                /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReleasesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReleasesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRelease: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier for the release. Must be a valid UUID format. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedReleaseResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedReleaseResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getReleaseCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter cards to a specific set within the release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                setId?: string;
+                /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "jordan" matches "Michael Jordan", "Jordan Love", etc. */
+                name?: string;
+                /** @description Field to sort results by. "number" sorts by card number in set, "name" sorts alphabetically by player/subject name. */
+                sort?: "number" | "name";
+                /** @description Sort direction. "asc" for ascending (1-999 for number, A-Z for name), "desc" for descending (999-1 for number, Z-A for name). */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path: {
+                /** @description Unique identifier for the release. Must be a valid UUID format. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRandomReleases: {
+        parameters: {
+            query?: {
+                /** @description Filter releases by segment. Accepts either a UUID (e.g., "550e8400-e29b-41d4-a716-446655440000") or exact segment name (e.g., "Sports"). Case-insensitive for names. */
+                segment?: string;
+                /** @description Filter releases by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Case-insensitive for names. */
+                manufacturer?: string;
+                /** @description Filter by exact year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter releases from this year onwards (inclusive). Example: "2020" returns releases from 2020, 2021, 2022, etc. Ignored if "year" is specified. */
+                min_year?: string;
+                /** @description Filter releases up to this year (inclusive). Example: "2022" returns releases from 2022 and earlier. Ignored if "year" is specified. */
+                max_year?: string;
+                /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
+                name?: string;
+                /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
+                sort?: "year" | "name";
+                /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
+                order?: "asc" | "desc";
+                /** @description Number of random releases to return. Minimum: 1, Maximum: 200, Default: 1. If fewer releases match filters, returns all available. */
+                count?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomReleasesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomReleasesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSets: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter sets to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                releaseId?: string;
+                /** @description Search sets by name using partial string matching. Case-insensitive. Example: "base" matches "Base Set", "Base Chrome", etc. */
+                name?: string;
+                /** @description Filter sets by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter sets from releases in this year onwards (inclusive). Example: "2020" returns sets from 2020, 2021, 2022 releases, etc. */
+                min_year?: string;
+                /** @description Filter sets from releases up to this year (inclusive). Example: "2022" returns sets from 2022 and earlier releases. */
+                max_year?: string;
+                /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                manufacturer?: string;
+                /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
+                sort?: "name" | "year";
+                /** @description Sort direction. "asc" for ascending, "desc" for descending. */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Set UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedSetResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedSetResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSetCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search by card name (partial match) */
+                name?: string;
+                /** @description Filter by card number */
+                number?: string;
+                /** @description Field to sort by */
+                sort?: "number" | "name";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path: {
+                /** @description Set UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRandomSets: {
+        parameters: {
+            query?: {
+                /** @description Filter sets to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                releaseId?: string;
+                /** @description Search sets by name using partial string matching. Case-insensitive. Example: "base" matches "Base Set", "Base Chrome", etc. */
+                name?: string;
+                /** @description Filter sets by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter sets from releases in this year onwards (inclusive). Example: "2020" returns sets from 2020, 2021, 2022 releases, etc. */
+                min_year?: string;
+                /** @description Filter sets from releases up to this year (inclusive). Example: "2022" returns sets from 2022 and earlier releases. */
+                max_year?: string;
+                /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                manufacturer?: string;
+                /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
+                sort?: "name" | "year";
+                /** @description Sort direction. "asc" for ascending, "desc" for descending. */
+                order?: "asc" | "desc";
+                /** @description Number of random sets to return. Minimum: 1, Maximum: 200, Default: 1. If fewer sets match filters, returns all available. */
+                count?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "lebron" matches "LeBron James", "LeBron James Jr.", etc. */
+                name?: string;
+                /** @description Filter by exact card number. Example: "23" returns all cards numbered 23 across all sets. */
+                number?: string;
+                /** @description Filter cards to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                releaseId?: string;
+                /** @description Filter cards by release name using partial string matching. Case-insensitive. Example: "chrome" matches cards from "Topps Chrome", "Bowman Chrome", etc. */
+                releaseName?: string;
+                /** @description Filter cards by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter cards from releases in this year onwards (inclusive). Example: "2020" returns cards from 2020, 2021, 2022 releases, etc. */
+                min_year?: string;
+                /** @description Filter cards from releases up to this year (inclusive). Example: "2022" returns cards from 2022 and earlier releases. */
+                max_year?: string;
+                /** @description Filter cards to a specific set. Must be a valid UUID. More specific than releaseId filter. */
+                setId?: string;
+                /** @description Filter cards by set name using partial string matching. Case-insensitive. Example: "rookie" matches cards from "Rated Rookies", "Rookie Stars", etc. */
+                setName?: string;
+                /** @description Filter cards by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                manufacturer?: string;
+                /** @description Filter cards by attribute UUID. Returns only cards tagged with this specific attribute (e.g., Rookie Card, Autograph, etc.) */
+                attributeId?: string;
+                /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
+                attributeShortName?: string;
+                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
+                sort?: "name" | "release" | "set" | "year" | "price-raw";
+                /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedCardResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedCardResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRandomCards: {
+        parameters: {
+            query?: {
+                /** @description Search cards by player/subject name using partial string matching. Case-insensitive. Example: "lebron" matches "LeBron James", "LeBron James Jr.", etc. */
+                name?: string;
+                /** @description Filter by exact card number. Example: "23" returns all cards numbered 23 across all sets. */
+                number?: string;
+                /** @description Filter cards to a specific release. Must be a valid UUID. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                releaseId?: string;
+                /** @description Filter cards by release name using partial string matching. Case-insensitive. Example: "chrome" matches cards from "Topps Chrome", "Bowman Chrome", etc. */
+                releaseName?: string;
+                /** @description Filter cards by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter cards from releases in this year onwards (inclusive). Example: "2020" returns cards from 2020, 2021, 2022 releases, etc. */
+                min_year?: string;
+                /** @description Filter cards from releases up to this year (inclusive). Example: "2022" returns cards from 2022 and earlier releases. */
+                max_year?: string;
+                /** @description Filter cards to a specific set. Must be a valid UUID. More specific than releaseId filter. */
+                setId?: string;
+                /** @description Filter cards by set name using partial string matching. Case-insensitive. Example: "rookie" matches cards from "Rated Rookies", "Rookie Stars", etc. */
+                setName?: string;
+                /** @description Filter cards by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
+                manufacturer?: string;
+                /** @description Filter cards by attribute UUID. Returns only cards tagged with this specific attribute (e.g., Rookie Card, Autograph, etc.) */
+                attributeId?: string;
+                /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
+                attributeShortName?: string;
+                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
+                sort?: "name" | "release" | "set" | "year" | "price-raw";
+                /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
+                order?: "asc" | "desc";
+                /** @description Number of random cards to return. Minimum: 1, Maximum: 200, Default: 1. If fewer cards match filters, returns all available. */
+                count?: number;
+                /** @description Enable parallel odds system. When true, each card has a weighted chance to convert to a parallel based on the parallel's numberedTo value. Lower numbered parallels (e.g., 1/1) are rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. */
+                includeParallels?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getAttributes: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search attributes by full name using partial string matching. Case-insensitive. Example: "rookie" matches "Rookie Card", "Rookie Year", etc. */
+                name?: string;
+                /** @description Search attributes by short name/code using partial string matching. Case-insensitive. Example: "R" matches "RC" (Rookie Card), "RPA" (Rookie Patch Auto), etc. */
+                shortName?: string;
+                /** @description Field to sort results by. "name" = full name, "shortName" = abbreviation, "cardCount" = number of cards with this attribute. */
+                sort?: "name" | "shortName" | "cardCount";
+                /** @description Sort direction. "asc" for ascending (A-Z, lowest count first), "desc" for descending (Z-A, highest count first). */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAttributesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAttributesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getAttributeById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Attribute UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedAttributeResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedAttributeResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getParallels: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search parallels by name using partial string matching. Case-insensitive. Example: "gold" matches "Gold Refractor", "Gold Prizm", etc. */
+                name?: string;
+                /** @description Filter parallels to a specific release. Must be a valid UUID. Returns all parallel types across all sets in the release. */
+                releaseId?: string;
+                /** @description Filter parallels by release name using partial string matching. Case-insensitive. Example: "prizm" matches parallels from "Prizm Basketball", "Prizm Football", etc. */
+                releaseName?: string;
+                /** @description Filter parallels by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter parallels from releases in this year onwards (inclusive). Example: "2020" returns parallels from 2020, 2021, 2022 releases, etc. */
+                min_year?: string;
+                /** @description Filter parallels from releases up to this year (inclusive). Example: "2022" returns parallels from 2022 and earlier releases. */
+                max_year?: string;
+                /** @description Field to sort results by. "name" = parallel name, "release" = release name, "set" = set name, "year" = release year. */
+                sort?: "name" | "release" | "set" | "year";
+                /** @description Sort direction. "asc" for ascending, "desc" for descending. */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedParallelsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedParallelsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteSegments: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteManufacturers: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+                /** @description Filter manufacturers by segment UUID */
+                segmentId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteYears: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+                /** @description Filter years by segment UUID */
+                segmentId?: string;
+                /** @description Filter years by manufacturer UUID */
+                manufacturerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteReleases: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+                /** @description Filter releases by segment UUID */
+                segmentId?: string;
+                /** @description Filter releases by manufacturer UUID */
+                manufacturerId?: string;
+                /** @description Filter releases by year (e.g., "2023") */
+                year?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteSets: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+                /** @description Filter sets by release UUID */
+                releaseId?: string;
+                /** @description Filter sets by segment UUID (when releaseId not provided) */
+                segmentId?: string;
+                /** @description Filter sets by manufacturer UUID (when releaseId not provided) */
+                manufacturerId?: string;
+                /** @description Filter sets by year (when releaseId not provided) */
+                year?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    autocompleteCards: {
+        parameters: {
+            query: {
+                /** @description Search query string. Minimum 1 character for autocomplete suggestions. */
+                q: string;
+                /** @description Filter cards by set UUID */
+                setId?: string;
+                /** @description Filter cards by release UUID (when setId not provided) */
+                releaseId?: string;
+                /** @description Filter cards by segment UUID (for broader search) */
+                segmentId?: string;
+                /** @description Filter cards by manufacturer UUID (for broader search) */
+                manufacturerId?: string;
+                /** @description Filter cards by year (for broader search) */
+                year?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectors: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectorsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectorsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createCollector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateCollectorInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collector UUID */
+                collectorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateCollector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collector UUID */
+                collectorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateCollectorInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collector"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteCollector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collector UUID */
+                collectorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollections: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter by collector UUID */
+                collectorId?: string;
+                /** @description Search by collection name (partial match) */
+                name?: string;
+                /** @description Field to sort by */
+                sort?: "name";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectionsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectionsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateCollectionInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateCollectionInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionBreakdown: {
+        parameters: {
+            query: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Dimension to group the collection by */
+                groupBy: "release" | "year" | "grade" | "player" | "manufacturer";
+                /** @description Metric to sort groups by */
+                sortBy?: "count" | "value" | "roi" | "percentage";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+                /** @description Minimum card count to include in results */
+                minCount?: number;
+                /** @description Minimum total value to include in results */
+                minValue?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionBreakdownResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionBreakdownResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionAnalytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionAnalyticsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionAnalyticsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionSetProgress: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Metric to sort sets by */
+                sortBy?: "completion" | "missing" | "cost" | "difficulty";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+                /** @description Filter sets with minimum completion percentage */
+                minCompletion?: number;
+                /** @description Filter for sets >80% complete */
+                nearComplete?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetProgressListResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetProgressListResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSetProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collectionId: string;
+                setId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetProgress"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetProgress"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getParallelSetProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collectionId: string;
+                setId: string;
+                parallelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParallelSetProgress"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParallelSetProgress"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter by card UUID */
+                cardId?: string;
+                /** @description Filter by parallel UUID */
+                parallelId?: string;
+                /** @description Filter by grade UUID */
+                gradeId?: string;
+                /** @description Filter by sold status (true for sold, false for not sold) */
+                hasSold?: boolean;
+                /** @description Field to sort by */
+                sort?: "buyDate" | "soldDate" | "buyPrice" | "soldPrice";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectionCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCollectionCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    addCollectionCards: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateCollectionCardInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddCollectionCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionCard"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionCard"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateCollectionCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateCollectionCardInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionCard"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionCard"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteCollectionCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getBinders: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search by binder name (partial match) */
+                name?: string;
+                /** @description Field to sort by */
+                sort?: "name";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBindersResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBindersResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateBinderInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateBinderInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Binder"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getBinderCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBinderCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBinderCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    addCardToBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AddCardToBinderInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BinderCard"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    removeCardFromBinder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Binder UUID */
+                binderId: string;
+                /** @description Binder Card UUID (the link ID, not the collection card ID) */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCollectionCardImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    uploadCollectionCardImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadCollectionCardImageResponse"];
+                };
+            };
+        };
+    };
+    getCollectionCardImageThumbnail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Collection UUID */
+                collectionId: string;
+                /** @description Collection Card UUID */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getLists: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter by collector UUID */
+                collectorId?: string;
+                /** @description Search by list name (partial match) */
+                name?: string;
+                /** @description Field to sort by */
+                sort?: "name";
+                /** @description Sort order */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedListsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedListsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateListInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateListInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["List"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getListCards: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+            };
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedListCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedListCardsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    addCardsToList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AddCardToListInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddCardsToListResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    removeCardFromList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description List UUID */
+                listId: string;
+                /** @description Card UUID to remove from list */
+                cardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCardImage: {
+        parameters: {
+            query?: {
+                /** @description Image response format: "raw" returns binary image data, "json" returns base64-encoded data URI */
+                format?: "raw" | "json";
+            };
+            header?: never;
+            path: {
+                /** @description Unique identifier (UUID) of the card to retrieve the image for */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    processAIQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AIQueryRequestInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIQueryResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIError"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIError"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIError"];
+                };
+            };
+        };
+    };
+    submitReleaseFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitSetFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitCardFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitManufacturerFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitSegmentFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitIdentifyFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitGeneralFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FeedbackInputInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackSubmitResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionInfo"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getGradingCompanies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingCompaniesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingCompaniesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getGradingTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingTypesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingTypesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getGrades: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                companyId: string;
+                typeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+}

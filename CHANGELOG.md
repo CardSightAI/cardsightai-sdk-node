@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2025-11-04
+
+### Internal
+- **Improved Type Definitions** - Updated to use OpenAPI specification with named component schemas
+  - Better IDE IntelliSense and autocomplete for all types
+  - Clearer type hints in error messages (references `IdentifyCardResponse` instead of anonymous inline types)
+  - Smaller generated type file (10,231 lines vs 11,690 lines - 14% reduction)
+  - All endpoint operations now have semantic operationIds for better documentation
+- **No Breaking Changes** - All existing code remains fully compatible
+  - Runtime API unchanged
+  - Type signatures structurally identical
+  - Zero consumer code changes required
+
+### Developer Experience Improvements
+- Type definitions now reference named schemas from `components.schemas`
+- Advanced users can access operation types via `operations['operationId']`
+- Better TypeScript error messages when types don't match
+
 ## [2.1.0] - 2025-10-26
 
 ### Added

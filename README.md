@@ -603,6 +603,33 @@ function processDetection(detection: CardDetection): void {
 }
 ```
 
+### Advanced Type Usage
+
+The SDK provides access to all OpenAPI-generated types for advanced use cases:
+
+```typescript
+import type { paths, components, operations } from 'cardsightai';
+
+// Access named component schemas
+type Card = components['schemas']['Card'];
+type Set = components['schemas']['Set'];
+type Release = components['schemas']['Release'];
+type IdentifyResponse = components['schemas']['IdentifyCardResponse'];
+
+// Access operation types directly by operationId
+type IdentifyCardOperation = operations['identifyCard'];
+type GetCardsOperation = operations['getCards'];
+
+// Extract specific response types from operations
+type HealthResponse = operations['getHealth']['responses']['200']['content']['application/json'];
+type CardsListResponse = operations['getCards']['responses']['200']['content']['application/json'];
+
+// The SDK uses path-based type helpers internally for consistency with openapi-fetch
+type CardListParams = paths['/v1/catalog/cards']['get']['parameters']['query'];
+```
+
+The OpenAPI specification now uses named schemas in `components.schemas` for better type reusability and clearer documentation. All types are structurally compatible with previous versions.
+
 ## Error Handling
 
 The SDK provides detailed error information:
