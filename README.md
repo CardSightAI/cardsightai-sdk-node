@@ -148,7 +148,7 @@ if (result.data?.success && result.data.detections) {
 #### Response Structure
 
 ```typescript
-// Single card detected
+// Single card detected (base card)
 {
   success: true,
   requestId: "req_abc123",
@@ -163,10 +163,38 @@ if (result.data?.success && result.data.detections) {
         setName: "Base Set",
         name: "Mike Trout",
         number: "27"
+        // parallel is undefined for base cards
       }
     }
   ],
   processingTime: 1250  // Time in milliseconds
+}
+
+// Parallel variant detected
+{
+  success: true,
+  requestId: "req_par123",
+  detections: [
+    {
+      confidence: "High",
+      card: {
+        id: "cd4e3a2f-8b9d-4c7e-a1b2-3d4e5f6g7h8i",
+        year: "2023",
+        manufacturer: "Topps",
+        releaseName: "Chrome",
+        setName: "Base Set",
+        name: "Aaron Judge",
+        number: "99",
+        parallel: {
+          id: "par_uuid",
+          name: "Gold Refractor",
+          description: "Gold refractor parallel",
+          numberedTo: 50
+        }
+      }
+    }
+  ],
+  processingTime: 1350
 }
 
 // Multiple cards detected - the API returns all detected cards
@@ -230,6 +258,81 @@ cards.forEach(card => {
 // Check if any cards were detected
 if (hasDetections(result.data)) {
   console.log(`Found ${result.data.detections.length} card(s)`);
+}
+```
+
+#### Parallel Variant Detection
+
+The identify endpoint can detect parallel variants (special editions like Refractors, Prizms, numbered parallels, etc.). When a parallel is detected, the card object includes detailed parallel information:
+
+```typescript
+import {
+  hasParallel,
+  getParallelInfo,
+  isNumberedParallel,
+  formatParallelDisplay
+} from 'cardsightai';
+
+const result = await client.identify.card(imageFile);
+
+for (const detection of result.data?.detections || []) {
+  if (detection.card) {
+    console.log(`Card: ${detection.card.name}`);
+
+    // Check if it's a parallel variant
+    if (hasParallel(detection)) {
+      const parallel = getParallelInfo(detection);
+      console.log(`  Parallel: ${formatParallelDisplay(detection)}`);
+      // Output: "Gold Refractor /50" or "Black Prizm"
+
+      // Access detailed parallel information
+      console.log(`  Parallel Name: ${parallel.name}`);
+      console.log(`  Parallel ID: ${parallel.id}`);
+
+      if (parallel.description) {
+        console.log(`  Description: ${parallel.description}`);
+      }
+
+      // Check if it's a numbered parallel (limited print run)
+      if (isNumberedParallel(detection)) {
+        console.log(`  🔥 NUMBERED: Only ${parallel.numberedTo} exist!`);
+      }
+    } else {
+      console.log(`  Type: Base Card`);
+    }
+  }
+}
+```
+
+**Parallel Object Structure:**
+
+```typescript
+// When a parallel variant is detected
+{
+  confidence: "High",
+  card: {
+    id: "card_uuid",
+    name: "Mike Trout",
+    year: "2023",
+    // ... other card fields
+    parallel?: {
+      id: "parallel_uuid",        // UUID of the parallel type
+      name: "Gold Refractor",     // Human-readable name
+      description?: "...",         // Optional additional details
+      numberedTo?: 50             // Print run for numbered parallels
+    }
+  }
+}
+
+// Base cards have no parallel object
+{
+  confidence: "High",
+  card: {
+    id: "card_uuid",
+    name: "Aaron Judge",
+    // ... other fields
+    // parallel is undefined
+  }
 }
 ```
 

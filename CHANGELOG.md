@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-11-14
+
+### Added
+- **Parallel Variant Detection** - The identify endpoint now detects parallel variants (special editions like Refractors, Prizms, numbered parallels, etc.):
+  - New optional `parallel` object in card detection responses
+  - Fields: `id` (parallel UUID), `name` (e.g., "Gold Refractor"), `description`, `numberedTo` (for limited print runs)
+  - Base cards have `parallel` as `undefined`
+- **Parallel Utility Functions** - New helper functions for working with parallel detections:
+  - `hasParallel(detection)` - Check if detection is a parallel variant
+  - `getParallelInfo(detection)` - Extract parallel details safely
+  - `isNumberedParallel(detection)` - Check if it's a numbered parallel (limited print run)
+  - `formatParallelDisplay(detection)` - Format parallel info for display (e.g., "Gold Refractor /50")
+
+### Enhanced
+- **Documentation** - Added comprehensive parallel detection examples to README
+- **Type Support** - Full TypeScript support for parallel object structure via OpenAPI-generated types
+
+### Notes
+- No breaking changes - the `parallel` field is optional and only present on parallel variants
+- Parallel detection structure differs from random endpoint parallel generation:
+  - Identify endpoint: Nested `parallel` object with `{ id, name, description?, numberedTo? }`
+  - Random endpoint: Flat fields `{ isParallel, parallelId, parallelName, numberedTo }`
+
 ## [2.1.1] - 2025-11-04
 
 ### Internal

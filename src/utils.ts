@@ -122,3 +122,51 @@ export function formatCardDisplay(card: DetectedCard): string {
 
   return parts.join(' ');
 }
+
+/**
+ * Check if a detection is a parallel variant
+ * @param detection - The card detection
+ * @returns True if the detected card is a parallel variant
+ */
+export function hasParallel(detection: CardDetection): boolean {
+  return Boolean(detection.card?.parallel);
+}
+
+/**
+ * Get parallel information from a detection
+ * @param detection - The card detection
+ * @returns Parallel information if available, undefined otherwise
+ */
+export function getParallelInfo(detection: CardDetection) {
+  return detection.card?.parallel;
+}
+
+/**
+ * Check if a detection is a numbered parallel (limited print run)
+ * @param detection - The card detection
+ * @returns True if the card is a numbered parallel (has numberedTo value)
+ */
+export function isNumberedParallel(detection: CardDetection): boolean {
+  return Boolean(detection.card?.parallel?.numberedTo);
+}
+
+/**
+ * Format parallel information as a display string
+ * @param detection - The card detection
+ * @returns Formatted string with parallel details, or empty string if not a parallel
+ * @example
+ * // "Gold Refractor /50"
+ * // "Black Prizm"
+ * // "Orange /25"
+ */
+export function formatParallelDisplay(detection: CardDetection): string {
+  const parallel = detection.card?.parallel;
+  if (!parallel) return '';
+
+  const parts = [parallel.name];
+  if (parallel.numberedTo) {
+    parts.push(`/${parallel.numberedTo}`);
+  }
+
+  return parts.join(' ');
+}

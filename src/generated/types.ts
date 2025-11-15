@@ -44,6 +44,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/health/detailed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detailed health check with dependency status
+         * @description Returns detailed health status including database and Redis connectivity checks. Requires authentication.
+         */
+        get: operations["getDetailedHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/identify/card": {
         parameters: {
             query?: never;
@@ -2787,6 +2807,17 @@ export interface components {
             name: string;
             /** @description Card number from catalog (e.g., "#23", "RC-1") */
             number?: string;
+            /** @description Parallel variant information if this card is identified as a parallel (e.g., refractor, numbered, color variant) */
+            parallel?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+                description?: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            };
         };
         IdentificationDataInput: {
             /**
@@ -4158,6 +4189,17 @@ export interface components {
             name: string;
             /** @description Card number from catalog (e.g., "#23", "RC-1") */
             number?: string;
+            /** @description Parallel variant information if this card is identified as a parallel (e.g., refractor, numbered, color variant) */
+            parallel?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+                description?: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            };
         };
         IdentificationData: {
             /**
@@ -4945,6 +4987,48 @@ export interface operations {
             };
         };
     };
+    getDetailedHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description DetailedHealthResponse */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Overall health status: healthy (all dependencies up), degraded (some non-critical dependencies down), unhealthy (critical dependencies down)
+                         * @enum {string}
+                         */
+                        status: "healthy" | "degraded" | "unhealthy";
+                        /** @description ISO 8601 timestamp when the health check was performed */
+                        timestamp: string;
+                        /** @description Health status of individual dependencies (database, Redis, etc.) */
+                        checks?: {
+                            [key: string]: {
+                                /**
+                                 * @description Health status of the component
+                                 * @enum {string}
+                                 */
+                                status: "healthy" | "unhealthy";
+                                /** @description Optional message describing the health status */
+                                message?: string;
+                                /** @description Response time in milliseconds */
+                                responseTime?: number;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
     identifyCard: {
         parameters: {
             query?: never;
@@ -5058,7 +5142,7 @@ export interface operations {
     getSegments: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5134,7 +5218,7 @@ export interface operations {
     getManufacturers: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5210,7 +5294,7 @@ export interface operations {
     getReleases: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5364,7 +5448,7 @@ export interface operations {
     getReleaseCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5529,7 +5613,7 @@ export interface operations {
     getSets: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5683,7 +5767,7 @@ export interface operations {
     getSetCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5848,7 +5932,7 @@ export interface operations {
     getCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6112,7 +6196,7 @@ export interface operations {
     getAttributes: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6258,7 +6342,7 @@ export interface operations {
     getParallels: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6782,7 +6866,7 @@ export interface operations {
     getCollectors: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7118,7 +7202,7 @@ export interface operations {
     getCollections: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7462,7 +7546,7 @@ export interface operations {
     getCollectionBreakdown: {
         parameters: {
             query: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7613,7 +7697,7 @@ export interface operations {
     getCollectionSetProgress: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7831,7 +7915,7 @@ export interface operations {
     getCollectionCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8182,7 +8266,7 @@ export interface operations {
     getBinders: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8536,7 +8620,7 @@ export interface operations {
     getBinderCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8817,7 +8901,7 @@ export interface operations {
     getLists: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -9161,7 +9245,7 @@ export interface operations {
     getListCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 1000, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
