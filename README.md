@@ -155,7 +155,14 @@ if (result.data?.success && result.data.detections) {
   detections: [
     {
       confidence: "High",  // Confidence level: "High", "Medium", or "Low"
-      card: {
+      aiIdentification: {   // Raw AI result - always present
+        year: "2023",
+        release: "Series 1",
+        set: "Base Set",
+        name: "Mike Trout",
+        number: "27"
+      },
+      card: {               // Catalog match - only present for exact matches
         id: "cd4e3a2f-8b9d-4c7e-a1b2-3d4e5f6g7h8i",
         year: "2023",
         manufacturer: "Topps",
@@ -310,6 +317,7 @@ for (const detection of result.data?.detections || []) {
 // When a parallel variant is detected
 {
   confidence: "High",
+  aiIdentification: { /* raw AI result */ },
   card: {
     id: "card_uuid",
     name: "Mike Trout",
@@ -318,8 +326,10 @@ for (const detection of result.data?.detections || []) {
     parallel?: {
       id: "parallel_uuid",        // UUID of the parallel type
       name: "Gold Refractor",     // Human-readable name
-      description?: "...",         // Optional additional details
-      numberedTo?: 50             // Print run for numbered parallels
+      description?: "...",        // Optional additional details
+      isPartial?: true,           // True if parallel only applies to specific cards
+      numberedTo?: 50,            // Print run for numbered parallels
+      cards?: ["uuid1", "uuid2"]  // Card UUIDs (only when isPartial is true)
     }
   }
 }
@@ -327,6 +337,7 @@ for (const detection of result.data?.detections || []) {
 // Base cards have no parallel object
 {
   confidence: "High",
+  aiIdentification: { /* raw AI result */ },
   card: {
     id: "card_uuid",
     name: "Aaron Judge",
@@ -378,6 +389,11 @@ const segments = await client.catalog.segments.list();
 
 // Get all parallels/variations
 const parallels = await client.catalog.parallels.list();
+
+// Get detailed parallel information by ID
+const parallel = await client.catalog.parallels.get('parallel_uuid');
+// Returns: id, name, description, numberedTo, isPartial, setId, setName,
+//          releaseId, releaseName, releaseYear, cards (for partial parallels)
 
 // Get catalog statistics
 const stats = await client.catalog.statistics.get();
@@ -681,6 +697,8 @@ import {
   IdentifyResult,
   CardDetection,
   DetectedCard,
+  AIIdentification,
+  DetailedParallel,
   Card,
   Set,
   Collection

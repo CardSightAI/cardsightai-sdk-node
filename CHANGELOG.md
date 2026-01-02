@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-01-02
+
+### Breaking Changes
+- **`catalog.parallels` restructured** - Changed from a function to an object with `list()` and `get()` methods:
+  ```typescript
+  // Before (v2.2.x)
+  await client.catalog.parallels({ setId: '...' });
+
+  // After (v2.3.0)
+  await client.catalog.parallels.list({ setId: '...' });
+  ```
+
+### Added
+- **Get Parallel by ID** - New endpoint to retrieve detailed parallel information:
+  - `catalog.parallels.get(id)` - Returns parallel details with set and release context
+  - Response includes: `id`, `name`, `description`, `numberedTo`, `isPartial`, `setId`, `setName`, `releaseId`, `releaseName`, `releaseYear`, and `cards` array for partial parallels
+- **`AIIdentification` type** - New type export for raw AI identification results
+- **`DetailedParallel` type** - New type export for the detailed parallel response
+
+### Enhanced
+- **Partial Parallel Support** - Parallels that only apply to specific cards now include:
+  - `isPartial: true` flag when parallel applies to subset of cards
+  - `cards: string[]` array of card UUIDs for partial parallels
+- **Card Variation Tracking** - Cards now include `variationOf` field (UUID of base card for variation cards)
+- **AI Identification Always Present** - `CardDetection` now includes `aiIdentification` field containing raw AI results, even when no exact catalog match is found
+- **Enhanced Catalog Statistics** - `CatalogCardStats` now includes `parallels` count for total parallel card instances
+- **Breakdown IDs** - `CatalogSegmentBreakdownItem` and `CatalogManufacturerBreakdownItem` now include `id` field
+
+### API Changes (Documentation Only)
+- Identify endpoint now supports files up to 20MB (was 10MB)
+- Added HEIF and HEIC image format support
+- Confidence thresholds adjusted: Medium 75-89% (was 70-89%), Low 50-74% (was <70%)
+- Pagination max `take` increased to 100 (was 50) on most endpoints
+
 ## [2.2.0] - 2025-11-14
 
 ### Added

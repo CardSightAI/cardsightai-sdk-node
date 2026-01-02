@@ -17,6 +17,8 @@ export type {
   CardDetection,
   DetectedCard,
   IdentifyResult,
+  AIIdentification,
+  DetailedParallel,
 } from './types.js';
 
 // Export utility functions for working with identification results
@@ -29,6 +31,10 @@ export {
   getFirstDetection,
   countByConfidence,
   formatCardDisplay,
+  hasParallel,
+  getParallelInfo,
+  isNumberedParallel,
+  formatParallelDisplay,
 } from './utils.js';
 
 // Default export

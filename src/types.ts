@@ -144,8 +144,18 @@ export interface AIQueryRequest {
 // Card Identification types
 export type CardIdentificationResponse = GetResponseData<'/v1/identify/card', 'post'>;
 
+// AI Identification - raw AI result, always present in detections
+export interface AIIdentification {
+  year: string;
+  release: string;
+  set?: string;
+  name?: string;
+  number?: string;
+}
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
+  aiIdentification: AIIdentification;
   card?: DetectedCard;
 }
 
@@ -157,6 +167,14 @@ export interface DetectedCard {
   setName?: string;
   name: string;
   number?: string;
+  parallel?: {
+    id: string;
+    name: string;
+    description?: string;
+    isPartial?: true;
+    numberedTo?: number;
+    cards?: string[];
+  };
 }
 
 // Utility type for easier access to the identification result
@@ -166,6 +184,9 @@ export interface IdentifyResult {
   detections?: CardDetection[];
   processingTime?: number;
 }
+
+// Detailed parallel response from GET /v1/catalog/parallels/{id}
+export type DetailedParallel = components['schemas']['DetailedParallelResponse'];
 
 // Export all generated types
 export type { paths, components } from './generated/types.js';

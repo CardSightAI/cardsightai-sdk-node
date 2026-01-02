@@ -77,5 +77,7 @@ test('Client structure', async (t) => {
     assert(typeof client.catalog.cards.get === 'function', 'Should have catalog.cards.get()');
     assert(typeof client.catalog.sets.list === 'function', 'Should have catalog.sets.list()');
     assert(typeof client.catalog.manufacturers === 'function', 'Should have catalog.manufacturers()');
+    assert(typeof client.catalog.parallels.list === 'function', 'Should have catalog.parallels.list()');
+    assert(typeof client.catalog.parallels.get === 'function', 'Should have catalog.parallels.get()');
   });
 });

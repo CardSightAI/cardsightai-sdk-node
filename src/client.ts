@@ -296,8 +296,13 @@ export class CardSightAI {
     /**
      * Get parallels
      */
-    parallels: (params?: GetQueryParams<'/v1/catalog/parallels'>) =>
-      this.client.GET('/v1/catalog/parallels', { params: { query: params } }),
+    parallels: {
+      list: (params?: GetQueryParams<'/v1/catalog/parallels'>) =>
+        this.client.GET('/v1/catalog/parallels', { params: { query: params } }),
+
+      get: (id: string) =>
+        this.client.GET('/v1/catalog/parallels/{id}', { params: { path: { id } } })
+    },
 
     /**
      * Get attributes

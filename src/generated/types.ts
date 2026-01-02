@@ -75,7 +75,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies a baseball card from the submitted image
-         * @description Identify a baseball card from an image. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 10MB. Supported formats: JPEG, PNG, WebP.
+         * @description Identify a baseball card from an image. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
          */
         post: operations["identifyCard"];
         delete?: never;
@@ -463,6 +463,26 @@ export interface paths {
          * @description Search for parallels by name and filter by release. Returns all sets containing the parallel with release information
          */
         get: operations["getParallels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog/parallels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get detailed parallel information
+         * @description Retrieve detailed information about a specific Parallel, including set and release context. For partial parallels (isPartial=true), the response includes an array of Card IDs that have this Parallel.
+         */
+        get: operations["getParallel"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2777,8 +2797,11 @@ export interface components {
             data: components["schemas"]["FeedbackResponseInput"];
         };
         FileUploadInput: {
-            /** @description The image file to analyze */
-            image: unknown;
+            /**
+             * Format: binary
+             * @description The image file to analyze
+             */
+            image: string;
         };
         AIIdentificationInput: {
             /** @description Release year identified by AI (e.g., "2023", "1989") */
@@ -2787,8 +2810,8 @@ export interface components {
             release: string;
             /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
             set?: string;
-            /** @description Player or subject name on the card (e.g., "Michael Jordan", "Tom Brady") */
-            name: string;
+            /** @description Player or subject name on the card, if identified (e.g., "Michael Jordan", "Tom Brady") */
+            name?: string;
             /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
             number?: string;
         };
@@ -2815,17 +2838,26 @@ export interface components {
                 name: string;
                 /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
                 description?: string;
+                /**
+                 * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+                 * @constant
+                 */
+                isPartial?: true;
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
+                /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+                cards?: string[];
             };
         };
         IdentificationDataInput: {
             /**
-             * @description AI confidence level for this detection (High: 90-100%, Medium: 70-89%, Low: <70%)
+             * @description AI confidence level for this detection (High: 90-100%, Medium: 75-89%, Low: 50-74%)
              * @enum {string}
              */
             confidence: "High" | "Medium" | "Low";
-            /** @description Matched card details from catalog. Null if no match found or confidence too low. */
+            /** @description Raw AI identification result - always present. Contains year, release, and optionally set, name, number. */
+            aiIdentification: components["schemas"]["AIIdentificationInput"];
+            /** @description Matched card details from catalog. Absent if no exact match found (partial identification). */
             card?: components["schemas"]["CardDetailsInput"];
         };
         IdentifyCardResponseInput: {
@@ -2958,6 +2990,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
         };
         AttributeInput: {
             /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
@@ -2976,6 +3013,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
             /** @description Average pricing data for this parallel variant. Only included when price data is available. */
@@ -2987,6 +3029,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
         };
         AttributeSummaryInput: {
             /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
@@ -3055,6 +3099,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         DetailedCardInput: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -3092,6 +3138,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         ReleaseWithSetsInput: {
             /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
@@ -3116,6 +3164,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
             /** @description Average pricing data for this parallel variant. Only included when price data is available. */
@@ -3127,6 +3180,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
             /** @description Set UUID */
             setId: string;
             /** @description Set name */
@@ -3279,6 +3334,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         PaginatedAttributesResponseInput: {
             /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
@@ -3312,7 +3369,36 @@ export interface components {
             /** @description Number of results included in this page */
             take: number;
         };
+        DetailedParallelResponseInput: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". */
+            name: string;
+            /** @description Additional details about the parallel such as special features or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number. Example: 50 means /50 parallel. Null for unlimited parallels. */
+            numberedTo?: number;
+            /** @description True if this parallel applies to specific cards only (e.g., cards 1-400 of a 800-card set). False if it applies to the entire set. */
+            isPartial: boolean;
+            /** @description UUID of the set this parallel belongs to. */
+            setId: string;
+            /** @description Name of the set this parallel belongs to. */
+            setName: string;
+            /** @description UUID of the release containing this parallel's set. */
+            releaseId: string;
+            /** @description Name of the release (e.g., "2023 Topps Chrome Baseball"). */
+            releaseName: string;
+            /** @description Year the release was issued (e.g., "2023"). */
+            releaseYear: string;
+            /** @description Array of card UUIDs that have this parallel variant. Only present when isPartial=true. Empty array if partial but no cards mapped. */
+            cards?: string[];
+        };
         CatalogSegmentBreakdownItemInput: {
+            /**
+             * Format: uuid
+             * @description Segment unique identifier
+             */
+            id: string;
             /** @description Segment name */
             name: string;
             /** @description Number of releases in this segment */
@@ -3325,6 +3411,11 @@ export interface components {
             breakdown: components["schemas"]["CatalogSegmentBreakdownItemInput"][];
         };
         CatalogManufacturerBreakdownItemInput: {
+            /**
+             * Format: uuid
+             * @description Manufacturer unique identifier
+             */
+            id: string;
             /** @description Manufacturer name */
             name: string;
             /** @description Number of releases by this manufacturer */
@@ -3363,12 +3454,14 @@ export interface components {
             identifiable: number;
         };
         CatalogCardStatsInput: {
-            /** @description Total number of all cards in catalog */
+            /** @description Total cards including all parallel versions */
             total: number;
-            /** @description Count of base cards (original cards) */
+            /** @description Base cards (non-parallel, non-variation) */
             base: number;
-            /** @description Count of card variations */
+            /** @description Variation cards (non-parallel) */
             variations: number;
+            /** @description Total parallel card instances */
+            parallels: number;
         };
         CatalogParallelStatsInput: {
             /** @description Total number of parallel types */
@@ -3422,6 +3515,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -4159,8 +4254,11 @@ export interface components {
             data: components["schemas"]["FeedbackResponse"];
         };
         FileUpload: {
-            /** @description The image file to analyze */
-            image: unknown;
+            /**
+             * Format: binary
+             * @description The image file to analyze
+             */
+            image: string;
         };
         AIIdentification: {
             /** @description Release year identified by AI (e.g., "2023", "1989") */
@@ -4169,8 +4267,8 @@ export interface components {
             release: string;
             /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
             set?: string;
-            /** @description Player or subject name on the card (e.g., "Michael Jordan", "Tom Brady") */
-            name: string;
+            /** @description Player or subject name on the card, if identified (e.g., "Michael Jordan", "Tom Brady") */
+            name?: string;
             /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
             number?: string;
         };
@@ -4197,17 +4295,26 @@ export interface components {
                 name: string;
                 /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
                 description?: string;
+                /**
+                 * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+                 * @constant
+                 */
+                isPartial?: true;
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
+                /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+                cards?: string[];
             };
         };
         IdentificationData: {
             /**
-             * @description AI confidence level for this detection (High: 90-100%, Medium: 70-89%, Low: <70%)
+             * @description AI confidence level for this detection (High: 90-100%, Medium: 75-89%, Low: 50-74%)
              * @enum {string}
              */
             confidence: "High" | "Medium" | "Low";
-            /** @description Matched card details from catalog. Null if no match found or confidence too low. */
+            /** @description Raw AI identification result - always present. Contains year, release, and optionally set, name, number. */
+            aiIdentification: components["schemas"]["AIIdentification"];
+            /** @description Matched card details from catalog. Absent if no exact match found (partial identification). */
             card?: components["schemas"]["CardDetails"];
         };
         IdentifyCardResponse: {
@@ -4340,6 +4447,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
         };
         Attribute: {
             /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
@@ -4358,6 +4470,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
             /** @description Average pricing data for this parallel variant. Only included when price data is available. */
@@ -4369,6 +4486,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
         };
         AttributeSummary: {
             /** @description Unique identifier for the attribute. Format: UUID v4. This ID is permanent and used for all API operations involving this attribute. */
@@ -4437,6 +4556,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         DetailedCard: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -4474,6 +4595,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         ReleaseWithSets: {
             /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
@@ -4498,6 +4621,11 @@ export interface components {
             name: string;
             /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
             description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
             /** @description Average pricing data for this parallel variant. Only included when price data is available. */
@@ -4509,6 +4637,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
             /** @description Set UUID */
             setId: string;
             /** @description Set name */
@@ -4661,6 +4791,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
         };
         PaginatedAttributesResponse: {
             /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
@@ -4694,7 +4826,36 @@ export interface components {
             /** @description Number of results included in this page */
             take: number;
         };
+        DetailedParallelResponse: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". */
+            name: string;
+            /** @description Additional details about the parallel such as special features or visual description. May be null. */
+            description?: string;
+            /** @description Limited print run number. Example: 50 means /50 parallel. Null for unlimited parallels. */
+            numberedTo?: number;
+            /** @description True if this parallel applies to specific cards only (e.g., cards 1-400 of a 800-card set). False if it applies to the entire set. */
+            isPartial: boolean;
+            /** @description UUID of the set this parallel belongs to. */
+            setId: string;
+            /** @description Name of the set this parallel belongs to. */
+            setName: string;
+            /** @description UUID of the release containing this parallel's set. */
+            releaseId: string;
+            /** @description Name of the release (e.g., "2023 Topps Chrome Baseball"). */
+            releaseName: string;
+            /** @description Year the release was issued (e.g., "2023"). */
+            releaseYear: string;
+            /** @description Array of card UUIDs that have this parallel variant. Only present when isPartial=true. Empty array if partial but no cards mapped. */
+            cards?: string[];
+        };
         CatalogSegmentBreakdownItem: {
+            /**
+             * Format: uuid
+             * @description Segment unique identifier
+             */
+            id: string;
             /** @description Segment name */
             name: string;
             /** @description Number of releases in this segment */
@@ -4707,6 +4868,11 @@ export interface components {
             breakdown: components["schemas"]["CatalogSegmentBreakdownItem"][];
         };
         CatalogManufacturerBreakdownItem: {
+            /**
+             * Format: uuid
+             * @description Manufacturer unique identifier
+             */
+            id: string;
             /** @description Manufacturer name */
             name: string;
             /** @description Number of releases by this manufacturer */
@@ -4745,12 +4911,14 @@ export interface components {
             identifiable: number;
         };
         CatalogCardStats: {
-            /** @description Total number of all cards in catalog */
+            /** @description Total cards including all parallel versions */
             total: number;
-            /** @description Count of base cards (original cards) */
+            /** @description Base cards (non-parallel, non-variation) */
             base: number;
-            /** @description Count of card variations */
+            /** @description Variation cards (non-parallel) */
             variations: number;
+            /** @description Total parallel card instances */
+            parallels: number;
         };
         CatalogParallelStats: {
             /** @description Total number of parallel types */
@@ -4804,6 +4972,8 @@ export interface components {
                 /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
                 "psa-9"?: string;
             };
+            /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
+            variationOf?: string;
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -5036,7 +5206,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "multipart/form-data": components["schemas"]["FileUploadInput"];
                 "image/jpeg": components["schemas"]["FileUploadInput"];
@@ -5142,7 +5312,7 @@ export interface operations {
     getSegments: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5218,7 +5388,7 @@ export interface operations {
     getManufacturers: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5294,7 +5464,7 @@ export interface operations {
     getReleases: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5448,7 +5618,7 @@ export interface operations {
     getReleaseCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5613,7 +5783,7 @@ export interface operations {
     getSets: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5767,7 +5937,7 @@ export interface operations {
     getSetCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -5932,7 +6102,7 @@ export interface operations {
     getCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6196,7 +6366,7 @@ export interface operations {
     getAttributes: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6342,7 +6512,7 @@ export interface operations {
     getParallels: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -6385,6 +6555,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedParallelsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getParallel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier for the parallel type. Must be a valid UUID format. Example: "550e8400-e29b-41d4-a716-446655440000" */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedParallelResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedParallelResponse"];
                 };
             };
             /** @description Default Response */
@@ -6866,7 +7104,7 @@ export interface operations {
     getCollectors: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7202,7 +7440,7 @@ export interface operations {
     getCollections: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7546,7 +7784,7 @@ export interface operations {
     getCollectionBreakdown: {
         parameters: {
             query: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7697,7 +7935,7 @@ export interface operations {
     getCollectionSetProgress: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -7915,7 +8153,7 @@ export interface operations {
     getCollectionCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8266,7 +8504,7 @@ export interface operations {
     getBinders: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8620,7 +8858,7 @@ export interface operations {
     getBinderCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -8841,12 +9079,50 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
+            /** @description Binary image data (JPEG) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "image/jpeg": string;
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -8889,19 +9165,57 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
+            /** @description Binary image data (JPEG) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "image/jpeg": string;
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
     getLists: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -9245,7 +9559,7 @@ export interface operations {
     getListCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 50, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
@@ -9461,12 +9775,51 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
+            /** @description Card image in requested format. Returns binary JPEG when format=raw (default), or JSON with base64 data URI when format=json. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "image/jpeg": string;
+                    "application/json": components["schemas"]["ImageJsonResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
