@@ -19,6 +19,7 @@ export type {
   IdentifyResult,
   AIIdentification,
   DetailedParallel,
+  CardParallel
 } from './types.js';
 
 // Export utility functions for working with identification results
@@ -35,6 +36,12 @@ export {
   getParallelInfo,
   isNumberedParallel,
   formatParallelDisplay,
+  // Card parallel utilities (for catalog cards with parallels array)
+  getCardParallels,
+  hasCardParallels,
+  findParallelByName,
+  getNumberedParallels,
+  formatCardParallel
 } from './utils.js';
 
 // Default export

@@ -2,16 +2,14 @@
  * Utility functions for working with CardSight AI SDK responses
  */
 
-import type { CardDetection, IdentifyResult, DetectedCard } from './types.js';
+import type { CardDetection, IdentifyResult, DetectedCard, CardParallel } from './types.js';
 
 /**
  * Get the highest confidence detection from an identification result
  * @param result - The identification result
  * @returns The detection with the highest confidence, or undefined if no detections
  */
-export function getHighestConfidenceDetection(
-  result: IdentifyResult
-): CardDetection | undefined {
+export function getHighestConfidenceDetection(result: IdentifyResult): CardDetection | undefined {
   if (!result.detections || result.detections.length === 0) {
     return undefined;
   }
@@ -42,7 +40,7 @@ export function filterByConfidence(
   const confidenceOrder = { High: 3, Medium: 2, Low: 1 };
   const minScore = confidenceOrder[minConfidence] || 0;
 
-  return result.detections.filter(detection => {
+  return result.detections.filter((detection) => {
     const score = confidenceOrder[detection.confidence] || 0;
     return score >= minScore;
   });
@@ -57,8 +55,8 @@ export function getDetectedCards(result: IdentifyResult): DetectedCard[] {
   if (!result.detections) return [];
 
   return result.detections
-    .filter(detection => detection.card !== undefined)
-    .map(detection => detection.card!);
+    .filter((detection) => detection.card !== undefined)
+    .map((detection) => detection.card!);
 }
 
 /**
@@ -100,7 +98,7 @@ export function countByConfidence(
 
   if (!result.detections) return counts;
 
-  result.detections.forEach(detection => {
+  result.detections.forEach((detection) => {
     if (detection.confidence in counts) {
       counts[detection.confidence]++;
     }
@@ -169,4 +167,70 @@ export function formatParallelDisplay(detection: CardDetection): string {
   }
 
   return parts.join(' ');
+}
+
+// ============================================================================
+// Card Parallel Utilities (for catalog cards with parallels array)
+// ============================================================================
+
+/**
+ * Card-like object with optional parallels array (matches catalog card responses)
+ */
+interface CardWithParallels {
+  parallels?: CardParallel[];
+}
+
+/**
+ * Get all parallels for a card from catalog responses
+ * @param card - A card object from catalog endpoints
+ * @returns Array of parallel variants, or empty array if none
+ */
+export function getCardParallels(card: CardWithParallels): CardParallel[] {
+  return card.parallels || [];
+}
+
+/**
+ * Check if a card has any parallel variants available
+ * @param card - A card object from catalog endpoints
+ * @returns True if the card has at least one parallel variant
+ */
+export function hasCardParallels(card: CardWithParallels): boolean {
+  return Boolean(card.parallels && card.parallels.length > 0);
+}
+
+/**
+ * Find a specific parallel by name (case-insensitive)
+ * @param card - A card object from catalog endpoints
+ * @param name - The name of the parallel to find
+ * @returns The matching parallel, or undefined if not found
+ */
+export function findParallelByName(
+  card: CardWithParallels,
+  name: string
+): CardParallel | undefined {
+  if (!card.parallels) return undefined;
+  const lowerName = name.toLowerCase();
+  return card.parallels.find((p) => p.name.toLowerCase() === lowerName);
+}
+
+/**
+ * Get only numbered parallels (those with limited print runs)
+ * @param card - A card object from catalog endpoints
+ * @returns Array of numbered parallel variants
+ */
+export function getNumberedParallels(card: CardWithParallels): CardParallel[] {
+  if (!card.parallels) return [];
+  return card.parallels.filter((p) => p.numberedTo !== undefined);
+}
+
+/**
+ * Format a card parallel for display
+ * @param parallel - The parallel object
+ * @returns Formatted string (e.g., "Gold Refractor /50" or "Black Prizm")
+ */
+export function formatCardParallel(parallel: CardParallel): string {
+  if (parallel.numberedTo) {
+    return `${parallel.name} /${parallel.numberedTo}`;
+  }
+  return parallel.name;
 }

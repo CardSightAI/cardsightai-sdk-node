@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-01-10
+
+### Added
+- **Card Parallels on Catalog Cards** - Cards from catalog endpoints now include a `parallels` array listing all available parallel variants:
+  - Each parallel contains: `id` (UUID), `name` (e.g., "Gold Refractor"), and optional `numberedTo` (print run)
+  - Allows displaying all available parallels without separate API calls
+  - New `CardParallel` type export for TypeScript users
+- **Card Parallel Utility Functions** - New helper functions for working with catalog card parallels:
+  - `getCardParallels(card)` - Get all parallels for a catalog card
+  - `hasCardParallels(card)` - Check if a card has any parallel variants
+  - `findParallelByName(card, name)` - Find a specific parallel by name (case-insensitive)
+  - `getNumberedParallels(card)` - Get only numbered parallels (those with limited print runs)
+  - `formatCardParallel(parallel)` - Format a parallel for display (e.g., "Gold Refractor /50")
+- **Grade Condition Field** - The `Grade` schema now includes a `condition` field:
+  - Provides human-readable condition descriptors (e.g., "GEM MINT", "MINT", "PRISTINE")
+  - Useful for display: "PSA 10 - GEM MINT"
+
+### Breaking Changes
+- **Removed `note` field** - The `note` field was removed from `GradingCompany` and `GradingType` schemas
+  - This field was nullable and rarely used
+  - Code accessing `gradingCompany.note` or `gradingType.note` will need to be updated
+
+### Notes
+- Card parallel utilities (`getCardParallels`, etc.) are for catalog cards with `parallels[]` array
+- Detection parallel utilities (`hasParallel`, `getParallelInfo`, etc.) are for identify responses with `card.parallel` object
+- These serve different purposes: catalog shows all available parallels, identify shows the detected parallel
+
 ## [2.3.0] - 2026-01-02
 
 ### Breaking Changes

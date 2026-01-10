@@ -347,6 +347,49 @@ for (const detection of result.data?.detections || []) {
 }
 ```
 
+#### Card Parallel Utilities (Catalog)
+
+Cards from catalog endpoints now include a `parallels` array listing all available parallel variants. Use these utilities to work with catalog card parallels:
+
+```typescript
+import {
+  getCardParallels,
+  hasCardParallels,
+  findParallelByName,
+  getNumberedParallels,
+  formatCardParallel,
+  type CardParallel
+} from 'cardsightai';
+
+// Get a card from the catalog
+const { data: card } = await client.catalog.cards.get('card_uuid');
+
+// Check if the card has any parallel variants
+if (hasCardParallels(card)) {
+  // Get all parallels
+  const parallels = getCardParallels(card);
+  console.log(`This card has ${parallels.length} parallel variants`);
+
+  // Format each parallel for display
+  parallels.forEach(p => {
+    console.log(`- ${formatCardParallel(p)}`);
+    // Output: "Gold Refractor /50", "Black Prizm", "Orange /25"
+  });
+
+  // Get only numbered parallels (limited print runs)
+  const numbered = getNumberedParallels(card);
+  console.log(`${numbered.length} are numbered parallels`);
+
+  // Find a specific parallel by name
+  const gold = findParallelByName(card, 'Gold Refractor');
+  if (gold) {
+    console.log(`Found Gold Refractor with ID: ${gold.id}`);
+  }
+}
+```
+
+**Note**: These utilities are for catalog cards (`card.parallels[]`). For identification results, use `hasParallel()`, `getParallelInfo()`, etc. which work with the detected `card.parallel` object.
+
 ### Catalog Operations
 
 Search and retrieve cards, sets, releases, and other catalog data:
@@ -394,6 +437,17 @@ const parallels = await client.catalog.parallels.list();
 const parallel = await client.catalog.parallels.get('parallel_uuid');
 // Returns: id, name, description, numberedTo, isPartial, setId, setName,
 //          releaseId, releaseName, releaseYear, cards (for partial parallels)
+
+// Cards now include their available parallels directly
+const { data: card } = await client.catalog.cards.get('card_uuid');
+if (card?.parallels && card.parallels.length > 0) {
+  console.log('Available parallels:');
+  card.parallels.forEach(p => {
+    // Each parallel has: id, name, numberedTo (optional)
+    const display = p.numberedTo ? `${p.name} /${p.numberedTo}` : p.name;
+    console.log(`- ${display}`);
+  });
+}
 
 // Get catalog statistics
 const stats = await client.catalog.statistics.get();
@@ -593,8 +647,14 @@ const companies = await client.grades.companies.list();
 const types = await client.grades.companies.types('PSA');
 
 // Get specific grades for a grading type
-const grades = await client.grades.companies.grades('PSA', 'psa_regular');
-// Returns grades like 10, 9, 8, with half grades where applicable
+const { data: grades } = await client.grades.companies.grades('PSA', 'psa_regular');
+
+// Grades include condition descriptors
+grades?.grades?.forEach(grade => {
+  // grade.grade = "10", grade.condition = "GEM MINT"
+  console.log(`${grade.grade} - ${grade.condition}`);
+  // Output: "10 - GEM MINT", "9 - MINT", etc.
+});
 ```
 
 ### AI-Powered Search

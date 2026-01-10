@@ -3101,6 +3101,15 @@ export interface components {
             };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
+            parallels?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            }[];
         };
         DetailedCardInput: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -3517,6 +3526,15 @@ export interface components {
             };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
+            parallels?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            }[];
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -3575,8 +3593,6 @@ export interface components {
             name: string;
             /** @description Detailed description of the grading company and its services */
             description: string | null;
-            /** @description Additional notes or important information about this grading company */
-            note: string | null;
         };
         GradingTypeInput: {
             /**
@@ -3595,8 +3611,6 @@ export interface components {
             name: string;
             /** @description Detailed description of what this grading type offers or represents */
             description: string | null;
-            /** @description Additional notes about this grading type */
-            note: string | null;
         };
         GradeInput: {
             /**
@@ -3620,6 +3634,8 @@ export interface components {
             gradingCompanyName: string;
             /** @description The grade value as a string (e.g., "10", "9.5", "8") to support decimal and "Authentic" grades */
             grade: string;
+            /** @description The condition descriptor for this grade (e.g., "GEM MINT", "MINT", "PRISTINE") */
+            condition: string | null;
         };
         GradingCompaniesResponseInput: {
             /** @description List of grading companies */
@@ -4558,6 +4574,15 @@ export interface components {
             };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
+            parallels?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            }[];
         };
         DetailedCard: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -4974,6 +4999,15 @@ export interface components {
             };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
+            parallels?: {
+                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+                id: string;
+                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+                name: string;
+                /** @description Limited print run number for this parallel */
+                numberedTo?: number;
+            }[];
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -5032,8 +5066,6 @@ export interface components {
             name: string;
             /** @description Detailed description of the grading company and its services */
             description: string | null;
-            /** @description Additional notes or important information about this grading company */
-            note: string | null;
         };
         GradingType: {
             /**
@@ -5052,8 +5084,6 @@ export interface components {
             name: string;
             /** @description Detailed description of what this grading type offers or represents */
             description: string | null;
-            /** @description Additional notes about this grading type */
-            note: string | null;
         };
         Grade: {
             /**
@@ -5077,6 +5107,8 @@ export interface components {
             gradingCompanyName: string;
             /** @description The grade value as a string (e.g., "10", "9.5", "8") to support decimal and "Authentic" grades */
             grade: string;
+            /** @description The condition descriptor for this grade (e.g., "GEM MINT", "MINT", "PRISTINE") */
+            condition: string | null;
         };
         GradingCompaniesResponse: {
             /** @description List of grading companies */

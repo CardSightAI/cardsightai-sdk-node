@@ -188,5 +188,15 @@ export interface IdentifyResult {
 // Detailed parallel response from GET /v1/catalog/parallels/{id}
 export type DetailedParallel = components['schemas']['DetailedParallelResponse'];
 
+// Parallel variant information attached to cards in catalog responses
+export interface CardParallel {
+  /** Unique identifier for the parallel type (UUID) */
+  id: string;
+  /** Name of the parallel variant (e.g., "Gold Refractor", "Black Prizm") */
+  name: string;
+  /** Limited print run number for numbered parallels (e.g., 50 for /50) */
+  numberedTo?: number;
+}
+
 // Export all generated types
 export type { paths, components } from './generated/types.js';
