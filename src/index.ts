@@ -14,10 +14,10 @@ export type { paths, components } from './generated/types.js';
 // Export identification types and utilities
 export type {
   CardIdentificationResponse,
+  CardIdentificationBySegmentResponse,
   CardDetection,
   DetectedCard,
   IdentifyResult,
-  AIIdentification,
   DetailedParallel,
   CardParallel
 } from './types.js';
@@ -28,6 +28,9 @@ export {
   filterByConfidence,
   getDetectedCards,
   hasDetections,
+  isExactMatch,
+  isSetLevelMatch,
+  getExactMatches,
   isSuccessful,
   getFirstDetection,
   countByConfidence,

@@ -28,7 +28,7 @@ The most comprehensive baseball card identification and collection management pl
 
 | Feature | Description | Primary Methods |
 |---------|-------------|-----------------|
-| **Card Identification** | Identify multiple cards from images using AI | `identify.card()` |
+| **Card Identification** | Identify multiple cards from images using AI | `identify.card()`, `identify.cardBySegment()` |
 | **Catalog Search** | Search 2M+ baseball cards database | `catalog.cards.list()`, `catalog.sets.list()` |
 | **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
 | **Collections** | Manage owned card collections with analytics | `collections.create()`, `collections.cards.add()` |
@@ -80,8 +80,9 @@ const result = await client.identify.card(imageFile);
 if (result.data?.success) {
   // The API can detect multiple cards in a single image
   const detection = result.data.detections?.[0]; // Get best match
-  if (detection?.card) {
-    console.log(`Card: ${detection.card.name}`);
+  if (detection) {
+    console.log(`Card: ${detection.card.name}`);       // Exact match only
+    console.log(`Set: ${detection.card.releaseName}`);  // Exact + set-level match
     console.log(`Confidence: ${detection.confidence}`); // "High", "Medium", or "Low"
     console.log(`Total cards detected: ${result.data.detections.length}`);
   }
@@ -94,7 +95,7 @@ That's it! The SDK handles all API communication, type safety, and error handlin
 
 ### Card Identification
 
-The identification endpoint uses AI to detect baseball cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection.
+The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target a specific sport.
 
 ```typescript
 import { CardSightAI } from 'cardsightai';
@@ -129,13 +130,23 @@ if (result.data?.success && result.data.detections) {
   for (const detection of result.data.detections) {
     console.log(`\nConfidence: ${detection.confidence}`);
 
-    if (detection.card) {
+    // card is always present — field completeness depends on match level
+    if (detection.card.id) {
+      // Exact match — all fields populated
       console.log(`  Name: ${detection.card.name}`);
       console.log(`  Year: ${detection.card.year}`);
       console.log(`  Manufacturer: ${detection.card.manufacturer}`);
       console.log(`  Set: ${detection.card.setName || detection.card.releaseName}`);
       console.log(`  Number: ${detection.card.number || 'N/A'}`);
       console.log(`  Card ID: ${detection.card.id}`);
+    } else if (detection.card.setId) {
+      // Set-level match — no specific card, but set info available
+      console.log(`  Release: ${detection.card.releaseName}`);
+      console.log(`  Set: ${detection.card.setName}`);
+      console.log(`  Year: ${detection.card.year}`);
+    } else {
+      // No match — card detected in image but not identified
+      console.log('  Could not identify this card');
     }
   }
 
@@ -143,49 +154,33 @@ if (result.data?.success && result.data.detections) {
   console.log(`\nRequest ID: ${result.data.requestId}`);
   console.log(`Processing time: ${result.data.processingTime}ms`);
 }
+
+// Segment-specific identification (football, basketball, etc.)
+const footballResult = await client.identify.cardBySegment('football', imageBuffer);
+const basketballResult = await client.identify.cardBySegment('basketball', blob);
 ```
 
 #### Response Structure
 
+Each detection has a `confidence` level and a `card` object. The `card` is always present, but its fields are populated based on the match level:
+
+- **Exact match**: `card.id` present — all fields populated including `name`, `number`, and optionally `parallel`
+- **Set-level match**: `card.setId` present but no `card.id` — release/set info available but no specific card
+- **No match**: `card` is an empty object `{}` — a card was detected in the image but couldn't be identified
+
 ```typescript
-// Single card detected (base card)
+// Exact card match with parallel variant
 {
   success: true,
   requestId: "req_abc123",
   detections: [
     {
-      confidence: "High",  // Confidence level: "High", "Medium", or "Low"
-      aiIdentification: {   // Raw AI result - always present
-        year: "2023",
-        release: "Series 1",
-        set: "Base Set",
-        name: "Mike Trout",
-        number: "27"
-      },
-      card: {               // Catalog match - only present for exact matches
-        id: "cd4e3a2f-8b9d-4c7e-a1b2-3d4e5f6g7h8i",
-        year: "2023",
-        manufacturer: "Topps",
-        releaseName: "Series 1",
-        setName: "Base Set",
-        name: "Mike Trout",
-        number: "27"
-        // parallel is undefined for base cards
-      }
-    }
-  ],
-  processingTime: 1250  // Time in milliseconds
-}
-
-// Parallel variant detected
-{
-  success: true,
-  requestId: "req_par123",
-  detections: [
-    {
       confidence: "High",
       card: {
         id: "cd4e3a2f-8b9d-4c7e-a1b2-3d4e5f6g7h8i",
+        segmentId: "seg-uuid",
+        releaseId: "rel-uuid",
+        setId: "set-uuid",
         year: "2023",
         manufacturer: "Topps",
         releaseName: "Chrome",
@@ -195,27 +190,49 @@ if (result.data?.success && result.data.detections) {
         parallel: {
           id: "par_uuid",
           name: "Gold Refractor",
-          description: "Gold refractor parallel",
           numberedTo: 50
         }
       }
     }
   ],
-  processingTime: 1350
+  processingTime: 1250
 }
 
-// Multiple cards detected - the API returns all detected cards
+// Mixed results - exact match, set-level match, and no match
 {
   success: true,
   requestId: "req_xyz789",
   detections: [
     {
       confidence: "High",
-      card: { /* Aaron Judge card details */ }
+      card: {
+        id: "card-uuid",
+        segmentId: "seg-uuid",
+        releaseId: "rel-uuid",
+        setId: "set-uuid",
+        year: "2023",
+        manufacturer: "Topps",
+        releaseName: "Series 1",
+        setName: "Base Set",
+        name: "Mike Trout",
+        number: "27"
+      }
     },
     {
       confidence: "Medium",
-      card: { /* Shohei Ohtani card details */ }
+      card: {
+        segmentId: "seg-uuid",
+        releaseId: "rel-uuid",
+        setId: "set-uuid",
+        year: "2024",
+        manufacturer: "Panini",
+        releaseName: "Prizm Football",
+        setName: "Base Set"
+      }
+    },
+    {
+      confidence: "Low",
+      card: {}
     }
   ],
   processingTime: 1500
@@ -240,6 +257,9 @@ import {
   filterByConfidence,
   getDetectedCards,
   hasDetections,
+  isExactMatch,
+  isSetLevelMatch,
+  getExactMatches,
   formatCardDisplay
 } from 'cardsightai';
 
@@ -247,20 +267,35 @@ const result = await client.identify.card(imageFile);
 
 // Get the highest confidence detection (best match)
 const bestMatch = getHighestConfidenceDetection(result.data);
-if (bestMatch?.card) {
+if (bestMatch) {
   console.log('Best match:', formatCardDisplay(bestMatch.card));
   // Output: "2023 Topps Series 1 Base Set Mike Trout #27"
 }
 
-// Filter by confidence level
-const highConfidenceOnly = filterByConfidence(result.data, 'High');
-const mediumAndAbove = filterByConfidence(result.data, 'Medium');
+// Check match levels
+for (const detection of result.data?.detections || []) {
+  if (isExactMatch(detection)) {
+    console.log(`Exact: ${formatCardDisplay(detection.card)}`);
+  } else if (isSetLevelMatch(detection)) {
+    console.log(`Set-level: ${detection.card.releaseName} ${detection.card.setName}`);
+  } else {
+    console.log('Unidentified card detected');
+  }
+}
 
-// Get all card objects (excludes empty detections)
+// Get only exact matches (detections with card.id)
+const exactMatches = getExactMatches(result.data);
+console.log(`${exactMatches.length} exact match(es)`);
+
+// Get all exact-match card objects
 const cards = getDetectedCards(result.data);
 cards.forEach(card => {
   console.log(`- ${formatCardDisplay(card)}`);
 });
+
+// Filter by confidence level
+const highConfidenceOnly = filterByConfidence(result.data, 'High');
+const mediumAndAbove = filterByConfidence(result.data, 'Medium');
 
 // Check if any cards were detected
 if (hasDetections(result.data)) {
@@ -274,6 +309,7 @@ The identify endpoint can detect parallel variants (special editions like Refrac
 
 ```typescript
 import {
+  isExactMatch,
   hasParallel,
   getParallelInfo,
   isNumberedParallel,
@@ -283,7 +319,7 @@ import {
 const result = await client.identify.card(imageFile);
 
 for (const detection of result.data?.detections || []) {
-  if (detection.card) {
+  if (isExactMatch(detection)) {
     console.log(`Card: ${detection.card.name}`);
 
     // Check if it's a parallel variant
@@ -314,12 +350,14 @@ for (const detection of result.data?.detections || []) {
 **Parallel Object Structure:**
 
 ```typescript
-// When a parallel variant is detected
+// When a parallel variant is detected (exact match)
 {
   confidence: "High",
-  aiIdentification: { /* raw AI result */ },
   card: {
     id: "card_uuid",
+    segmentId: "seg_uuid",
+    releaseId: "rel_uuid",
+    setId: "set_uuid",
     name: "Mike Trout",
     year: "2023",
     // ... other card fields
@@ -337,7 +375,6 @@ for (const detection of result.data?.detections || []) {
 // Base cards have no parallel object
 {
   confidence: "High",
-  aiIdentification: { /* raw AI result */ },
   card: {
     id: "card_uuid",
     name: "Aaron Judge",
@@ -757,7 +794,6 @@ import {
   IdentifyResult,
   CardDetection,
   DetectedCard,
-  AIIdentification,
   DetailedParallel,
   Card,
   Set,
@@ -778,8 +814,8 @@ if (result.data) {
 
 // Use types in your functions
 function processDetection(detection: CardDetection): void {
-  if (detection.confidence === 'High' && detection.card) {
-    console.log(`High confidence: ${detection.card.name}`);
+  if (detection.confidence === 'High' && detection.card.id) {
+    console.log(`High confidence exact match: ${detection.card.name}`);
   }
 }
 ```
@@ -878,7 +914,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | Category | Endpoints | SDK Methods |
 |----------|-----------|------------|
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
-| **Identification** | 1 | `identify.card()` |
+| **Identification** | 2 | `identify.card()`, `identify.cardBySegment()` |
 | **Catalog** | 17 | `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |

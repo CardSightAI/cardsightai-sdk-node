@@ -74,10 +74,30 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Identifies a baseball card from the submitted image
-         * @description Identify a baseball card from an image. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         * Identifies a card from the submitted image (defaults to baseball)
+         * @description Identify a card from an image. Defaults to the baseball segment. Use POST /card/:segment for other sports. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
          */
         post: operations["identifyCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/identify/card/{segment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Identifies a card from the submitted image for a specific segment (sport)
+         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID or name (case-insensitive, e.g., "football", "basketball"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         */
+        post: operations["identifyCardBySegment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2803,34 +2823,28 @@ export interface components {
              */
             image: string;
         };
-        AIIdentificationInput: {
-            /** @description Release year identified by AI (e.g., "2023", "1989") */
-            year: string;
-            /** @description Release/product name identified by AI (e.g., "Topps Chrome", "Upper Deck Series 1") */
-            release: string;
-            /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
-            set?: string;
-            /** @description Player or subject name on the card, if identified (e.g., "Michael Jordan", "Tom Brady") */
-            name?: string;
-            /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
-            number?: string;
-        };
         CardDetailsInput: {
-            /** @description Unique UUID of the identified card from the CardSightAI catalog */
-            id: string;
+            /** @description UUID of the identified card. Present only for exact card matches. */
+            id?: string;
+            /** @description UUID of the segment. Present for both exact card and set-level matches. */
+            segmentId?: string;
+            /** @description UUID of the release. Present for both exact card and set-level matches. */
+            releaseId?: string;
+            /** @description UUID of the set. Present for both exact card and set-level matches. */
+            setId?: string;
             /** @description Release year from catalog (e.g., "2023", "1989") */
-            year: string;
+            year?: string;
             /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
-            manufacturer: string;
+            manufacturer?: string;
             /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
-            releaseName: string;
+            releaseName?: string;
             /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
             setName?: string;
-            /** @description Player or subject name from catalog (e.g., "Michael Jordan", "Tom Brady") */
-            name: string;
-            /** @description Card number from catalog (e.g., "#23", "RC-1") */
+            /** @description Player or subject name. Present only for exact card matches. */
+            name?: string;
+            /** @description Card number. Present only for exact card matches. */
             number?: string;
-            /** @description Parallel variant information if this card is identified as a parallel (e.g., refractor, numbered, color variant) */
+            /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
                 id: string;
@@ -2855,10 +2869,8 @@ export interface components {
              * @enum {string}
              */
             confidence: "High" | "Medium" | "Low";
-            /** @description Raw AI identification result - always present. Contains year, release, and optionally set, name, number. */
-            aiIdentification: components["schemas"]["AIIdentificationInput"];
-            /** @description Matched card details from catalog. Absent if no exact match found (partial identification). */
-            card?: components["schemas"]["CardDetailsInput"];
+            /** @description Identified card details. Completeness reflects match level: full fields for exact card match, set-level fields for set match, empty object for unmatched detection. */
+            card: components["schemas"]["CardDetailsInput"];
         };
         IdentifyCardResponseInput: {
             /** @description Whether the identification process completed successfully */
@@ -2980,6 +2992,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
         };
         ParallelInput: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -3082,6 +3096,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the set this card belongs to */
             setName: string;
             /** @description Name of the release */
@@ -3124,6 +3140,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the release */
             releaseName?: string;
             /** @description Year of the release */
@@ -3320,6 +3338,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the release */
             releaseName?: string;
             /** @description Year of the release */
@@ -3507,6 +3527,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the set this card belongs to */
             setName: string;
             /** @description Name of the release */
@@ -4276,34 +4298,28 @@ export interface components {
              */
             image: string;
         };
-        AIIdentification: {
-            /** @description Release year identified by AI (e.g., "2023", "1989") */
-            year: string;
-            /** @description Release/product name identified by AI (e.g., "Topps Chrome", "Upper Deck Series 1") */
-            release: string;
-            /** @description Set name within the release, if identified (e.g., "Base Set", "Rookies") */
-            set?: string;
-            /** @description Player or subject name on the card, if identified (e.g., "Michael Jordan", "Tom Brady") */
-            name?: string;
-            /** @description Card number within the set (e.g., "#23", "RC-1"). May include prefixes or suffixes. */
-            number?: string;
-        };
         CardDetails: {
-            /** @description Unique UUID of the identified card from the CardSightAI catalog */
-            id: string;
+            /** @description UUID of the identified card. Present only for exact card matches. */
+            id?: string;
+            /** @description UUID of the segment. Present for both exact card and set-level matches. */
+            segmentId?: string;
+            /** @description UUID of the release. Present for both exact card and set-level matches. */
+            releaseId?: string;
+            /** @description UUID of the set. Present for both exact card and set-level matches. */
+            setId?: string;
             /** @description Release year from catalog (e.g., "2023", "1989") */
-            year: string;
+            year?: string;
             /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
-            manufacturer: string;
+            manufacturer?: string;
             /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
-            releaseName: string;
+            releaseName?: string;
             /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
             setName?: string;
-            /** @description Player or subject name from catalog (e.g., "Michael Jordan", "Tom Brady") */
-            name: string;
-            /** @description Card number from catalog (e.g., "#23", "RC-1") */
+            /** @description Player or subject name. Present only for exact card matches. */
+            name?: string;
+            /** @description Card number. Present only for exact card matches. */
             number?: string;
-            /** @description Parallel variant information if this card is identified as a parallel (e.g., refractor, numbered, color variant) */
+            /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
                 id: string;
@@ -4328,10 +4344,8 @@ export interface components {
              * @enum {string}
              */
             confidence: "High" | "Medium" | "Low";
-            /** @description Raw AI identification result - always present. Contains year, release, and optionally set, name, number. */
-            aiIdentification: components["schemas"]["AIIdentification"];
-            /** @description Matched card details from catalog. Absent if no exact match found (partial identification). */
-            card?: components["schemas"]["CardDetails"];
+            /** @description Identified card details. Completeness reflects match level: full fields for exact card match, set-level fields for set match, empty object for unmatched detection. */
+            card: components["schemas"]["CardDetails"];
         };
         IdentifyCardResponse: {
             /** @description Whether the identification process completed successfully */
@@ -4453,6 +4467,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
         };
         Parallel: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -4555,6 +4571,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the set this card belongs to */
             setName: string;
             /** @description Name of the release */
@@ -4597,6 +4615,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the release */
             releaseName?: string;
             /** @description Year of the release */
@@ -4793,6 +4813,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the release */
             releaseName?: string;
             /** @description Year of the release */
@@ -4980,6 +5002,8 @@ export interface components {
             name: string;
             /** @description Additional card details such as team, position, special notations, or card back information. May be null. */
             description?: string;
+            /** @description Indicates this card exists only as a parallel, not as a base card. For example, if a set has 15 base cards but a parallel variant has 20 cards, the 5 extra cards would have isParallelOnly: true. */
+            isParallelOnly?: boolean;
             /** @description Name of the set this card belongs to */
             setName: string;
             /** @description Name of the release */
@@ -5267,6 +5291,99 @@ export interface operations {
             };
             /** @description Default Response */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    identifyCardBySegment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Segment identifier - either a UUID or segment name (e.g., "football", "baseball") */
+                segment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+                "image/jpeg": components["schemas"]["FileUploadInput"];
+                "image/png": components["schemas"]["FileUploadInput"];
+                "image/webp": components["schemas"]["FileUploadInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentifyCardResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -143,29 +143,26 @@ export interface AIQueryRequest {
 
 // Card Identification types
 export type CardIdentificationResponse = GetResponseData<'/v1/identify/card', 'post'>;
-
-// AI Identification - raw AI result, always present in detections
-export interface AIIdentification {
-  year: string;
-  release: string;
-  set?: string;
-  name?: string;
-  number?: string;
-}
+export type CardIdentificationBySegmentResponse = GetResponseData<
+  '/v1/identify/card/{segment}',
+  'post'
+>;
 
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
-  aiIdentification: AIIdentification;
-  card?: DetectedCard;
+  card: DetectedCard;
 }
 
 export interface DetectedCard {
-  id: string;
-  year: string;
-  manufacturer: string;
-  releaseName: string;
+  id?: string;
+  segmentId?: string;
+  releaseId?: string;
+  setId?: string;
+  year?: string;
+  manufacturer?: string;
+  releaseName?: string;
   setName?: string;
-  name: string;
+  name?: string;
   number?: string;
   parallel?: {
     id: string;

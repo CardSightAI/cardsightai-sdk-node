@@ -85,8 +85,8 @@ export class AuthenticationError extends CardSightAIError {
  * Main CardSightAI SDK client
  */
 export class CardSightAI {
-  private client: OpenAPIClient<paths>;
-  private config: Required<CardSightAIConfig>;
+  private readonly client: OpenAPIClient<paths>;
+  private readonly config: Required<CardSightAIConfig>;
 
   constructor(config?: CardSightAIConfig) {
     // Get API key from config or environment
@@ -122,7 +122,7 @@ export class CardSightAI {
   /**
    * Set up middleware for error handling and request enhancement
    */
-  private setupMiddleware() {
+  private setupMiddleware(): void {
     const config = this.config; // Capture config for closure
 
     // WeakMap to store timeout cleanup functions
@@ -130,7 +130,7 @@ export class CardSightAI {
 
     // Error handling middleware
     this.client.use({
-      async onRequest({ request, options }) {
+      onRequest({ request, options }) {
         // Check if body is FormData - if so, don't set Content-Type
         const isFormData = (options as any).body instanceof FormData;
 
@@ -190,7 +190,9 @@ export class CardSightAI {
             // If response isn't JSON, try text
             try {
               const text = await response.clone().text();
-              if (text) errorMessage = text;
+              if (text) {
+                errorMessage = text;
+              }
             } catch {
               // Ignore parsing errors
             }
@@ -228,7 +230,7 @@ export class CardSightAI {
    */
   public readonly identify = {
     /**
-     * Identify a card from an image
+     * Identify a card from an image (defaults to baseball segment)
      */
     card: (image: Blob | File | ArrayBuffer, options?: any) => {
       const formData = new FormData();
@@ -241,6 +243,29 @@ export class CardSightAI {
 
       return this.client.POST('/v1/identify/card', {
         ...options,
+        body: formData as any,
+        bodySerializer: (body: any) => body // Don't serialize FormData
+      });
+    },
+
+    /**
+     * Identify a card from an image for a specific segment (sport)
+     * @param segment - Segment identifier (UUID or name like "football", "basketball")
+     * @param image - Image data to identify
+     * @param options - Additional request options
+     */
+    cardBySegment: (segment: string, image: Blob | File | ArrayBuffer, options?: any) => {
+      const formData = new FormData();
+
+      if (image instanceof Blob || image instanceof File) {
+        formData.append('image', image);
+      } else {
+        formData.append('image', new Blob([image]));
+      }
+
+      return this.client.POST('/v1/identify/card/{segment}', {
+        ...options,
+        params: { path: { segment } },
         body: formData as any,
         bodySerializer: (body: any) => body // Don't serialize FormData
       });
@@ -882,7 +907,7 @@ export class CardSightAI {
   /**
    * Direct access to the underlying OpenAPI client for advanced use cases
    */
-  public get raw() {
+  public get raw(): OpenAPIClient<paths> {
     return this.client;
   }
 }

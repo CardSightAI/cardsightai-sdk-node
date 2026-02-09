@@ -35,7 +35,9 @@ export function filterByConfidence(
   result: IdentifyResult,
   minConfidence: 'High' | 'Medium' | 'Low'
 ): CardDetection[] {
-  if (!result.detections) return [];
+  if (!result.detections) {
+    return [];
+  }
 
   const confidenceOrder = { High: 3, Medium: 2, Low: 1 };
   const minScore = confidenceOrder[minConfidence] || 0;
@@ -47,16 +49,18 @@ export function filterByConfidence(
 }
 
 /**
- * Get all detected cards (excluding detections without card data)
+ * Get all detected cards with exact matches (card has an id)
  * @param result - The identification result
- * @returns Array of detected cards
+ * @returns Array of detected cards with exact matches
  */
 export function getDetectedCards(result: IdentifyResult): DetectedCard[] {
-  if (!result.detections) return [];
+  if (!result.detections) {
+    return [];
+  }
 
   return result.detections
-    .filter((detection) => detection.card !== undefined)
-    .map((detection) => detection.card!);
+    .filter((detection) => detection.card.id !== undefined)
+    .map((detection) => detection.card);
 }
 
 /**
@@ -66,6 +70,36 @@ export function getDetectedCards(result: IdentifyResult): DetectedCard[] {
  */
 export function hasDetections(result: IdentifyResult): boolean {
   return Boolean(result.detections && result.detections.length > 0);
+}
+
+/**
+ * Check if a detection is an exact card match (has a card id)
+ * @param detection - The card detection
+ * @returns True if the detection is an exact match
+ */
+export function isExactMatch(detection: CardDetection): boolean {
+  return detection.card.id !== undefined;
+}
+
+/**
+ * Check if a detection is a set-level match (no card id, but has set id)
+ * @param detection - The card detection
+ * @returns True if the detection is a set-level match
+ */
+export function isSetLevelMatch(detection: CardDetection): boolean {
+  return detection.card.id === undefined && detection.card.setId !== undefined;
+}
+
+/**
+ * Get all exact match detections from an identification result
+ * @param result - The identification result
+ * @returns Array of detections with exact card matches
+ */
+export function getExactMatches(result: IdentifyResult): CardDetection[] {
+  if (!result.detections) {
+    return [];
+  }
+  return result.detections.filter((detection) => detection.card.id !== undefined);
 }
 
 /**
@@ -96,7 +130,9 @@ export function countByConfidence(
 ): Record<'High' | 'Medium' | 'Low', number> {
   const counts = { High: 0, Medium: 0, Low: 0 };
 
-  if (!result.detections) return counts;
+  if (!result.detections) {
+    return counts;
+  }
 
   result.detections.forEach((detection) => {
     if (detection.confidence in counts) {
@@ -113,12 +149,27 @@ export function countByConfidence(
  * @returns Formatted string representation of the card
  */
 export function formatCardDisplay(card: DetectedCard): string {
-  const parts = [card.year, card.manufacturer, card.releaseName];
-  if (card.setName) parts.push(card.setName);
-  parts.push(card.name);
-  if (card.number) parts.push(`#${card.number}`);
+  const parts: string[] = [];
+  if (card.year) {
+    parts.push(card.year);
+  }
+  if (card.manufacturer) {
+    parts.push(card.manufacturer);
+  }
+  if (card.releaseName) {
+    parts.push(card.releaseName);
+  }
+  if (card.setName) {
+    parts.push(card.setName);
+  }
+  if (card.name) {
+    parts.push(card.name);
+  }
+  if (card.number) {
+    parts.push(`#${card.number}`);
+  }
 
-  return parts.join(' ');
+  return parts.join(' ') || 'Unknown Card';
 }
 
 /**
@@ -127,7 +178,7 @@ export function formatCardDisplay(card: DetectedCard): string {
  * @returns True if the detected card is a parallel variant
  */
 export function hasParallel(detection: CardDetection): boolean {
-  return Boolean(detection.card?.parallel);
+  return Boolean(detection.card.parallel);
 }
 
 /**
@@ -135,8 +186,8 @@ export function hasParallel(detection: CardDetection): boolean {
  * @param detection - The card detection
  * @returns Parallel information if available, undefined otherwise
  */
-export function getParallelInfo(detection: CardDetection) {
-  return detection.card?.parallel;
+export function getParallelInfo(detection: CardDetection): DetectedCard['parallel'] {
+  return detection.card.parallel;
 }
 
 /**
@@ -145,7 +196,7 @@ export function getParallelInfo(detection: CardDetection) {
  * @returns True if the card is a numbered parallel (has numberedTo value)
  */
 export function isNumberedParallel(detection: CardDetection): boolean {
-  return Boolean(detection.card?.parallel?.numberedTo);
+  return Boolean(detection.card.parallel?.numberedTo);
 }
 
 /**
@@ -158,8 +209,10 @@ export function isNumberedParallel(detection: CardDetection): boolean {
  * // "Orange /25"
  */
 export function formatParallelDisplay(detection: CardDetection): string {
-  const parallel = detection.card?.parallel;
-  if (!parallel) return '';
+  const parallel = detection.card.parallel;
+  if (!parallel) {
+    return '';
+  }
 
   const parts = [parallel.name];
   if (parallel.numberedTo) {
@@ -208,7 +261,9 @@ export function findParallelByName(
   card: CardWithParallels,
   name: string
 ): CardParallel | undefined {
-  if (!card.parallels) return undefined;
+  if (!card.parallels) {
+    return undefined;
+  }
   const lowerName = name.toLowerCase();
   return card.parallels.find((p) => p.name.toLowerCase() === lowerName);
 }
@@ -219,7 +274,9 @@ export function findParallelByName(
  * @returns Array of numbered parallel variants
  */
 export function getNumberedParallels(card: CardWithParallels): CardParallel[] {
-  if (!card.parallels) return [];
+  if (!card.parallels) {
+    return [];
+  }
   return card.parallels.filter((p) => p.numberedTo !== undefined);
 }
 

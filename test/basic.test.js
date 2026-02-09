@@ -1,6 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { init, CardSightAIError, AuthenticationError } from '../dist/esm/index.js';
+import {
+  init,
+  CardSightAIError,
+  AuthenticationError,
+  isExactMatch,
+  isSetLevelMatch,
+  getExactMatches
+} from '../dist/esm/index.js';
 
 test('SDK initialization', async (t) => {
   await t.test('should throw error when no API key provided', () => {
@@ -72,6 +79,14 @@ test('Client structure', async (t) => {
     assert(typeof client.health.checkAuth === 'function', 'Should have health.checkAuth()');
   });
 
+  await t.test('identify endpoints should exist', () => {
+    assert(typeof client.identify.card === 'function', 'Should have identify.card()');
+    assert(
+      typeof client.identify.cardBySegment === 'function',
+      'Should have identify.cardBySegment()'
+    );
+  });
+
   await t.test('catalog endpoints should exist', () => {
     assert(typeof client.catalog.cards.list === 'function', 'Should have catalog.cards.list()');
     assert(typeof client.catalog.cards.get === 'function', 'Should have catalog.cards.get()');
@@ -79,5 +94,51 @@ test('Client structure', async (t) => {
     assert(typeof client.catalog.manufacturers === 'function', 'Should have catalog.manufacturers()');
     assert(typeof client.catalog.parallels.list === 'function', 'Should have catalog.parallels.list()');
     assert(typeof client.catalog.parallels.get === 'function', 'Should have catalog.parallels.get()');
+  });
+});
+
+test('Match-level utility functions', async (t) => {
+  await t.test('isExactMatch should detect exact matches', () => {
+    const exact = { confidence: 'High', card: { id: 'uuid', name: 'Mike Trout' } };
+    const setLevel = { confidence: 'Medium', card: { setId: 'set-uuid', year: '2023' } };
+    const noMatch = { confidence: 'Low', card: {} };
+
+    assert.strictEqual(isExactMatch(exact), true, 'Should be exact match when card has id');
+    assert.strictEqual(isExactMatch(setLevel), false, 'Should not be exact match without card id');
+    assert.strictEqual(isExactMatch(noMatch), false, 'Should not be exact match for empty card');
+  });
+
+  await t.test('isSetLevelMatch should detect set-level matches', () => {
+    const exact = { confidence: 'High', card: { id: 'uuid', setId: 'set-uuid' } };
+    const setLevel = { confidence: 'Medium', card: { setId: 'set-uuid', year: '2023' } };
+    const noMatch = { confidence: 'Low', card: {} };
+
+    assert.strictEqual(isSetLevelMatch(exact), false, 'Exact match should not be set-level');
+    assert.strictEqual(isSetLevelMatch(setLevel), true, 'Should be set-level match');
+    assert.strictEqual(isSetLevelMatch(noMatch), false, 'No match should not be set-level');
+  });
+
+  await t.test('getExactMatches should filter exact matches', () => {
+    const result = {
+      success: true,
+      requestId: 'req-1',
+      detections: [
+        { confidence: 'High', card: { id: 'uuid-1', name: 'Card 1' } },
+        { confidence: 'Medium', card: { setId: 'set-uuid', year: '2023' } },
+        { confidence: 'Low', card: {} }
+      ]
+    };
+
+    const matches = getExactMatches(result);
+    assert.strictEqual(matches.length, 1, 'Should return only exact matches');
+    assert.strictEqual(matches[0].card.id, 'uuid-1', 'Should return the exact match detection');
+  });
+
+  await t.test('getExactMatches should handle empty detections', () => {
+    assert.deepStrictEqual(getExactMatches({ success: true, requestId: 'r' }), []);
+    assert.deepStrictEqual(
+      getExactMatches({ success: true, requestId: 'r', detections: [] }),
+      []
+    );
   });
 });

@@ -5,6 +5,76 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-02-08
+
+### Breaking Changes
+- **`AIIdentification` type removed** - The `AIIdentification` interface and all references to `aiIdentification` have been removed from the SDK. Detections no longer include a separate AI result object.
+- **`CardDetection.card` is now required** - The `card` field on `CardDetection` is always present (no longer optional). Its fields are populated based on match level:
+  - **Exact match**: `card.id` present, all fields populated
+  - **Set-level match**: `card.setId` present but no `card.id`, release/set info available
+  - **No match**: `card` is an empty object `{}`
+- **`DetectedCard` fields are now all optional** - Fields like `id`, `year`, `manufacturer`, `releaseName`, and `name` that were previously required are now optional. Add null checks when accessing these fields.
+- **`getDetectedCards()` behavior changed** - Now returns only exact matches (detections where `card.id` is defined), instead of all detections with a card object.
+- **`formatCardDisplay()` handles optional fields** - Returns `'Unknown Card'` when no fields are available, instead of producing strings with `undefined`.
+
+### Added
+- **Segment-Specific Identification** - New `identify.cardBySegment(segment, image)` method for identifying cards in specific sports segments:
+  - Accepts segment UUID or name (e.g., `"football"`, `"basketball"`)
+  - `identify.card()` continues to default to baseball
+  - New `CardIdentificationBySegmentResponse` type export
+- **Match-Level Utility Functions** - New helpers for the 3-tier match system:
+  - `isExactMatch(detection)` - Check if detection has a card ID (exact match)
+  - `isSetLevelMatch(detection)` - Check if detection matched at set level only
+  - `getExactMatches(result)` - Get all exact match detections from a result
+- **New `DetectedCard` fields** - `segmentId`, `releaseId`, and `setId` fields for set-level and exact matches
+
+### Migration Guide
+
+**Updating from v2.x to v3.0:**
+
+1. **Remove `AIIdentification` imports and usage:**
+   ```typescript
+   // Before (v2.x)
+   import { AIIdentification } from 'cardsightai';
+   const ai = detection.aiIdentification;
+
+   // After (v3.0) — removed, use detection.card directly
+   const card = detection.card;
+   ```
+
+2. **Update `detection.card` access (no longer optional):**
+   ```typescript
+   // Before (v2.x)
+   if (detection.card) {
+     console.log(detection.card.name);
+   }
+
+   // After (v3.0) — card is always present, check match level
+   if (detection.card.id) {
+     console.log(detection.card.name);  // Exact match
+   } else if (detection.card.setId) {
+     console.log(detection.card.setName);  // Set-level match
+   }
+   ```
+
+3. **Add null checks for `DetectedCard` fields:**
+   ```typescript
+   // Before (v2.x)
+   console.log(detection.card.name);  // string (required)
+
+   // After (v3.0)
+   console.log(detection.card.name ?? 'Unknown');  // string | undefined
+   ```
+
+4. **Use new match-level utilities:**
+   ```typescript
+   import { isExactMatch, isSetLevelMatch, getExactMatches } from 'cardsightai';
+
+   if (isExactMatch(detection)) { /* exact card match */ }
+   if (isSetLevelMatch(detection)) { /* set-level match */ }
+   const exactOnly = getExactMatches(result.data);
+   ```
+
 ## [2.4.0] - 2026-01-10
 
 ### Added
