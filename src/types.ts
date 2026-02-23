@@ -148,6 +148,9 @@ export type CardIdentificationBySegmentResponse = GetResponseData<
   'post'
 >;
 
+// Card Detection (presence check) types
+export type CardDetectionResponse = GetResponseData<'/v1/detect/card', 'post'>;
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;

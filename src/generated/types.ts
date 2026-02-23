@@ -64,6 +64,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/detect/card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Detect trading card presence in an image
+         * @description Checks whether one or more trading cards are present in the submitted image. Returns a boolean detected flag and card count. Does not identify or catalog the cards. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB.
+         */
+        post: operations["detectCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/identify/card": {
         parameters: {
             query?: never;
@@ -2882,6 +2902,16 @@ export interface components {
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
         };
+        DetectCardResponseInput: {
+            /** @description Whether one or more trading cards were detected in the image */
+            detected: boolean;
+            /** @description Number of trading cards detected in the image */
+            count: number;
+            /** @description Unique identifier for tracking this detection request */
+            requestId: string;
+            /** @description Total processing time in milliseconds */
+            processingTime: number;
+        };
         AIQueryRequestInput: {
             /** @description Natural language query */
             query: string;
@@ -2946,6 +2976,8 @@ export interface components {
             id: string;
             /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
             name: string;
+            /** @description Whether cards in this segment can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
         };
         ManufacturerInput: {
             /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
@@ -2968,6 +3000,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
         };
         SetInput: {
             /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
@@ -2978,6 +3012,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
         };
         CardInput: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -3069,6 +3105,8 @@ export interface components {
             year: string;
             /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
             name: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             description?: string;
         };
         SetSummaryWithCountsInput: {
@@ -3078,6 +3116,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
             /** @description Number of base cards in this set */
             cardCount: number;
             /** @description Number of parallel types in this set */
@@ -3181,6 +3221,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCountsInput"][];
         };
@@ -3265,6 +3307,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCountsInput"][];
         };
@@ -3287,6 +3331,8 @@ export interface components {
                 name: string;
                 /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
                 description?: string;
+                /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+                is_identifiable: boolean;
                 /** @description Number of base cards in this set */
                 cardCount: number;
                 /** @description Number of parallel types in this set */
@@ -3314,6 +3360,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
             /** @description Name of the release */
             releaseName: string;
             /** @description Year of the release */
@@ -3581,6 +3629,8 @@ export interface components {
                 name: string;
                 /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
                 description?: string;
+                /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+                is_identifiable: boolean;
                 /** @description Number of base cards in this set */
                 cardCount: number;
                 /** @description Number of parallel types in this set */
@@ -4357,6 +4407,16 @@ export interface components {
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
         };
+        DetectCardResponse: {
+            /** @description Whether one or more trading cards were detected in the image */
+            detected: boolean;
+            /** @description Number of trading cards detected in the image */
+            count: number;
+            /** @description Unique identifier for tracking this detection request */
+            requestId: string;
+            /** @description Total processing time in milliseconds */
+            processingTime: number;
+        };
         AIQueryRequest: {
             /** @description Natural language query */
             query: string;
@@ -4421,6 +4481,8 @@ export interface components {
             id: string;
             /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
             name: string;
+            /** @description Whether cards in this segment can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
         };
         Manufacturer: {
             /** @description Unique identifier for the manufacturer. Format: UUID v4. This ID is permanent and used for all API operations involving this manufacturer. */
@@ -4443,6 +4505,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
         };
         Set: {
             /** @description Unique identifier for the set. Format: UUID v4. This ID is permanent and used for all API operations involving this set. */
@@ -4453,6 +4517,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
         };
         Card: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -4544,6 +4610,8 @@ export interface components {
             year: string;
             /** @description Full name of the release. Typically includes year, brand, and sport/category. Example: "2023 Topps Chrome Baseball" */
             name: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             description?: string;
         };
         SetSummaryWithCounts: {
@@ -4553,6 +4621,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
             /** @description Number of base cards in this set */
             cardCount: number;
             /** @description Number of parallel types in this set */
@@ -4656,6 +4726,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCounts"][];
         };
@@ -4740,6 +4812,8 @@ export interface components {
             name: string;
             /** @description Additional details about the release, such as special features, number of cards, or notable inclusions. May be null. */
             description?: string;
+            /** @description Whether any set in this release can be identified by the CardSightAI identification service. True if at least one set has is_identifiable = true. */
+            is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCounts"][];
         };
@@ -4762,6 +4836,8 @@ export interface components {
                 name: string;
                 /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
                 description?: string;
+                /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+                is_identifiable: boolean;
                 /** @description Number of base cards in this set */
                 cardCount: number;
                 /** @description Number of parallel types in this set */
@@ -4789,6 +4865,8 @@ export interface components {
             name: string;
             /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
             description?: string;
+            /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+            is_identifiable: boolean;
             /** @description Name of the release */
             releaseName: string;
             /** @description Year of the release */
@@ -5056,6 +5134,8 @@ export interface components {
                 name: string;
                 /** @description Additional details about the set, such as card count, special features, or checklist highlights. May be null. */
                 description?: string;
+                /** @description Whether cards in this set can be identified by the CardSightAI identification service. */
+                is_identifiable: boolean;
                 /** @description Number of base cards in this set */
                 cardCount: number;
                 /** @description Number of parallel types in this set */
@@ -5251,6 +5331,78 @@ export interface operations {
                             };
                         };
                     };
+                };
+            };
+        };
+    };
+    detectCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+                "image/jpeg": components["schemas"]["FileUploadInput"];
+                "image/png": components["schemas"]["FileUploadInput"];
+                "image/webp": components["schemas"]["FileUploadInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetectCardResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -5467,6 +5619,8 @@ export interface operations {
                 skip?: number;
                 /** @description Filter segments by name using partial string matching. Case-insensitive. Example: "sport" matches "Sports", "Motorsports", etc. */
                 name?: string;
+                /** @description Filter segments by identifiability. "true" returns only segments that can be identified by AI, "false" returns only non-identifiable segments. */
+                is_identifiable?: "true" | "false";
                 /** @description Field to sort results by. Currently only supports sorting by segment name. */
                 sort?: "name";
                 /** @description Sort direction. "asc" for ascending (A-Z), "desc" for descending (Z-A). Defaults to ascending. */
@@ -5629,6 +5783,8 @@ export interface operations {
                 max_year?: string;
                 /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
                 name?: string;
+                /** @description Filter releases by identifiability. "true" returns releases with at least one AI-identifiable set, "false" returns releases with no identifiable sets. */
+                is_identifiable?: "true" | "false";
                 /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
                 sort?: "year" | "name";
                 /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
@@ -5860,6 +6016,8 @@ export interface operations {
                 max_year?: string;
                 /** @description Search releases by name using partial string matching. Case-insensitive. Example: "chrome" matches "Topps Chrome", "Bowman Chrome", etc. */
                 name?: string;
+                /** @description Filter releases by identifiability. "true" returns releases with at least one AI-identifiable set, "false" returns releases with no identifiable sets. */
+                is_identifiable?: "true" | "false";
                 /** @description Field to sort results by. "year" sorts by release year, "name" sorts alphabetically by release name. */
                 sort?: "year" | "name";
                 /** @description Sort direction. "asc" for ascending (oldest first for year, A-Z for name), "desc" for descending (newest first for year, Z-A for name). */
@@ -5948,6 +6106,8 @@ export interface operations {
                 max_year?: string;
                 /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
                 manufacturer?: string;
+                /** @description Filter sets by identifiability. "true" returns only sets that can be identified by AI, "false" returns only non-identifiable sets. */
+                is_identifiable?: "true" | "false";
                 /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
                 sort?: "name" | "year";
                 /** @description Sort direction. "asc" for ascending, "desc" for descending. */
@@ -6179,6 +6339,8 @@ export interface operations {
                 max_year?: string;
                 /** @description Filter sets by manufacturer. Accepts either a UUID or exact manufacturer name (e.g., "Topps", "Panini"). Filters through the release relationship. */
                 manufacturer?: string;
+                /** @description Filter sets by identifiability. "true" returns only sets that can be identified by AI, "false" returns only non-identifiable sets. */
+                is_identifiable?: "true" | "false";
                 /** @description Field to sort results by. "name" sorts by set name, "year" sorts by release year then set name. */
                 sort?: "name" | "year";
                 /** @description Sort direction. "asc" for ascending, "desc" for descending. */
@@ -7327,7 +7489,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateCollectorInput"];
             };
@@ -7467,7 +7629,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateCollectorInput"];
             };
@@ -7671,7 +7833,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateCollectionInput"];
             };
@@ -7811,7 +7973,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateCollectionInput"];
             };
@@ -8394,7 +8556,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateCollectionCardInput"];
             };
@@ -8529,7 +8691,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateCollectionCardInput"];
             };
@@ -8739,7 +8901,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateBinderInput"];
             };
@@ -8883,7 +9045,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateBinderInput"];
             };
@@ -9091,7 +9253,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AddCardToBinderInput"];
             };
@@ -9446,7 +9608,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateListInput"];
             };
@@ -9586,7 +9748,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateListInput"];
             };
@@ -9788,7 +9950,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AddCardToListInput"];
             };
@@ -9979,7 +10141,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AIQueryRequestInput"];
             };
@@ -10032,7 +10194,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10103,7 +10265,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10174,7 +10336,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10245,7 +10407,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10316,7 +10478,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10387,7 +10549,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };
@@ -10456,7 +10618,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["FeedbackInputInput"];
             };

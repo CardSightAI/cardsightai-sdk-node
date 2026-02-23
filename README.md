@@ -29,6 +29,7 @@ The most comprehensive baseball card identification and collection management pl
 | Feature | Description | Primary Methods |
 |---------|-------------|-----------------|
 | **Card Identification** | Identify multiple cards from images using AI | `identify.card()`, `identify.cardBySegment()` |
+| **Card Detection** | Check if trading cards are present in an image | `detect.card()` |
 | **Catalog Search** | Search 2M+ baseball cards database | `catalog.cards.list()`, `catalog.sets.list()` |
 | **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
 | **Collections** | Manage owned card collections with analytics | `collections.create()`, `collections.cards.add()` |
@@ -245,6 +246,30 @@ Each detection has a `confidence` level and a `card` object. The `card` is alway
   detections: [],
   processingTime: 800
 }
+```
+
+### Card Detection (Presence Check)
+
+The detection endpoint is a lightweight alternative to full identification — it checks whether trading cards are present in an image without identifying them. This is faster and cheaper when you only need to know if cards exist in the image.
+
+```typescript
+import { CardSightAI } from 'cardsightai';
+import { readFileSync } from 'fs';
+
+const client = new CardSightAI({ apiKey: 'your_api_key' });
+
+// Check if an image contains trading cards
+const imageBuffer = readFileSync('path/to/image.jpg');
+const result = await client.detect.card(imageBuffer);
+
+if (result.data) {
+  console.log(`Cards detected: ${result.data.detected}`);   // true/false
+  console.log(`Number of cards: ${result.data.count}`);      // 0, 1, 2, ...
+}
+
+// Works with the same image types as identify
+const blob = await fetch(imageUrl).then(r => r.blob());
+const blobResult = await client.detect.card(blob);
 ```
 
 ### Working with Identification Results
@@ -915,6 +940,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 |----------|-----------|------------|
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
 | **Identification** | 2 | `identify.card()`, `identify.cardBySegment()` |
+| **Detection** | 1 | `detect.card()` |
 | **Catalog** | 17 | `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |

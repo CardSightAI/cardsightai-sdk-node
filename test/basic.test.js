@@ -66,6 +66,7 @@ test('Client structure', async (t) => {
   await t.test('should have all main endpoint groups', () => {
     assert(client.health, 'Should have health endpoints');
     assert(client.identify, 'Should have identify endpoints');
+    assert(client.detect, 'Should have detect endpoints');
     assert(client.catalog, 'Should have catalog endpoints');
     assert(client.collections, 'Should have collections endpoints');
     assert(client.autocomplete, 'Should have autocomplete endpoints');
@@ -85,6 +86,10 @@ test('Client structure', async (t) => {
       typeof client.identify.cardBySegment === 'function',
       'Should have identify.cardBySegment()'
     );
+  });
+
+  await t.test('detect endpoints should exist', () => {
+    assert(typeof client.detect.card === 'function', 'Should have detect.card()');
   });
 
   await t.test('catalog endpoints should exist', () => {

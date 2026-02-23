@@ -273,6 +273,33 @@ export class CardSightAI {
   };
 
   /**
+   * Card detection endpoints
+   */
+  public readonly detect = {
+    /**
+     * Detect whether trading cards are present in an image
+     * @param image - Image data to check for card presence
+     * @param options - Additional request options
+     * @returns Detection result with `detected` flag and `count`
+     */
+    card: (image: Blob | File | ArrayBuffer, options?: any) => {
+      const formData = new FormData();
+
+      if (image instanceof Blob || image instanceof File) {
+        formData.append('image', image);
+      } else {
+        formData.append('image', new Blob([image]));
+      }
+
+      return this.client.POST('/v1/detect/card', {
+        ...options,
+        body: formData as any,
+        bodySerializer: (body: any) => body // Don't serialize FormData
+      });
+    }
+  };
+
+  /**
    * Catalog endpoints
    */
   public readonly catalog = {

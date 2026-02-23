@@ -15,6 +15,7 @@ export type { paths, components } from './generated/types.js';
 export type {
   CardIdentificationResponse,
   CardIdentificationBySegmentResponse,
+  CardDetectionResponse,
   CardDetection,
   DetectedCard,
   IdentifyResult,

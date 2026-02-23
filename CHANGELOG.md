@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-23
+
+### Added
+- **Card Detection Endpoint** - New lightweight `detect.card()` method to check if trading cards are present in an image without full identification:
+  - `client.detect.card(image)` - Returns whether cards are detected and how many
+  - Same image input pattern as `identify.card()` (accepts `Blob`, `File`, or `ArrayBuffer`)
+  - New `CardDetectionResponse` type export
+  - Faster and cheaper than full identification when you only need presence detection
+- **`is_identifiable` Field** - Segment, Release, and Set entities now include an `is_identifiable` boolean field indicating whether AI identification is supported
+- **`is_identifiable` Filter** - Catalog list endpoints for segments, releases, and sets now support filtering by `is_identifiable` query parameter
+
 ## [3.0.0] - 2026-02-08
 
 ### Breaking Changes
