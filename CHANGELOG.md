@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-03-09
+
+### Added
+- **Catalog Search Endpoint** - New `catalog.search()` method for fuzzy search across cards, sets, releases, and parallels:
+  - `client.catalog.search({ q: 'Michael Jordan Baseball' })` - Global search with required query string
+  - Supports filtering by `type` (card|set|release|parallel), `segment`, `manufacturer`, `year`, `min_year`, `max_year`
+  - Pagination via `take` and `skip` parameters
+  - Response includes `results` array with `type`, `id`, `name`, `relevance`, and optional context fields
+  - New `CatalogSearchResponse` type export
+- **Grading/Slab Detection on Identifications** - Card detections now include optional grading data when a card is inside a graded slab:
+  - `detection.grading` contains `confidence` ("High"|"Medium"|"Low") and `company` ({ id?, name })
+  - New `SlabGradingDetail` and `SlabCompany` type exports
+  - Updated `CardDetection` interface with optional `grading` field
+- **Grading Utility Functions** - New helpers for working with slab detection data:
+  - `hasGrading(detection)` - Check if detection includes grading/slab info
+  - `getGradingInfo(detection)` - Extract grading details safely
+  - `formatGradingDisplay(detection)` - Format grading info for display (e.g., "PSA - High confidence")
+
 ## [3.1.0] - 2026-02-23
 
 ### Added

@@ -151,9 +151,23 @@ export type CardIdentificationBySegmentResponse = GetResponseData<
 // Card Detection (presence check) types
 export type CardDetectionResponse = GetResponseData<'/v1/detect/card', 'post'>;
 
+// Catalog search types
+export type CatalogSearchResponse = GetResponseData<'/v1/catalog/search', 'get'>;
+
+// Grading/slab detection types (from identify responses)
+export type SlabGradingDetail = components['schemas']['SlabGradingDetail'];
+export type SlabCompany = components['schemas']['SlabCompany'];
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;
+  grading?: {
+    confidence: 'High' | 'Medium' | 'Low';
+    company: {
+      id?: string;
+      name: string;
+    };
+  };
 }
 
 export interface DetectedCard {

@@ -16,11 +16,14 @@ export type {
   CardIdentificationResponse,
   CardIdentificationBySegmentResponse,
   CardDetectionResponse,
+  CatalogSearchResponse,
   CardDetection,
   DetectedCard,
   IdentifyResult,
   DetailedParallel,
-  CardParallel
+  CardParallel,
+  SlabGradingDetail,
+  SlabCompany
 } from './types.js';
 
 // Export utility functions for working with identification results
@@ -40,6 +43,10 @@ export {
   getParallelInfo,
   isNumberedParallel,
   formatParallelDisplay,
+  // Grading/slab detection utilities
+  hasGrading,
+  getGradingInfo,
+  formatGradingDisplay,
   // Card parallel utilities (for catalog cards with parallels array)
   getCardParallels,
   hasCardParallels,

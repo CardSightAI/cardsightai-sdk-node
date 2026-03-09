@@ -379,6 +379,13 @@ export class CardSightAI {
     },
 
     /**
+     * Search across cards, sets, releases, and parallels
+     * @param params - Query parameters including q (required), take, skip, type, segment, etc.
+     */
+    search: (params: GetQueryParams<'/v1/catalog/search'>) =>
+      this.client.GET('/v1/catalog/search', { params: { query: params } }),
+
+    /**
      * Get catalog statistics
      */
     statistics: () => this.client.GET('/v1/catalog/statistics'),

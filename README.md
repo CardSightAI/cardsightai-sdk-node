@@ -8,7 +8,7 @@
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
 The most comprehensive baseball card identification and collection management platform.
-**2M+ Cards** • **AI-Powered Recognition** • **Free Tier Available**
+**7M+ Cards** • **AI-Powered Recognition** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -30,19 +30,19 @@ The most comprehensive baseball card identification and collection management pl
 |---------|-------------|-----------------|
 | **Card Identification** | Identify multiple cards from images using AI | `identify.card()`, `identify.cardBySegment()` |
 | **Card Detection** | Check if trading cards are present in an image | `detect.card()` |
-| **Catalog Search** | Search 2M+ baseball cards database | `catalog.cards.list()`, `catalog.sets.list()` |
+| **Catalog Search** | Fuzzy search across cards, sets, releases, parallels | `catalog.search()`, `catalog.cards.list()` |
 | **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
 | **Collections** | Manage owned card collections with analytics | `collections.create()`, `collections.cards.add()` |
 | **Collectors** | Manage collector profiles with names | `collectors.create()`, `collectors.update()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `lists.cards.add()` |
 | **Binders** | Organize collection subsets | `collections.binders.create()` |
-| **Grading** | PSA, BGS, SGC grade information | `grades.companies.list()` |
+| **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
 | **AI Search** | Natural language queries | `ai.query()` |
 | **Autocomplete** | Search suggestions for all entities | `autocomplete.cards()` |
 
 ## Requirements
 
-- Node.js 20.0+ (uses native fetch)
+- Node.js 22.0+ (uses native fetch)
 - TypeScript 5.0+ (optional, for TypeScript projects)
 - API Key from [cardsight.ai](https://cardsight.ai) (free tier available)
 
@@ -168,6 +168,8 @@ Each detection has a `confidence` level and a `card` object. The `card` is alway
 - **Exact match**: `card.id` present — all fields populated including `name`, `number`, and optionally `parallel`
 - **Set-level match**: `card.setId` present but no `card.id` — release/set info available but no specific card
 - **No match**: `card` is an empty object `{}` — a card was detected in the image but couldn't be identified
+
+Detections may also include a `grading` object when the card is inside a graded slab (see [Grading/Slab Detection](#gradingslab-detection) below).
 
 ```typescript
 // Exact card match with parallel variant
@@ -409,6 +411,51 @@ for (const detection of result.data?.detections || []) {
 }
 ```
 
+#### Grading/Slab Detection
+
+When identifying a card that is inside a graded slab, the detection includes grading information:
+
+```typescript
+import {
+  hasGrading,
+  getGradingInfo,
+  formatGradingDisplay
+} from 'cardsightai';
+
+const result = await client.identify.card(imageFile);
+
+for (const detection of result.data?.detections || []) {
+  // Check if the card is in a graded slab
+  if (hasGrading(detection)) {
+    const grading = getGradingInfo(detection);
+    console.log(`Grading Company: ${grading.company.name}`);
+    console.log(`Detection Confidence: ${grading.confidence}`);
+    console.log(`Display: ${formatGradingDisplay(detection)}`);
+    // Output: "PSA - High confidence"
+  }
+}
+```
+
+**Grading Object Structure:**
+
+```typescript
+{
+  confidence: "High",
+  card: {
+    id: "card_uuid",
+    name: "Mike Trout",
+    // ... other card fields
+  },
+  grading: {
+    confidence: "High",        // Slab detection confidence
+    company: {
+      id: "company_uuid",     // Optional grading company UUID
+      name: "PSA"             // Grading company name
+    }
+  }
+}
+```
+
 #### Card Parallel Utilities (Catalog)
 
 Cards from catalog endpoints now include a `parallels` array listing all available parallel variants. Use these utilities to work with catalog card parallels:
@@ -451,6 +498,44 @@ if (hasCardParallels(card)) {
 ```
 
 **Note**: These utilities are for catalog cards (`card.parallels[]`). For identification results, use `hasParallel()`, `getParallelInfo()`, etc. which work with the detected `card.parallel` object.
+
+### Catalog Search
+
+Search across cards, sets, releases, and parallels with a single query:
+
+```typescript
+// Global fuzzy search
+const results = await client.catalog.search({
+  q: 'Ken Griffey Jr',  // Required search query
+  take: 10,             // Limit results
+  skip: 0               // Pagination offset
+});
+
+// Filter by entity type
+const cardResults = await client.catalog.search({
+  q: 'Topps Chrome',
+  type: 'set',          // 'card' | 'set' | 'release' | 'parallel'
+  year: 2023
+});
+
+// Filter by segment, manufacturer, year range
+const footballCards = await client.catalog.search({
+  q: 'Patrick Mahomes',
+  segment: 'football',
+  min_year: 2020,
+  max_year: 2024
+});
+
+// Process results
+if (results.data) {
+  console.log(`Found ${results.data.total_count} results`);
+  for (const result of results.data.results) {
+    console.log(`[${result.type}] ${result.name} (relevance: ${result.relevance})`);
+    if (result.setName) console.log(`  Set: ${result.setName}`);
+    if (result.year) console.log(`  Year: ${result.year}`);
+  }
+}
+```
 
 ### Catalog Operations
 
@@ -820,6 +905,9 @@ import {
   CardDetection,
   DetectedCard,
   DetailedParallel,
+  CatalogSearchResponse,
+  SlabGradingDetail,
+  SlabCompany,
   Card,
   Set,
   Collection
@@ -941,7 +1029,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
 | **Identification** | 2 | `identify.card()`, `identify.cardBySegment()` |
 | **Detection** | 1 | `detect.card()` |
-| **Catalog** | 17 | `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
+| **Catalog** | 18 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |

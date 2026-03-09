@@ -223,6 +223,41 @@ export function formatParallelDisplay(detection: CardDetection): string {
 }
 
 // ============================================================================
+// Grading/Slab Detection Utilities
+// ============================================================================
+
+/**
+ * Check if a detection includes grading/slab information
+ * @param detection - The card detection
+ * @returns True if grading data is present
+ */
+export function hasGrading(detection: CardDetection): boolean {
+  return Boolean(detection.grading);
+}
+
+/**
+ * Get grading information from a detection
+ * @param detection - The card detection
+ * @returns Grading info if available, undefined otherwise
+ */
+export function getGradingInfo(detection: CardDetection): CardDetection['grading'] {
+  return detection.grading;
+}
+
+/**
+ * Format grading information as a display string
+ * @param detection - The card detection
+ * @returns Formatted string (e.g., "PSA - High confidence"), or empty string if no grading
+ */
+export function formatGradingDisplay(detection: CardDetection): string {
+  if (!detection.grading) {
+    return '';
+  }
+
+  return `${detection.grading.company.name} - ${detection.grading.confidence} confidence`;
+}
+
+// ============================================================================
 // Card Parallel Utilities (for catalog cards with parallels array)
 // ============================================================================
 

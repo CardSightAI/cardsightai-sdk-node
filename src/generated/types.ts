@@ -191,6 +191,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/catalog/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search across cards, sets, releases, and parallels
+         * @description Global fuzzy search endpoint that searches across card names, set names, release names, parallel names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps", "1952 mickey mantle", or "refractor". Uses PostgreSQL full-text search combined with trigram similarity for typo-tolerant matching. Results are ranked by relevance and returned as a mixed list of cards, sets, releases, and parallels. Cards and sets that match a parallel name (e.g., "Refractor") are boosted in relevance and include the matching parallelName in the response. Use the "type" parameter to filter to a specific entity type.
+         */
+        get: operations["searchCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog/segments": {
         parameters: {
             query?: never;
@@ -2891,13 +2911,15 @@ export interface components {
             confidence: "High" | "Medium" | "Low";
             /** @description Identified card details. Completeness reflects match level: full fields for exact card match, set-level fields for set match, empty object for unmatched detection. */
             card: components["schemas"]["CardDetailsInput"];
+            /** @description Grading slab data matched to this specific card detection. Present when the card is inside a graded slab. */
+            grading?: components["schemas"]["SlabGradingDetailInput"];
         };
         IdentifyCardResponseInput: {
             /** @description Whether the identification process completed successfully */
             success: boolean;
             /** @description Unique identifier for tracking this identification request */
             requestId: string;
-            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Empty if no cards found. */
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab. Empty if no cards found. */
             detections?: components["schemas"]["IdentificationDataInput"][];
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
@@ -2911,6 +2933,24 @@ export interface components {
             requestId: string;
             /** @description Total processing time in milliseconds */
             processingTime: number;
+        };
+        SlabCompanyInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the grading company from the catalog. Absent if company could not be matched.
+             */
+            id?: string;
+            /** @description Grading company name detected on the slab (e.g., "PSA", "BGS", "CGC", "SGC") */
+            name: string;
+        };
+        SlabGradingDetailInput: {
+            /**
+             * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
+             * @enum {string}
+             */
+            confidence: "High" | "Medium" | "Low";
+            /** @description Grading company that issued this slab */
+            company: components["schemas"]["SlabCompanyInput"];
         };
         AIQueryRequestInput: {
             /** @description Natural language query */
@@ -3650,6 +3690,39 @@ export interface components {
             cards: components["schemas"]["CardWithOptionalParallelInput"][];
             /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
             count: number;
+        };
+        SearchResultInput: {
+            /**
+             * @description Entity type of this search result.
+             * @enum {string}
+             */
+            type: "card" | "set" | "release" | "parallel";
+            /** @description Unique identifier (UUID) for this entity. Use this ID to fetch full details from the corresponding entity endpoint. */
+            id: string;
+            /** @description Primary name of the entity. Player/subject name for cards, set name for sets, release name for releases. */
+            name: string;
+            /** @description Relevance score combining full-text search rank and fuzzy similarity. Higher values indicate stronger matches. Results are sorted by this score descending. */
+            relevance: number;
+            /** @description Release year associated with this result. */
+            year?: string;
+            /** @description Set name. Present for card and parallel results. */
+            setName?: string;
+            /** @description Release name. Present for card, set, and parallel results. */
+            releaseName?: string;
+            /** @description Manufacturer name. */
+            manufacturerName?: string;
+            /** @description Name of the matching parallel variant. Present when a parallel name contributed to this result's relevance. */
+            parallelName?: string;
+        };
+        CatalogSearchResponseInput: {
+            /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
+            results: components["schemas"]["SearchResultInput"][];
+            /** @description Total number of results matching the query across all included types. */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination. */
+            skip: number;
+            /** @description Number of results included in this page. */
+            take: number;
         };
         AutocompleteResponseInput: {
             /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
@@ -4396,13 +4469,15 @@ export interface components {
             confidence: "High" | "Medium" | "Low";
             /** @description Identified card details. Completeness reflects match level: full fields for exact card match, set-level fields for set match, empty object for unmatched detection. */
             card: components["schemas"]["CardDetails"];
+            /** @description Grading slab data matched to this specific card detection. Present when the card is inside a graded slab. */
+            grading?: components["schemas"]["SlabGradingDetail"];
         };
         IdentifyCardResponse: {
             /** @description Whether the identification process completed successfully */
             success: boolean;
             /** @description Unique identifier for tracking this identification request */
             requestId: string;
-            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Empty if no cards found. */
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab. Empty if no cards found. */
             detections?: components["schemas"]["IdentificationData"][];
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
@@ -4416,6 +4491,24 @@ export interface components {
             requestId: string;
             /** @description Total processing time in milliseconds */
             processingTime: number;
+        };
+        SlabCompany: {
+            /**
+             * Format: uuid
+             * @description UUID of the grading company from the catalog. Absent if company could not be matched.
+             */
+            id?: string;
+            /** @description Grading company name detected on the slab (e.g., "PSA", "BGS", "CGC", "SGC") */
+            name: string;
+        };
+        SlabGradingDetail: {
+            /**
+             * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
+             * @enum {string}
+             */
+            confidence: "High" | "Medium" | "Low";
+            /** @description Grading company that issued this slab */
+            company: components["schemas"]["SlabCompany"];
         };
         AIQueryRequest: {
             /** @description Natural language query */
@@ -5156,6 +5249,39 @@ export interface components {
             /** @description Actual number of cards returned. May be less than requested count if insufficient matches. */
             count: number;
         };
+        SearchResult: {
+            /**
+             * @description Entity type of this search result.
+             * @enum {string}
+             */
+            type: "card" | "set" | "release" | "parallel";
+            /** @description Unique identifier (UUID) for this entity. Use this ID to fetch full details from the corresponding entity endpoint. */
+            id: string;
+            /** @description Primary name of the entity. Player/subject name for cards, set name for sets, release name for releases. */
+            name: string;
+            /** @description Relevance score combining full-text search rank and fuzzy similarity. Higher values indicate stronger matches. Results are sorted by this score descending. */
+            relevance: number;
+            /** @description Release year associated with this result. */
+            year?: string;
+            /** @description Set name. Present for card and parallel results. */
+            setName?: string;
+            /** @description Release name. Present for card, set, and parallel results. */
+            releaseName?: string;
+            /** @description Manufacturer name. */
+            manufacturerName?: string;
+            /** @description Name of the matching parallel variant. Present when a parallel name contributed to this result's relevance. */
+            parallelName?: string;
+        };
+        CatalogSearchResponse: {
+            /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
+            results: components["schemas"]["SearchResult"][];
+            /** @description Total number of results matching the query across all included types. */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination. */
+            skip: number;
+            /** @description Number of results included in this page. */
+            take: number;
+        };
         AutocompleteResponse: {
             /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
             suggestions: string[];
@@ -5592,6 +5718,90 @@ export interface operations {
             };
             /** @description Default Response */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    searchCatalog: {
+        parameters: {
+            query: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Free-text search query. Searches across card names, set names, release names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps" or "1952 mickey mantle". Minimum 2 characters. */
+                q: string;
+                /** @description Filter results to a specific entity type. When omitted, returns mixed results across all types. */
+                type?: "card" | "set" | "release" | "parallel";
+                /** @description Filter by segment. Accepts either a UUID or exact segment name (case-insensitive). */
+                segment?: string;
+                /** @description Filter by manufacturer. Accepts either a UUID or exact manufacturer name (case-insensitive). */
+                manufacturer?: string;
+                /** @description Filter by exact release year (e.g., "2023"). When specified, overrides min_year and max_year parameters. */
+                year?: string;
+                /** @description Filter results from this year onwards (inclusive). Ignored if "year" is specified. */
+                min_year?: string;
+                /** @description Filter results up to this year (inclusive). Ignored if "year" is specified. */
+                max_year?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSearchResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSearchResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
