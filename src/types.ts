@@ -164,6 +164,16 @@ export type SlabAutoGrade = components['schemas']['SlabAutoGrade'];
 // Server advisory message type (from identify/detect responses)
 export type ServerMessage = components['schemas']['ServerMessage'];
 
+// Pricing types (completed sales data)
+export type PricingResponse = components['schemas']['PricingResponse'];
+export type PricingRecord = components['schemas']['PricingRecord'];
+export type BulkPricingResponse = components['schemas']['BulkPricingResponse'];
+export type BulkPricingResult = components['schemas']['BulkPricingResult'];
+
+// Marketplace types (active listings)
+export type MarketplaceResponse = components['schemas']['MarketplaceResponse'];
+export type MarketplaceRecord = components['schemas']['MarketplaceRecord'];
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;

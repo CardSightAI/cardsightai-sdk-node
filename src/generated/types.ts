@@ -2250,6 +2250,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/pricing/{card_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get completed sales pricing for a card
+         * @description Returns completed sales data for a single card, grouped into raw (ungraded) and graded sections. Graded results are organized by grading company and grade value. Supports filtering by parallel variant, grade, time period, and listing type.
+         */
+        get: operations["getCardPricing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/pricing/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get pricing for multiple cards
+         * @description Returns completed sales data for up to 100 cards in a single request. Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint.
+         */
+        post: operations["getBulkPricing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/marketplace/{card_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get active marketplace listings for a card
+         * @description Returns currently active marketplace listings for a single card, grouped into raw (ungraded) and graded sections. Includes a marketplace search link as the last record in the raw section. Supports filtering by parallel variant, grade, and listing type.
+         */
+        get: operations["getCardMarketplace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2903,23 +2963,7 @@ export interface components {
             /** @description Card number. Present only for exact card matches. */
             number?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
-            parallel?: {
-                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                id: string;
-                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                name: string;
-                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                description?: string;
-                /**
-                 * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
-                 * @constant
-                 */
-                isPartial?: true;
-                /** @description Limited print run number for this parallel */
-                numberedTo?: number;
-                /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
-                cards?: string[];
-            };
+            parallel?: components["schemas"]["ParallelSummaryInput"];
         };
         IdentificationDataInput: {
             /**
@@ -3169,15 +3213,6 @@ export interface components {
             isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
-            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
             cards?: string[];
         };
@@ -3295,15 +3330,6 @@ export interface components {
             parallels: components["schemas"]["ParallelSummaryInput"][];
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
         };
@@ -3339,15 +3365,6 @@ export interface components {
             isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
-            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
             cards?: string[];
             /** @description Set UUID */
@@ -3501,15 +3518,6 @@ export interface components {
             parallels: components["schemas"]["ParallelSummaryInput"][];
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
         };
@@ -3864,6 +3872,257 @@ export interface components {
             gradingType: components["schemas"]["GradingTypeInput"];
             /** @description Grandparent grading company information for context */
             gradingCompany: components["schemas"]["GradingCompanyInput"];
+        };
+        BulkPricingRequestInput: {
+            /** @description Array of card UUIDs to fetch pricing for (1-100). Matches the max page size of catalog search results. */
+            card_ids: string[];
+            /** @description Filter by parallel variant UUID. null = base card only. */
+            parallel_id?: string | null;
+            /** @description Filter by grade UUID. null = ungraded only. */
+            grade_id?: string | null;
+            /**
+             * @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit.
+             * @default all
+             */
+            period: string;
+            /**
+             * @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all
+             * @default both
+             * @enum {string}
+             */
+            listing_type: "auction" | "fixed" | "both";
+            /** @description Maximum number of records per card */
+            limit?: number;
+        };
+        PricingRecordInput: {
+            /** @description Listing title from marketplace */
+            title?: string | null;
+            /** @description Sale price in USD */
+            price: number;
+            /** @description Sale date in ISO 8601 format */
+            date?: string | null;
+            /** @description Data source (e.g., "ebay") */
+            source: string;
+            /** @description Type of listing: auction or fixed price */
+            listing_type?: ("auction" | "fixed") | null;
+            /** @description URL to the original listing */
+            url?: string | null;
+            /** @description Primary image URL for the listing */
+            image_url?: string | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+        };
+        MarketplaceRecordInput: {
+            /** @description Listing title */
+            title: string;
+            /** @description Current price or starting bid in USD */
+            price?: number | null;
+            /** @description Marketplace source */
+            source: string;
+            /** @description Type of listing */
+            listing_type?: ("auction" | "fixed" | "search") | null;
+            /** @description URL to the listing */
+            url?: string | null;
+            /** @description Primary image URL */
+            image_url?: string | null;
+            /** @description Condition description from seller */
+            condition?: string | null;
+            /** @description Listing end date in ISO 8601 format */
+            end_date?: string | null;
+            /** @description Number of bids (auctions only) */
+            bid_count?: number | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+        };
+        PricingCardContextInput: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Card name/subject */
+            name: string;
+            /** @description Card number in set */
+            number?: string | null;
+            /** @description Set context */
+            set: {
+                /**
+                 * Format: uuid
+                 * @description Set UUID
+                 */
+                set_id: string;
+                /** @description Set name */
+                name: string;
+                /** @description Release year */
+                year: string;
+                /** @description Release name */
+                release: string;
+            };
+            /** @description Parallel context if filtered by parallel */
+            parallel?: {
+                /**
+                 * Format: uuid
+                 * @description Parallel UUID
+                 */
+                parallel_id: string;
+                /** @description Parallel name */
+                name: string;
+            } | null;
+        };
+        PricingQueryEchoInput: {
+            /** @description Parallel UUID filter applied */
+            parallel_id?: string | null;
+            /** @description Grade UUID filter applied */
+            grade_id?: string | null;
+            /** @description Period filter applied (pricing only) */
+            period?: string;
+            /** @description Listing type filter applied */
+            listing_type?: string;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        SourceBreakdownItemInput: {
+            /** @description Source name */
+            source: string;
+            /** @description Number of records from this source */
+            count: number;
+        };
+        PricingMetaInput: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItemInput"][];
+            /** @description Date of most recent sale */
+            last_sale_date?: string | null;
+            /** @description Total records returned across all sections */
+            total_records: number;
+        };
+        RawPricingSectionInput: {
+            /** @description Period in days that was applied */
+            period_days: number | null;
+            /** @description Number of records */
+            count: number;
+            /** @description Pricing records for ungraded cards */
+            records: components["schemas"]["PricingRecordInput"][];
+        };
+        PricingGradeGroupInput: {
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Period in days that was applied */
+            period_days: number | null;
+            /** @description Number of records in this group */
+            count: number;
+            /** @description Pricing records for this grade */
+            records: components["schemas"]["PricingRecordInput"][];
+        };
+        PricingCompanyGroupInput: {
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Grade groups for this company */
+            grades: components["schemas"]["PricingGradeGroupInput"][];
+        };
+        PricingResponseInput: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContextInput"];
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingQueryEchoInput"];
+            /** @description Ungraded/raw pricing data */
+            raw: components["schemas"]["RawPricingSectionInput"];
+            /** @description Graded pricing data grouped by company and grade */
+            graded: components["schemas"]["PricingCompanyGroupInput"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["PricingMetaInput"];
+        };
+        RawMarketplaceSectionInput: {
+            /** @description Number of active listings */
+            count: number;
+            /** @description Active marketplace listings */
+            records: components["schemas"]["MarketplaceRecordInput"][];
+        };
+        MarketplaceGradeGroupInput: {
+            /** @description Grade value */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Number of listings */
+            count: number;
+            /** @description Active listings for this grade */
+            records: components["schemas"]["MarketplaceRecordInput"][];
+        };
+        MarketplaceCompanyGroupInput: {
+            /** @description Grading company name */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Grade groups */
+            grades: components["schemas"]["MarketplaceGradeGroupInput"][];
+        };
+        MarketplaceMetaInput: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItemInput"][];
+            /** @description Total records returned */
+            total_records: number;
+        };
+        MarketplaceResponseInput: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContextInput"];
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingQueryEchoInput"];
+            /** @description Ungraded active listings */
+            raw: components["schemas"]["RawMarketplaceSectionInput"];
+            /** @description Graded active listings grouped by company and grade */
+            graded: components["schemas"]["MarketplaceCompanyGroupInput"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["MarketplaceMetaInput"];
+        };
+        BulkPricingResultInput: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Whether pricing was successfully retrieved */
+            success: boolean;
+            /** @description Pricing data when successful */
+            data?: components["schemas"]["PricingResponseInput"];
+            /** @description Error details when unsuccessful */
+            error?: {
+                /** @description Error code */
+                code: string;
+                /** @description Error message */
+                message: string;
+            };
+        };
+        BulkPricingResponseInput: {
+            /** @description Pricing results for each requested card */
+            results: components["schemas"]["BulkPricingResultInput"][];
+            /** @description Summary counts */
+            meta: {
+                /** @description Number of cards requested */
+                requested: number;
+                /** @description Number of cards with successful results */
+                successful: number;
+                /** @description Number of cards that failed */
+                failed: number;
+            };
         };
         BasicHealthResponseInput: {
             /** @description Overall health status of the API (e.g., "healthy") */
@@ -4520,23 +4779,7 @@ export interface components {
             /** @description Card number. Present only for exact card matches. */
             number?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
-            parallel?: {
-                /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
-                id: string;
-                /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
-                name: string;
-                /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
-                description?: string;
-                /**
-                 * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
-                 * @constant
-                 */
-                isPartial?: true;
-                /** @description Limited print run number for this parallel */
-                numberedTo?: number;
-                /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
-                cards?: string[];
-            };
+            parallel?: components["schemas"]["ParallelSummary"];
         };
         IdentificationData: {
             /**
@@ -4786,15 +5029,6 @@ export interface components {
             isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
-            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
             cards?: string[];
         };
@@ -4912,15 +5146,6 @@ export interface components {
             parallels: components["schemas"]["ParallelSummary"][];
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
         };
@@ -4956,15 +5181,6 @@ export interface components {
             isPartial?: true;
             /** @description Limited print run number for this parallel */
             numberedTo?: number;
-            /** @description Average pricing data for this parallel variant. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
             cards?: string[];
             /** @description Set UUID */
@@ -5118,15 +5334,6 @@ export interface components {
             parallels: components["schemas"]["ParallelSummary"][];
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. Prices are averaged across all available sources. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
         };
@@ -5481,6 +5688,257 @@ export interface components {
             gradingType: components["schemas"]["GradingType"];
             /** @description Grandparent grading company information for context */
             gradingCompany: components["schemas"]["GradingCompany"];
+        };
+        BulkPricingRequest: {
+            /** @description Array of card UUIDs to fetch pricing for (1-100). Matches the max page size of catalog search results. */
+            card_ids: string[];
+            /** @description Filter by parallel variant UUID. null = base card only. */
+            parallel_id?: string | null;
+            /** @description Filter by grade UUID. null = ungraded only. */
+            grade_id?: string | null;
+            /**
+             * @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit.
+             * @default all
+             */
+            period: string;
+            /**
+             * @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all
+             * @default both
+             * @enum {string}
+             */
+            listing_type: "auction" | "fixed" | "both";
+            /** @description Maximum number of records per card */
+            limit?: number;
+        };
+        PricingRecord: {
+            /** @description Listing title from marketplace */
+            title?: string | null;
+            /** @description Sale price in USD */
+            price: number;
+            /** @description Sale date in ISO 8601 format */
+            date?: string | null;
+            /** @description Data source (e.g., "ebay") */
+            source: string;
+            /** @description Type of listing: auction or fixed price */
+            listing_type?: ("auction" | "fixed") | null;
+            /** @description URL to the original listing */
+            url?: string | null;
+            /** @description Primary image URL for the listing */
+            image_url?: string | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+        };
+        MarketplaceRecord: {
+            /** @description Listing title */
+            title: string;
+            /** @description Current price or starting bid in USD */
+            price?: number | null;
+            /** @description Marketplace source */
+            source: string;
+            /** @description Type of listing */
+            listing_type?: ("auction" | "fixed" | "search") | null;
+            /** @description URL to the listing */
+            url?: string | null;
+            /** @description Primary image URL */
+            image_url?: string | null;
+            /** @description Condition description from seller */
+            condition?: string | null;
+            /** @description Listing end date in ISO 8601 format */
+            end_date?: string | null;
+            /** @description Number of bids (auctions only) */
+            bid_count?: number | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+        };
+        PricingCardContext: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Card name/subject */
+            name: string;
+            /** @description Card number in set */
+            number?: string | null;
+            /** @description Set context */
+            set: {
+                /**
+                 * Format: uuid
+                 * @description Set UUID
+                 */
+                set_id: string;
+                /** @description Set name */
+                name: string;
+                /** @description Release year */
+                year: string;
+                /** @description Release name */
+                release: string;
+            };
+            /** @description Parallel context if filtered by parallel */
+            parallel?: {
+                /**
+                 * Format: uuid
+                 * @description Parallel UUID
+                 */
+                parallel_id: string;
+                /** @description Parallel name */
+                name: string;
+            } | null;
+        };
+        PricingQueryEcho: {
+            /** @description Parallel UUID filter applied */
+            parallel_id?: string | null;
+            /** @description Grade UUID filter applied */
+            grade_id?: string | null;
+            /** @description Period filter applied (pricing only) */
+            period?: string;
+            /** @description Listing type filter applied */
+            listing_type?: string;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        SourceBreakdownItem: {
+            /** @description Source name */
+            source: string;
+            /** @description Number of records from this source */
+            count: number;
+        };
+        PricingMeta: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItem"][];
+            /** @description Date of most recent sale */
+            last_sale_date?: string | null;
+            /** @description Total records returned across all sections */
+            total_records: number;
+        };
+        RawPricingSection: {
+            /** @description Period in days that was applied */
+            period_days: number | null;
+            /** @description Number of records */
+            count: number;
+            /** @description Pricing records for ungraded cards */
+            records: components["schemas"]["PricingRecord"][];
+        };
+        PricingGradeGroup: {
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Period in days that was applied */
+            period_days: number | null;
+            /** @description Number of records in this group */
+            count: number;
+            /** @description Pricing records for this grade */
+            records: components["schemas"]["PricingRecord"][];
+        };
+        PricingCompanyGroup: {
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Grade groups for this company */
+            grades: components["schemas"]["PricingGradeGroup"][];
+        };
+        PricingResponse: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContext"];
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingQueryEcho"];
+            /** @description Ungraded/raw pricing data */
+            raw: components["schemas"]["RawPricingSection"];
+            /** @description Graded pricing data grouped by company and grade */
+            graded: components["schemas"]["PricingCompanyGroup"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["PricingMeta"];
+        };
+        RawMarketplaceSection: {
+            /** @description Number of active listings */
+            count: number;
+            /** @description Active marketplace listings */
+            records: components["schemas"]["MarketplaceRecord"][];
+        };
+        MarketplaceGradeGroup: {
+            /** @description Grade value */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Number of listings */
+            count: number;
+            /** @description Active listings for this grade */
+            records: components["schemas"]["MarketplaceRecord"][];
+        };
+        MarketplaceCompanyGroup: {
+            /** @description Grading company name */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Grade groups */
+            grades: components["schemas"]["MarketplaceGradeGroup"][];
+        };
+        MarketplaceMeta: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItem"][];
+            /** @description Total records returned */
+            total_records: number;
+        };
+        MarketplaceResponse: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContext"];
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingQueryEcho"];
+            /** @description Ungraded active listings */
+            raw: components["schemas"]["RawMarketplaceSection"];
+            /** @description Graded active listings grouped by company and grade */
+            graded: components["schemas"]["MarketplaceCompanyGroup"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["MarketplaceMeta"];
+        };
+        BulkPricingResult: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Whether pricing was successfully retrieved */
+            success: boolean;
+            /** @description Pricing data when successful */
+            data?: components["schemas"]["PricingResponse"];
+            /** @description Error details when unsuccessful */
+            error?: {
+                /** @description Error code */
+                code: string;
+                /** @description Error message */
+                message: string;
+            };
+        };
+        BulkPricingResponse: {
+            /** @description Pricing results for each requested card */
+            results: components["schemas"]["BulkPricingResult"][];
+            /** @description Summary counts */
+            meta: {
+                /** @description Number of cards requested */
+                requested: number;
+                /** @description Number of cards with successful results */
+                successful: number;
+                /** @description Number of cards that failed */
+                failed: number;
+            };
         };
         BasicHealthResponse: {
             /** @description Overall health status of the API (e.g., "healthy") */
@@ -11273,6 +11731,231 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GradesResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCardPricing: {
+        parameters: {
+            query?: {
+                /** @description Filter by parallel variant. Pass a UUID for a specific parallel, "null" for base card only, or omit for all variants. */
+                parallel_id?: string;
+                /** @description Filter by grade. Pass a UUID for a specific grade, "null" for ungraded only, or omit for all grades. */
+                grade_id?: string;
+                /** @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit. */
+                period?: string;
+                /** @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all */
+                listing_type?: "auction" | "fixed" | "both";
+                /** @description Maximum number of records to return per card */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getBulkPricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkPricingRequestInput"];
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkPricingResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkPricingResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCardMarketplace: {
+        parameters: {
+            query?: {
+                /** @description Filter by parallel variant. Pass a UUID for a specific parallel, "null" for base card only, or omit for all variants. */
+                parallel_id?: string;
+                /** @description Filter by grade. Pass a UUID for a specific grade, "null" for ungraded only, or omit for all grades. */
+                grade_id?: string;
+                /** @description Filter by listing type. auction=auctions, fixed=buy-it-now, both=all */
+                listing_type?: "auction" | "fixed" | "both";
+                /** @description Maximum number of records to return per card */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceResponse"];
                 };
             };
             /** @description Default Response */

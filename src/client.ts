@@ -939,6 +939,43 @@ export class CardSightAI {
   };
 
   /**
+   * Pricing endpoints - Get completed sales pricing data for cards
+   */
+  public readonly pricing = {
+    /**
+     * Get completed sales pricing for a single card
+     * @param cardId - Card UUID
+     * @param params - Optional query parameters (parallel_id, grade_id, period, price_type, limit)
+     */
+    get: (cardId: string, params?: GetQueryParams<'/v1/pricing/{card_id}'>) =>
+      this.client.GET('/v1/pricing/{card_id}', {
+        params: { path: { card_id: cardId }, query: params }
+      }),
+
+    /**
+     * Get pricing for multiple cards in bulk (up to 100)
+     * @param data - Request body with card_ids and optional filters
+     */
+    bulk: (data: PostBody<'/v1/pricing/'>) =>
+      this.client.POST('/v1/pricing/', { body: data })
+  };
+
+  /**
+   * Marketplace endpoints - Get active marketplace listings for cards
+   */
+  public readonly marketplace = {
+    /**
+     * Get active marketplace listings for a single card
+     * @param cardId - Card UUID
+     * @param params - Optional query parameters (parallel_id, grade_id, listing_type, limit)
+     */
+    get: (cardId: string, params?: GetQueryParams<'/v1/marketplace/{card_id}'>) =>
+      this.client.GET('/v1/marketplace/{card_id}', {
+        params: { path: { card_id: cardId }, query: params }
+      })
+  };
+
+  /**
    * Direct access to the underlying OpenAPI client for advanced use cases
    */
   public get raw(): OpenAPIClient<paths> {

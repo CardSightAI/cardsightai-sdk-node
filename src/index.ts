@@ -27,7 +27,13 @@ export type {
   SlabGrade,
   SlabQualifier,
   SlabAutoGrade,
-  ServerMessage
+  ServerMessage,
+  PricingResponse,
+  PricingRecord,
+  BulkPricingResponse,
+  BulkPricingResult,
+  MarketplaceResponse,
+  MarketplaceRecord
 } from './types.js';
 
 // Export utility functions for working with identification results

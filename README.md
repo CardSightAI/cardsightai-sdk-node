@@ -36,6 +36,8 @@ The most comprehensive baseball card identification and collection management pl
 | **Collectors** | Manage collector profiles with names | `collectors.create()`, `collectors.update()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `lists.cards.add()` |
 | **Binders** | Organize collection subsets | `collections.binders.create()` |
+| **Pricing** | Completed sales data for cards | `pricing.get()`, `pricing.bulk()` |
+| **Marketplace** | Active marketplace listings for cards | `marketplace.get()` |
 | **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
 | **AI Search** | Natural language queries | `ai.query()` |
 | **Autocomplete** | Search suggestions for all entities | `autocomplete.cards()` |
@@ -581,6 +583,107 @@ if (results.data) {
 }
 ```
 
+### Pricing (Completed Sales)
+
+Get completed sales pricing data for cards, grouped into raw (ungraded) and graded sections:
+
+```typescript
+// Get pricing for a single card
+const pricing = await client.pricing.get('card_uuid');
+
+if (pricing.data) {
+  // Card context
+  console.log(`Card: ${pricing.data.card.name}`);
+  console.log(`Set: ${pricing.data.card.set.name} (${pricing.data.card.set.year})`);
+
+  // Raw (ungraded) sales
+  console.log(`\nUngraded sales: ${pricing.data.raw.count}`);
+  for (const sale of pricing.data.raw.records) {
+    console.log(`  $${sale.price} - ${sale.date} (${sale.source})`);
+  }
+
+  // Graded sales (grouped by company → grade)
+  for (const company of pricing.data.graded) {
+    console.log(`\n${company.company_name}:`);
+    for (const grade of company.grades) {
+      console.log(`  Grade ${grade.grade_value}: ${grade.count} sales`);
+      for (const sale of grade.records) {
+        console.log(`    $${sale.price} - ${sale.date}`);
+      }
+    }
+  }
+
+  // Metadata
+  console.log(`\nTotal records: ${pricing.data.meta.total_records}`);
+  console.log(`Last sale: ${pricing.data.meta.last_sale_date}`);
+}
+
+// Filter by parallel, grade, time period, and listing type
+const filtered = await client.pricing.get('card_uuid', {
+  parallel_id: 'parallel_uuid',  // Specific parallel (omit for all)
+  grade_id: 'grade_uuid',        // Specific grade (omit for all)
+  period: '90d',                  // Any combo: "7d", "2w", "3m", "1y", "all"
+  listing_type: 'both',          // auction, fixed, both
+  limit: 50                       // Max records per section
+});
+
+// Bulk pricing for multiple cards (up to 100)
+const bulk = await client.pricing.bulk({
+  card_ids: ['card_uuid_1', 'card_uuid_2', 'card_uuid_3'],
+  period: '90d',
+  listing_type: 'both'
+});
+
+if (bulk.data) {
+  console.log(`Requested: ${bulk.data.meta.requested}`);
+  console.log(`Successful: ${bulk.data.meta.successful}`);
+  console.log(`Failed: ${bulk.data.meta.failed}`);
+
+  for (const result of bulk.data.results) {
+    if (result.success && result.data) {
+      console.log(`${result.data.card.name}: ${result.data.meta.total_records} sales`);
+    } else if (result.error) {
+      console.log(`${result.card_id}: ${result.error.message}`);
+    }
+  }
+}
+```
+
+### Marketplace (Active Listings)
+
+Get currently active marketplace listings for cards:
+
+```typescript
+// Get active listings for a card
+const listings = await client.marketplace.get('card_uuid');
+
+if (listings.data) {
+  // Raw (ungraded) active listings
+  console.log(`Ungraded listings: ${listings.data.raw.count}`);
+  for (const listing of listings.data.raw.records) {
+    console.log(`  ${listing.title} - $${listing.price} (${listing.source})`);
+    if (listing.url) console.log(`    ${listing.url}`);
+    if (listing.bid_count) console.log(`    Bids: ${listing.bid_count}`);
+  }
+
+  // Graded active listings (grouped by company → grade)
+  for (const company of listings.data.graded) {
+    console.log(`\n${company.company_name}:`);
+    for (const grade of company.grades) {
+      console.log(`  Grade ${grade.grade_value}: ${grade.count} listings`);
+    }
+  }
+}
+
+// Filter by parallel, grade, and listing type
+const filtered = await client.marketplace.get('card_uuid', {
+  parallel_id: 'parallel_uuid',
+  grade_id: 'grade_uuid',
+  listing_type: 'fixed',  // auction, fixed (buy-it-now), both
+  limit: 25
+});
+```
+
 ### Catalog Operations
 
 Search and retrieve cards, sets, releases, and other catalog data:
@@ -959,6 +1062,11 @@ import {
   SlabQualifier,
   SlabAutoGrade,
   ServerMessage,
+  PricingResponse,
+  PricingRecord,
+  BulkPricingResponse,
+  MarketplaceResponse,
+  MarketplaceRecord,
   Card,
   Set,
   Collection
@@ -1084,6 +1192,8 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |
+| **Pricing** | 2 | `pricing.get()`, `pricing.bulk()` |
+| **Marketplace** | 1 | `marketplace.get()` |
 | **Grades** | 3 | `grades.companies.*` |
 | **Autocomplete** | 6 | `autocomplete.*` |
 | **AI** | 1 | `ai.query()` |

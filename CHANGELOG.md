@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.1] - 2026-04-01
+
+### Changed
+- **Unified `listing_type` filter** - Pricing and marketplace endpoints now share the same `listing_type` parameter (`"auction"` | `"fixed"` | `"both"`). The `price_type` field on pricing has been removed.
+- **Flexible date periods** - The `period` filter on pricing endpoints is now a freeform string supporting any combination of `d` (days), `w` (weeks), `m` (months), and `y` (years) — e.g., `"7d"`, `"2w"`, `"3m"`, `"1y"`, `"all"`. Replaces the previous fixed enum of `"30d"` | `"90d"` | `"6m"` | `"1y"` | `"all"`.
+
+## [3.4.0] - 2026-04-01
+
+### Added
+- **Pricing Endpoints** - New `pricing` namespace for completed sales pricing data:
+  - `pricing.get(cardId, params?)` - Get completed sales data for a single card, grouped into raw (ungraded) and graded sections organized by grading company and grade value
+  - `pricing.bulk(data)` - Get pricing for up to 100 cards in a single request; each card is processed independently and can succeed or fail without affecting others
+  - Supports filtering by `parallel_id`, `grade_id`, `period`, `listing_type` (auction/fixed/both), and `limit`
+  - New type exports: `PricingResponse`, `PricingRecord`, `BulkPricingResponse`, `BulkPricingResult`
+- **Marketplace Endpoint** - New `marketplace` namespace for active marketplace listings:
+  - `marketplace.get(cardId, params?)` - Get active marketplace listings for a single card, grouped into raw and graded sections
+  - Includes a marketplace search link as the last record in the raw section
+  - Supports filtering by `parallel_id`, `grade_id`, `listing_type` (bid/ask/both), and `limit`
+  - New type exports: `MarketplaceResponse`, `MarketplaceRecord`
+
+### Breaking Changes
+- **Removed `prices` field** - The inline `prices` object (`{ raw?, "psa-10"?, "psa-9"? }`) has been removed from `Card`, `DetailedParallelResponse`, and `ParallelSummary` schemas
+  - Code accessing `card.prices` or `parallel.prices` will need to be updated
+  - Use the new `pricing.get(cardId)` endpoint instead for detailed, filterable pricing data
+
 ## [3.3.0] - 2026-03-20
 
 ### Added
