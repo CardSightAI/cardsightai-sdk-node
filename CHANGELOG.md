@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-03-20
+
+### Added
+- **Enhanced Grading/Slab Detection** - `SlabGradingDetail` now includes detailed grade, qualifier, and autograph grade information:
+  - `grade?: SlabGrade` - Grade detected on the slab label (`value`, `condition`, and optional catalog `id`)
+  - `qualifier?: SlabQualifier` - Defect qualifier detected on the slab label (e.g., OC, MC, PD, ST)
+  - `autoGrade?: SlabAutoGrade` - Autograph grade detected on the slab label (`value`, `condition`, and optional catalog `id`)
+  - New type exports: `SlabGrade`, `SlabQualifier`, `SlabAutoGrade`
+- **Server Advisory Messages** - Identify and detect responses now include an optional `messages` array:
+  - Each message has `type` (`"info"` or `"warning"`) and `message` (human-readable text)
+  - Used for server advisories such as image quality warnings
+  - New `ServerMessage` type export
+- **Image Placeholder Support** - `images.getCard()` now accepts a `default` parameter:
+  - When `"true"`, returns a default placeholder image if the card image is not available
+  - When `"false"` (default), returns 404 if no image exists
+
+### Enhanced
+- **`formatGradingDisplay()` Updated** - Now includes grade value and condition when available (e.g., `"PSA 10 GEM MINT - High confidence"` instead of `"PSA - High confidence"`)
+- **Improved Feedback Documentation** - Better JSDoc descriptions on `FeedbackInput` and `FeedbackResponse` schema fields (documentation-only, no structural changes)
+
 ## [3.2.0] - 2026-03-09
 
 ### Added

@@ -154,6 +154,13 @@ if (result.data?.success && result.data.detections) {
   // Access request metadata
   console.log(`\nRequest ID: ${result.data.requestId}`);
   console.log(`Processing time: ${result.data.processingTime}ms`);
+
+  // Check for server advisory messages (e.g., image quality warnings)
+  if (result.data.messages?.length) {
+    for (const msg of result.data.messages) {
+      console.log(`[${msg.type}] ${msg.message}`);
+    }
+  }
 }
 
 // Segment-specific identification (football, basketball, etc.)
@@ -267,6 +274,13 @@ const result = await client.detect.card(imageBuffer);
 if (result.data) {
   console.log(`Cards detected: ${result.data.detected}`);   // true/false
   console.log(`Number of cards: ${result.data.count}`);      // 0, 1, 2, ...
+
+  // Check for server advisory messages
+  if (result.data.messages?.length) {
+    for (const msg of result.data.messages) {
+      console.log(`[${msg.type}] ${msg.message}`);
+    }
+  }
 }
 
 // Works with the same image types as identify
@@ -431,7 +445,23 @@ for (const detection of result.data?.detections || []) {
     console.log(`Grading Company: ${grading.company.name}`);
     console.log(`Detection Confidence: ${grading.confidence}`);
     console.log(`Display: ${formatGradingDisplay(detection)}`);
-    // Output: "PSA - High confidence"
+    // Output: "PSA 10 GEM MINT - High confidence"
+
+    // Access detailed grade information
+    if (grading.grade) {
+      console.log(`  Grade: ${grading.grade.value}`);        // e.g., "10"
+      console.log(`  Condition: ${grading.grade.condition}`); // e.g., "GEM MINT"
+    }
+
+    // Check for defect qualifiers (OC, MC, PD, ST)
+    if (grading.qualifier) {
+      console.log(`  Qualifier: ${grading.qualifier.code}`);  // e.g., "OC"
+    }
+
+    // Check for autograph grades
+    if (grading.autoGrade) {
+      console.log(`  Auto Grade: ${grading.autoGrade.value}`); // e.g., "10"
+    }
   }
 }
 ```
@@ -451,6 +481,20 @@ for (const detection of result.data?.detections || []) {
     company: {
       id: "company_uuid",     // Optional grading company UUID
       name: "PSA"             // Grading company name
+    },
+    grade: {                   // Optional - grade detected on the slab label
+      id: "grade_uuid",       // Optional catalog UUID
+      value: "10",            // Grade value
+      condition: "GEM MINT"   // Grade condition
+    },
+    qualifier: {               // Optional - defect qualifier (e.g., OC, MC, PD, ST)
+      id: "qualifier_uuid",   // Optional catalog UUID
+      code: "OC"              // Qualifier code
+    },
+    autoGrade: {               // Optional - autograph grade
+      id: "auto_grade_uuid",  // Optional catalog UUID
+      value: "10",            // Autograph grade value
+      condition: "MINT"       // Autograph grade condition
     }
   }
 }
@@ -852,6 +896,9 @@ const imageData = await client.images.getCard('card_uuid');
 // Get image as base64 JSON
 const imageJson = await client.images.getCard('card_uuid', { format: 'json' });
 
+// Get image with placeholder fallback (returns a default image instead of 404)
+const imageWithFallback = await client.images.getCard('card_uuid', { default: 'true' });
+
 // Get collection card images
 const collectionImage = await client.collections.cards.getImage(
   'collection_uuid',
@@ -908,6 +955,10 @@ import {
   CatalogSearchResponse,
   SlabGradingDetail,
   SlabCompany,
+  SlabGrade,
+  SlabQualifier,
+  SlabAutoGrade,
+  ServerMessage,
   Card,
   Set,
   Collection

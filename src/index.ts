@@ -23,7 +23,11 @@ export type {
   DetailedParallel,
   CardParallel,
   SlabGradingDetail,
-  SlabCompany
+  SlabCompany,
+  SlabGrade,
+  SlabQualifier,
+  SlabAutoGrade,
+  ServerMessage
 } from './types.js';
 
 // Export utility functions for working with identification results

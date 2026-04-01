@@ -247,14 +247,23 @@ export function getGradingInfo(detection: CardDetection): CardDetection['grading
 /**
  * Format grading information as a display string
  * @param detection - The card detection
- * @returns Formatted string (e.g., "PSA - High confidence"), or empty string if no grading
+ * @returns Formatted string (e.g., "PSA 10 GEM MINT - High confidence"), or empty string if no grading
  */
 export function formatGradingDisplay(detection: CardDetection): string {
   if (!detection.grading) {
     return '';
   }
 
-  return `${detection.grading.company.name} - ${detection.grading.confidence} confidence`;
+  const parts = [detection.grading.company.name];
+
+  if (detection.grading.grade?.value) {
+    parts.push(detection.grading.grade.value);
+    if (detection.grading.grade.condition) {
+      parts.push(detection.grading.grade.condition);
+    }
+  }
+
+  return `${parts.join(' ')} - ${detection.grading.confidence} confidence`;
 }
 
 // ============================================================================

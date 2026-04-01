@@ -157,6 +157,12 @@ export type CatalogSearchResponse = GetResponseData<'/v1/catalog/search', 'get'>
 // Grading/slab detection types (from identify responses)
 export type SlabGradingDetail = components['schemas']['SlabGradingDetail'];
 export type SlabCompany = components['schemas']['SlabCompany'];
+export type SlabGrade = components['schemas']['SlabGrade'];
+export type SlabQualifier = components['schemas']['SlabQualifier'];
+export type SlabAutoGrade = components['schemas']['SlabAutoGrade'];
+
+// Server advisory message type (from identify/detect responses)
+export type ServerMessage = components['schemas']['ServerMessage'];
 
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
@@ -166,6 +172,20 @@ export interface CardDetection {
     company: {
       id?: string;
       name: string;
+    };
+    grade?: {
+      id?: string;
+      value?: string;
+      condition?: string;
+    };
+    qualifier?: {
+      id?: string;
+      code: string;
+    };
+    autoGrade?: {
+      id?: string;
+      value?: string;
+      condition?: string;
     };
   };
 }
@@ -191,12 +211,19 @@ export interface DetectedCard {
   };
 }
 
+// Server advisory message (e.g., image quality warnings)
+export interface ServerMessageInfo {
+  type: 'info' | 'warning';
+  message: string;
+}
+
 // Utility type for easier access to the identification result
 export interface IdentifyResult {
   success: boolean;
   requestId: string;
   detections?: CardDetection[];
   processingTime?: number;
+  messages?: ServerMessageInfo[];
 }
 
 // Detailed parallel response from GET /v1/catalog/parallels/{id}

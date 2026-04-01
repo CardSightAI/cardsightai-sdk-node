@@ -2268,6 +2268,15 @@ export interface components {
             /** @description Error message describing why the operation failed */
             error: string;
         };
+        ServerMessageInput: {
+            /**
+             * @description Message severity level
+             * @enum {string}
+             */
+            type: "info" | "warning";
+            /** @description Human-readable message text */
+            message: string;
+        };
         CreateListInput: {
             /** @description UUID of the collector who will own this list */
             collectorId: string;
@@ -2826,29 +2835,38 @@ export interface components {
         };
         FeedbackInputInput: {
             /**
-             * @description FeedbackType
+             * @description Category of feedback. Accepted values: data_error (incorrect data), missing_data (something is missing from the catalog), suggestion (improvement idea), bug (something is broken), other (does not fit other categories)
              * @enum {string}
              */
             feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
+            /** @description Detailed description of the feedback. Include specifics such as what is wrong, what you expected, or what you suggest. Max 1000 characters. */
             message: string;
         };
         FeedbackResponseInput: {
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @description Unique identifier for this feedback submission
+             */
             unique_id: string;
             /**
-             * @description EntityType
+             * @description The type of entity this feedback is about
              * @enum {string}
              */
             entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
+            /** @description The unique ID of the entity, or null for general feedback */
             entity_id: string | null;
+            /** @description The category of feedback submitted */
             feedback_type: ("data_error" | "missing_data" | "suggestion" | "bug" | "other") | null;
+            /** @description The feedback message */
             message: string;
             /**
-             * @description FeedbackStatus
+             * @description Current review status of the feedback
              * @enum {string}
              */
             status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
+            /** @description ISO 8601 timestamp when the feedback was last updated */
             updated_at: string;
         };
         FeedbackSubmitResponseInput: {
@@ -2923,6 +2941,8 @@ export interface components {
             detections?: components["schemas"]["IdentificationDataInput"][];
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
+            /** @description Server advisory messages (e.g., image quality warnings) */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         DetectCardResponseInput: {
             /** @description Whether one or more trading cards were detected in the image */
@@ -2933,6 +2953,8 @@ export interface components {
             requestId: string;
             /** @description Total processing time in milliseconds */
             processingTime: number;
+            /** @description Server advisory messages (e.g., image quality warnings) */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         SlabCompanyInput: {
             /**
@@ -2943,6 +2965,37 @@ export interface components {
             /** @description Grading company name detected on the slab (e.g., "PSA", "BGS", "CGC", "SGC") */
             name: string;
         };
+        SlabGradeInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the grade from the catalog. Absent if grade could not be matched.
+             */
+            id?: string;
+            /** @description Grade value detected on the slab label */
+            value?: string;
+            /** @description Grade condition detected on the slab label */
+            condition?: string;
+        };
+        SlabQualifierInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the qualifier from the catalog. Absent if qualifier could not be matched.
+             */
+            id?: string;
+            /** @description Qualifier code (e.g., OC, MC, PD, ST) */
+            code: string;
+        };
+        SlabAutoGradeInput: {
+            /**
+             * Format: uuid
+             * @description UUID of the autograph grade from the catalog. Absent if not matched.
+             */
+            id?: string;
+            /** @description Autograph grade value */
+            value?: string;
+            /** @description Autograph grade condition */
+            condition?: string;
+        };
         SlabGradingDetailInput: {
             /**
              * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
@@ -2951,6 +3004,12 @@ export interface components {
             confidence: "High" | "Medium" | "Low";
             /** @description Grading company that issued this slab */
             company: components["schemas"]["SlabCompanyInput"];
+            /** @description Grade detected on the slab label */
+            grade?: components["schemas"]["SlabGradeInput"];
+            /** @description Defect qualifier detected on the slab label */
+            qualifier?: components["schemas"]["SlabQualifierInput"];
+            /** @description Autograph grade detected on the slab label */
+            autoGrade?: components["schemas"]["SlabAutoGradeInput"];
         };
         AIQueryRequestInput: {
             /** @description Natural language query */
@@ -3826,6 +3885,15 @@ export interface components {
             /** @description Error message describing why the operation failed */
             error: string;
         };
+        ServerMessage: {
+            /**
+             * @description Message severity level
+             * @enum {string}
+             */
+            type: "info" | "warning";
+            /** @description Human-readable message text */
+            message: string;
+        };
         CreateList: {
             /** @description UUID of the collector who will own this list */
             collectorId: string;
@@ -4384,29 +4452,38 @@ export interface components {
         };
         FeedbackInput: {
             /**
-             * @description FeedbackType
+             * @description Category of feedback. Accepted values: data_error (incorrect data), missing_data (something is missing from the catalog), suggestion (improvement idea), bug (something is broken), other (does not fit other categories)
              * @enum {string}
              */
             feedback_type?: "data_error" | "missing_data" | "suggestion" | "bug" | "other";
+            /** @description Detailed description of the feedback. Include specifics such as what is wrong, what you expected, or what you suggest. Max 1000 characters. */
             message: string;
         };
         FeedbackResponse: {
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @description Unique identifier for this feedback submission
+             */
             unique_id: string;
             /**
-             * @description EntityType
+             * @description The type of entity this feedback is about
              * @enum {string}
              */
             entity_type: "release" | "set" | "card" | "product" | "manufacturer" | "segment" | "general" | "identify";
+            /** @description The unique ID of the entity, or null for general feedback */
             entity_id: string | null;
+            /** @description The category of feedback submitted */
             feedback_type: ("data_error" | "missing_data" | "suggestion" | "bug" | "other") | null;
+            /** @description The feedback message */
             message: string;
             /**
-             * @description FeedbackStatus
+             * @description Current review status of the feedback
              * @enum {string}
              */
             status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
+            /** @description ISO 8601 timestamp when the feedback was last updated */
             updated_at: string;
         };
         FeedbackSubmitResponse: {
@@ -4481,6 +4558,8 @@ export interface components {
             detections?: components["schemas"]["IdentificationData"][];
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
+            /** @description Server advisory messages (e.g., image quality warnings) */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         DetectCardResponse: {
             /** @description Whether one or more trading cards were detected in the image */
@@ -4491,6 +4570,8 @@ export interface components {
             requestId: string;
             /** @description Total processing time in milliseconds */
             processingTime: number;
+            /** @description Server advisory messages (e.g., image quality warnings) */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         SlabCompany: {
             /**
@@ -4501,6 +4582,37 @@ export interface components {
             /** @description Grading company name detected on the slab (e.g., "PSA", "BGS", "CGC", "SGC") */
             name: string;
         };
+        SlabGrade: {
+            /**
+             * Format: uuid
+             * @description UUID of the grade from the catalog. Absent if grade could not be matched.
+             */
+            id?: string;
+            /** @description Grade value detected on the slab label */
+            value?: string;
+            /** @description Grade condition detected on the slab label */
+            condition?: string;
+        };
+        SlabQualifier: {
+            /**
+             * Format: uuid
+             * @description UUID of the qualifier from the catalog. Absent if qualifier could not be matched.
+             */
+            id?: string;
+            /** @description Qualifier code (e.g., OC, MC, PD, ST) */
+            code: string;
+        };
+        SlabAutoGrade: {
+            /**
+             * Format: uuid
+             * @description UUID of the autograph grade from the catalog. Absent if not matched.
+             */
+            id?: string;
+            /** @description Autograph grade value */
+            value?: string;
+            /** @description Autograph grade condition */
+            condition?: string;
+        };
         SlabGradingDetail: {
             /**
              * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
@@ -4509,6 +4621,12 @@ export interface components {
             confidence: "High" | "Medium" | "Low";
             /** @description Grading company that issued this slab */
             company: components["schemas"]["SlabCompany"];
+            /** @description Grade detected on the slab label */
+            grade?: components["schemas"]["SlabGrade"];
+            /** @description Defect qualifier detected on the slab label */
+            qualifier?: components["schemas"]["SlabQualifier"];
+            /** @description Autograph grade detected on the slab label */
+            autoGrade?: components["schemas"]["SlabAutoGrade"];
         };
         AIQueryRequest: {
             /** @description Natural language query */
@@ -10286,6 +10404,8 @@ export interface operations {
             query?: {
                 /** @description Image response format: "raw" returns binary image data, "json" returns base64-encoded data URI */
                 format?: "raw" | "json";
+                /** @description When true, returns a default placeholder image if the card image is not available. When false (default), returns 404 if no image exists. */
+                default?: "true" | "false";
             };
             header?: never;
             path: {
@@ -10400,6 +10520,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10471,6 +10592,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10542,6 +10664,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10613,6 +10736,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10684,6 +10808,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10755,6 +10880,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
@@ -10886,6 +11012,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description The unique ID (UUID) of the entity this feedback relates to */
                 id: string;
             };
             cookie?: never;
