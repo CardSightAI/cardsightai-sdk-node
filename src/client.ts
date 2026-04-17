@@ -379,6 +379,17 @@ export class CardSightAI {
     },
 
     /**
+     * Browse flexible card metadata fields (Artist, HP, Rarity, Mana Cost, etc.)
+     * with combined usage counts across cards, sets, releases, and segments.
+     */
+    fields: {
+      list: (params?: GetQueryParams<'/v1/catalog/fields'>) =>
+        this.client.GET('/v1/catalog/fields', { params: { query: params } }),
+
+      get: (id: string) => this.client.GET('/v1/catalog/fields/{id}', { params: { path: { id } } })
+    },
+
+    /**
      * Search across cards, sets, releases, and parallels
      * @param params - Query parameters including q (required), take, skip, type, segment, etc.
      */
@@ -415,6 +426,17 @@ export class CardSightAI {
       releases: (params?: GetQueryParams<'/v1/catalog/releases/random'>) =>
         this.client.GET('/v1/catalog/releases/random', { params: { query: params } })
     }
+  };
+
+  /**
+   * Release calendar — upcoming and recent card product releases sorted by release date.
+   */
+  public readonly releaseCalendar = {
+    /**
+     * List release calendar entries with optional filters for segment, manufacturer, and year.
+     */
+    list: (params?: GetQueryParams<'/v1/release-calendar/'>) =>
+      this.client.GET('/v1/release-calendar/', { params: { query: params } })
   };
 
   /**
@@ -956,8 +978,7 @@ export class CardSightAI {
      * Get pricing for multiple cards in bulk (up to 100)
      * @param data - Request body with card_ids and optional filters
      */
-    bulk: (data: PostBody<'/v1/pricing/'>) =>
-      this.client.POST('/v1/pricing/', { body: data })
+    bulk: (data: PostBody<'/v1/pricing/'>) => this.client.POST('/v1/pricing/', { body: data })
   };
 
   /**

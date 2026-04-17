@@ -18,6 +18,7 @@ The most comprehensive baseball card identification and collection management pl
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
+- **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
 - **Universal Compatibility** - Works in Node.js, browsers, and edge runtimes
 - **Dual Module System** - Supports both ESM and CommonJS
 - **Smart Error Handling** - Detailed error types with retry capabilities
@@ -41,6 +42,8 @@ The most comprehensive baseball card identification and collection management pl
 | **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
 | **AI Search** | Natural language queries | `ai.query()` |
 | **Autocomplete** | Search suggestions for all entities | `autocomplete.cards()` |
+| **Field Catalog** | Browse flexible metadata fields (Artist, HP, Rarity, etc.) with usage counts — powers cross-TCG metadata search | `catalog.fields.list()`, `catalog.fields.get()` |
+| **Release Calendar** | Upcoming and recent card product releases across segments and manufacturers | `releaseCalendar.list()` |
 
 ## Requirements
 
@@ -346,6 +349,50 @@ if (hasDetections(result.data)) {
 }
 ```
 
+#### Flexible Metadata, Suggestions, and Numbered Cards (v3.4.2+)
+
+Every detection's `card` now optionally includes three additional fields:
+
+- `numberedTo?: number` — print run for numbered base cards (e.g. `25` for a `/25`), independent of parallels
+- `fields?: FieldValue[]` — key/value metadata tailored to the TCG (e.g. `HP`, `RARITY`, `ARTIST`, `MANA_COST`)
+- `suggestions?: CardSuggestion[]` — alternative card candidates when multiple reprints scored similarly
+
+```typescript
+import {
+  getFieldValue,
+  formatFieldValues,
+  hasSuggestions,
+  getSuggestions,
+  isNumberedCard,
+  getNumberedTo
+} from 'cardsightai';
+
+const detection = result.data?.detections?.[0];
+if (!detection) return;
+
+// Pull a specific metadata value (case-insensitive key lookup)
+const artist = getFieldValue(detection, 'ARTIST');
+
+// Format all metadata for display
+console.log(formatFieldValues(detection, ' · '));
+// e.g. "HP: 120 · RARITY: Holo Rare · ARTIST: Mitsuhiro Arita"
+
+// Base-card print run (distinct from parallel print runs)
+if (isNumberedCard(detection)) {
+  console.log(`Limited to /${getNumberedTo(detection)}`);
+}
+
+// Alternative matches when reprints score similarly
+if (hasSuggestions(detection)) {
+  console.log('Could also be:');
+  for (const alt of getSuggestions(detection)) {
+    console.log(`  • ${alt.setName ?? 'Unknown set'} (${alt.id ?? 'no id'})`);
+  }
+}
+```
+
+See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon and Magic: The Gathering examples.
+
 #### Parallel Variant Detection
 
 The identify endpoint can detect parallel variants (special editions like Refractors, Prizms, numbered parallels, etc.). When a parallel is detected, the card object includes detailed parallel information:
@@ -583,6 +630,89 @@ if (results.data) {
 }
 ```
 
+### Fields (Flexible Metadata System)
+
+Every trading card game has different metadata: Pokémon cards have HP and Rarity, Magic: The Gathering cards have Mana Cost and Artist, Yu-Gi-Oh! cards have Attribute and Level. Rather than hard-coding columns per game, CardSight exposes a flexible **Fields** system — any card, set, release, or segment can carry key/value metadata, and the catalog exposes it as a first-class browsable entity. One SDK surface works across every TCG, no per-game branching required.
+
+**Browse available fields, sorted by how prevalent they are:**
+
+```typescript
+// usageCount tells you how many catalog entities (cards, sets, releases, segments) carry each field
+const fields = await client.catalog.fields.list({
+  sort: 'usageCount',
+  order: 'desc',
+  take: 20
+});
+
+fields.data?.fields.forEach(f => {
+  console.log(`${f.name} (${f.key}) — used on ${f.usageCount} entities`);
+});
+// e.g. "Artist (ARTIST) — used on 48,231 entities"
+//      "Rarity (RARITY) — used on 39,104 entities"
+//      "Hit Points (HP) — used on 11,520 entities"
+```
+
+**Example — find rare Pokémon cards:**
+
+Identification responses now include a `fields` array on every detected card, so you can surface rarity directly from a scan:
+
+```typescript
+import { CardSightAI, getFieldValue, isExactMatch } from 'cardsightai';
+
+const client = new CardSightAI({ apiKey: 'your_api_key_here' });
+const result = await client.identify.card(pokemonCardImage);
+const detection = result.data?.detections?.[0];
+
+if (detection && isExactMatch(detection)) {
+  const rarity = getFieldValue(detection, 'RARITY');
+  const hp = getFieldValue(detection, 'HP');
+  console.log(`${detection.card.name} — ${rarity} (HP: ${hp})`);
+  // e.g. "Charizard — Holo Rare (HP: 120)"
+
+  if (rarity?.toLowerCase().includes('rare')) {
+    // Route to a higher-value pricing lookup, flag for user review, etc.
+    const pricing = await client.pricing.get(detection.card.id);
+    // ...
+  }
+}
+```
+
+**Example — surface the artist on Magic: The Gathering cards:**
+
+```typescript
+import { CardSightAI, formatFieldValues, getFieldValue } from 'cardsightai';
+
+const client = new CardSightAI({ apiKey: 'your_api_key_here' });
+const result = await client.identify.cardBySegment('magic', mtgCardImage);
+const detection = result.data?.detections?.[0];
+
+if (detection) {
+  const artist = getFieldValue(detection, 'ARTIST');
+  const manaCost = getFieldValue(detection, 'MANA_COST');
+  console.log(`${detection.card.name} by ${artist} — ${manaCost}`);
+  // e.g. "Black Lotus by Christopher Rush — {0}"
+
+  // Or show every field at once:
+  console.log(formatFieldValues(detection, ' · '));
+  // e.g. "MANA_COST: {0} · ARTIST: Christopher Rush · RARITY: Rare"
+}
+```
+
+**Related utility helpers:**
+
+| Helper | Purpose |
+|--------|---------|
+| `hasFields(detection)` | Check whether a detection has any field values |
+| `getFields(detection)` | Return the full `FieldValue[]` array |
+| `getFieldValue(detection, key)` | Look up a single value by key (case-insensitive) |
+| `formatFieldValues(detection, separator?)` | Format all fields as a display string |
+| `hasSuggestions(detection)` | Check for alternative reprint candidates |
+| `getSuggestions(detection)` | Get the `CardSuggestion[]` array |
+| `isNumberedCard(detection)` | Check for a base-card print run (independent of parallels) |
+| `getNumberedTo(detection)` | Get the base-card print run number |
+
+The `CardDetails` type on every detection also exposes `numberedTo` (e.g. `25` for a `/25` card) and `suggestions` (alternative matches when reprints score similarly) alongside the new `fields` array — see [Working with Identification Results](#working-with-identification-results) for full details.
+
 ### Pricing (Completed Sales)
 
 Get completed sales pricing data for cards, grouped into raw (ungraded) and graded sections:
@@ -748,6 +878,29 @@ const stats = await client.catalog.statistics.get();
 console.log(`Total cards: ${stats.data?.totalCards}`);
 console.log(`Total sets: ${stats.data?.totalSets}`);
 ```
+
+### Release Calendar
+
+Browse upcoming and recent card product releases, sorted by release date (newest first). Useful for "coming soon" pages, recent-release feeds, and pre-order discovery.
+
+```typescript
+// Next page of upcoming 2026 Panini releases
+const calendar = await client.releaseCalendar.list({
+  manufacturer: 'Panini',   // UUID or name (case-insensitive)
+  year: '2026',
+  take: 20,
+  skip: 0
+});
+
+calendar.data?.release_calendar.forEach(entry => {
+  const preOrder = entry.pre_order_date ?? 'N/A';
+  console.log(`${entry.name} — releases ${entry.release_date} (pre-order: ${preOrder})`);
+});
+
+console.log(`Total upcoming: ${calendar.data?.total_count}`);
+```
+
+Filters: `segment`, `manufacturer`, `year` (all accept UUIDs or case-insensitive names). Each entry includes `id`, `name`, `year`, `release_date`, `pre_order_date`, `segment_id`, and `manufacturer_id`.
 
 ### Random Catalog (Pack Opening & Discovery)
 
@@ -1188,7 +1341,8 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
 | **Identification** | 2 | `identify.card()`, `identify.cardBySegment()` |
 | **Detection** | 1 | `detect.card()` |
-| **Catalog** | 18 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.random.*` |
+| **Catalog** | 20 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.fields.*`, `catalog.random.*` |
+| **Release Calendar** | 1 | `releaseCalendar.list()` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |

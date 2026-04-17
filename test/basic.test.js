@@ -6,7 +6,15 @@ import {
   AuthenticationError,
   isExactMatch,
   isSetLevelMatch,
-  getExactMatches
+  getExactMatches,
+  hasFields,
+  getFields,
+  getFieldValue,
+  formatFieldValues,
+  hasSuggestions,
+  getSuggestions,
+  isNumberedCard,
+  getNumberedTo
 } from '../dist/esm/index.js';
 
 test('SDK initialization', async (t) => {
@@ -99,6 +107,98 @@ test('Client structure', async (t) => {
     assert(typeof client.catalog.manufacturers === 'function', 'Should have catalog.manufacturers()');
     assert(typeof client.catalog.parallels.list === 'function', 'Should have catalog.parallels.list()');
     assert(typeof client.catalog.parallels.get === 'function', 'Should have catalog.parallels.get()');
+    assert(typeof client.catalog.fields.list === 'function', 'Should have catalog.fields.list()');
+    assert(typeof client.catalog.fields.get === 'function', 'Should have catalog.fields.get()');
+  });
+
+  await t.test('releaseCalendar endpoints should exist', () => {
+    assert(
+      typeof client.releaseCalendar.list === 'function',
+      'Should have releaseCalendar.list()'
+    );
+  });
+});
+
+test('Field value utility functions (v3.4.2)', async (t) => {
+  const pokemon = {
+    confidence: 'High',
+    card: {
+      id: 'uuid-pokemon',
+      name: 'Charizard',
+      fields: [
+        { key: 'HP', value: '120' },
+        { key: 'RARITY', value: 'Holo Rare' },
+        { key: 'ARTIST', value: 'Mitsuhiro Arita' }
+      ]
+    }
+  };
+  const empty = { confidence: 'Medium', card: { id: 'uuid-x' } };
+
+  await t.test('hasFields detects presence of field data', () => {
+    assert.strictEqual(hasFields(pokemon), true);
+    assert.strictEqual(hasFields(empty), false);
+  });
+
+  await t.test('getFields returns the array or empty', () => {
+    assert.strictEqual(getFields(pokemon).length, 3);
+    assert.deepStrictEqual(getFields(empty), []);
+  });
+
+  await t.test('getFieldValue looks up by key (case-insensitive)', () => {
+    assert.strictEqual(getFieldValue(pokemon, 'HP'), '120');
+    assert.strictEqual(getFieldValue(pokemon, 'hp'), '120');
+    assert.strictEqual(getFieldValue(pokemon, 'Rarity'), 'Holo Rare');
+    assert.strictEqual(getFieldValue(pokemon, 'MISSING'), undefined);
+    assert.strictEqual(getFieldValue(empty, 'HP'), undefined);
+  });
+
+  await t.test('formatFieldValues joins key/value pairs', () => {
+    assert.strictEqual(
+      formatFieldValues(pokemon),
+      'HP: 120 · RARITY: Holo Rare · ARTIST: Mitsuhiro Arita'
+    );
+    assert.strictEqual(formatFieldValues(pokemon, ', '), 'HP: 120, RARITY: Holo Rare, ARTIST: Mitsuhiro Arita');
+    assert.strictEqual(formatFieldValues(empty), '');
+  });
+});
+
+test('Card suggestion utility functions (v3.4.2)', async (t) => {
+  const withSuggestions = {
+    confidence: 'Medium',
+    card: {
+      id: 'uuid-a',
+      name: 'Reprint Candidate',
+      suggestions: [
+        { id: 'uuid-b', setName: '1989 Topps' },
+        { id: 'uuid-c', setName: '1990 Topps' }
+      ]
+    }
+  };
+  const without = { confidence: 'High', card: { id: 'uuid-x' } };
+
+  await t.test('hasSuggestions detects alternative candidates', () => {
+    assert.strictEqual(hasSuggestions(withSuggestions), true);
+    assert.strictEqual(hasSuggestions(without), false);
+  });
+
+  await t.test('getSuggestions returns the array or empty', () => {
+    assert.strictEqual(getSuggestions(withSuggestions).length, 2);
+    assert.deepStrictEqual(getSuggestions(without), []);
+  });
+});
+
+test('Numbered card utility functions (v3.4.2)', async (t) => {
+  const numbered = { confidence: 'High', card: { id: 'u', numberedTo: 25 } };
+  const base = { confidence: 'High', card: { id: 'u' } };
+
+  await t.test('isNumberedCard detects print run on base card', () => {
+    assert.strictEqual(isNumberedCard(numbered), true);
+    assert.strictEqual(isNumberedCard(base), false);
+  });
+
+  await t.test('getNumberedTo returns print run or undefined', () => {
+    assert.strictEqual(getNumberedTo(numbered), 25);
+    assert.strictEqual(getNumberedTo(base), undefined);
   });
 });
 

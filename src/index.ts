@@ -33,7 +33,20 @@ export type {
   BulkPricingResponse,
   BulkPricingResult,
   MarketplaceResponse,
-  MarketplaceRecord
+  MarketplaceRecord,
+  // Field catalog types (v3.4.2)
+  FieldValue,
+  FieldValues,
+  CardSuggestion,
+  Field,
+  FieldSummary,
+  DetailedFieldResponse,
+  PaginatedFieldsResponse,
+  FieldsResponse,
+  // Release calendar types (v3.4.2)
+  ReleaseCalendarEntry,
+  PaginatedReleaseCalendarResponse,
+  ReleaseCalendarResponse
 } from './types.js';
 
 // Export utility functions for working with identification results
@@ -62,7 +75,16 @@ export {
   hasCardParallels,
   findParallelByName,
   getNumberedParallels,
-  formatCardParallel
+  formatCardParallel,
+  // Field / suggestion / numbered-card utilities (v3.4.2)
+  hasFields,
+  getFields,
+  getFieldValue,
+  formatFieldValues,
+  hasSuggestions,
+  getSuggestions,
+  isNumberedCard,
+  getNumberedTo
 } from './utils.js';
 
 // Default export

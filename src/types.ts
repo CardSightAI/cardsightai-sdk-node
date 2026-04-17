@@ -174,6 +174,22 @@ export type BulkPricingResult = components['schemas']['BulkPricingResult'];
 export type MarketplaceResponse = components['schemas']['MarketplaceResponse'];
 export type MarketplaceRecord = components['schemas']['MarketplaceRecord'];
 
+// Field catalog types (v3.4.2) — flexible card metadata system
+export type FieldValue = components['schemas']['FieldValue'];
+export type FieldValues = components['schemas']['FieldValues'];
+export type CardSuggestion = components['schemas']['CardSuggestion'];
+export type Field = components['schemas']['Field'];
+export type FieldSummary = components['schemas']['FieldSummary'];
+export type DetailedFieldResponse = components['schemas']['DetailedFieldResponse'];
+export type PaginatedFieldsResponse = components['schemas']['PaginatedFieldsResponse'];
+export type FieldsResponse = GetResponseData<'/v1/catalog/fields', 'get'>;
+
+// Release calendar types (v3.4.2)
+export type ReleaseCalendarEntry = components['schemas']['ReleaseCalendarEntry'];
+export type PaginatedReleaseCalendarResponse =
+  components['schemas']['PaginatedReleaseCalendarResponse'];
+export type ReleaseCalendarResponse = GetResponseData<'/v1/release-calendar/', 'get'>;
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;
@@ -211,6 +227,12 @@ export interface DetectedCard {
   setName?: string;
   name?: string;
   number?: string;
+  description?: string;
+  /** Print run for numbered cards (e.g., 25 for a /25 card) */
+  numberedTo?: number;
+  attributes?: string[];
+  /** UUID of the parent card when this card is a variation */
+  variationOf?: string;
   parallel?: {
     id: string;
     name: string;
@@ -219,6 +241,10 @@ export interface DetectedCard {
     numberedTo?: number;
     cards?: string[];
   };
+  /** Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+  fields?: FieldValue[];
+  /** Alternative card matches when multiple reprints score similarly */
+  suggestions?: CardSuggestion[];
 }
 
 // Server advisory message (e.g., image quality warnings)

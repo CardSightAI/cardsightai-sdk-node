@@ -2,7 +2,14 @@
  * Utility functions for working with CardSight AI SDK responses
  */
 
-import type { CardDetection, IdentifyResult, DetectedCard, CardParallel } from './types.js';
+import type {
+  CardDetection,
+  IdentifyResult,
+  DetectedCard,
+  CardParallel,
+  FieldValue,
+  CardSuggestion
+} from './types.js';
 
 /**
  * Get the highest confidence detection from an identification result
@@ -334,4 +341,97 @@ export function formatCardParallel(parallel: CardParallel): string {
     return `${parallel.name} /${parallel.numberedTo}`;
   }
   return parallel.name;
+}
+
+// ============================================================================
+// Field Value Utilities (v3.4.2 — CardDetails.fields key/value metadata)
+// ============================================================================
+
+/**
+ * Check if a detection includes key/value field properties
+ * @param detection - The card detection
+ * @returns True if the card has one or more field values
+ */
+export function hasFields(detection: CardDetection): boolean {
+  return Boolean(detection.card.fields && detection.card.fields.length > 0);
+}
+
+/**
+ * Get all field values from a detection
+ * @param detection - The card detection
+ * @returns Array of field values, or empty array if none
+ */
+export function getFields(detection: CardDetection): FieldValue[] {
+  return detection.card.fields || [];
+}
+
+/**
+ * Get a single field value by key (case-insensitive)
+ * @param detection - The card detection
+ * @param key - The field key to look up (e.g., "HP", "RARITY", "ARTIST")
+ * @returns The field value string, or undefined if the key is not present
+ */
+export function getFieldValue(detection: CardDetection, key: string): string | undefined {
+  if (!detection.card.fields) {
+    return undefined;
+  }
+  const target = key.toLowerCase();
+  return detection.card.fields.find((f) => f.key.toLowerCase() === target)?.value;
+}
+
+/**
+ * Format fields as a display string
+ * @param detection - The card detection
+ * @param separator - String inserted between field entries (default: " · ")
+ * @returns Formatted string (e.g., "HP: 120 · Rarity: Holo Rare"), or empty string if no fields
+ */
+export function formatFieldValues(detection: CardDetection, separator: string = ' · '): string {
+  if (!detection.card.fields || detection.card.fields.length === 0) {
+    return '';
+  }
+  return detection.card.fields.map((f) => `${f.key}: ${f.value}`).join(separator);
+}
+
+// ============================================================================
+// Card Suggestion Utilities (v3.4.2 — alternative matches on similar reprints)
+// ============================================================================
+
+/**
+ * Check if a detection provides alternative card suggestions
+ * @param detection - The card detection
+ * @returns True if one or more suggestions are present
+ */
+export function hasSuggestions(detection: CardDetection): boolean {
+  return Boolean(detection.card.suggestions && detection.card.suggestions.length > 0);
+}
+
+/**
+ * Get alternative card suggestions from a detection
+ * @param detection - The card detection
+ * @returns Array of alternative card suggestions, or empty array if none
+ */
+export function getSuggestions(detection: CardDetection): CardSuggestion[] {
+  return detection.card.suggestions || [];
+}
+
+// ============================================================================
+// Numbered Card Utilities (v3.4.2 — CardDetails.numberedTo on base cards)
+// ============================================================================
+
+/**
+ * Check if a detected card is numbered (has a print run, independent of parallels)
+ * @param detection - The card detection
+ * @returns True if the card itself has a numberedTo value
+ */
+export function isNumberedCard(detection: CardDetection): boolean {
+  return typeof detection.card.numberedTo === 'number';
+}
+
+/**
+ * Get the print run for a numbered card
+ * @param detection - The card detection
+ * @returns The print run number, or undefined if the card is not numbered
+ */
+export function getNumberedTo(detection: CardDetection): number | undefined {
+  return detection.card.numberedTo;
 }

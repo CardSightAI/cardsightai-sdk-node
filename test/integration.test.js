@@ -50,6 +50,55 @@ describe('CardSightAI SDK Integration Tests', () => {
     assert.ok(response.data.cards.length <= 20, 'Should return cards'); // API seems to ignore limit param
   });
 
+  test('Catalog - Fields List (v3.4.2)', async () => {
+    const response = await client.catalog.fields.list({ take: 5 });
+    assert.ok(response.data, 'Response should have data');
+    assert.ok(Array.isArray(response.data.fields), 'fields should be an array');
+    assert.ok(typeof response.data.total_count === 'number', 'Response should include total_count');
+    if (response.data.fields.length > 0) {
+      const first = response.data.fields[0];
+      assert.ok(first.id, 'Field entry should have an id');
+      assert.ok(first.key, 'Field entry should have a key');
+      assert.ok(first.name, 'Field entry should have a name');
+      assert.ok(
+        typeof first.usageCount === 'number',
+        'Field entry should have a numeric usageCount'
+      );
+    }
+  });
+
+  test('Catalog - Fields Get By Id (v3.4.2)', async () => {
+    const listResponse = await client.catalog.fields.list({ take: 1 });
+    const firstId = listResponse.data?.fields?.[0]?.id;
+    if (!firstId) {
+      return; // No fields to fetch — skip without failing.
+    }
+    const response = await client.catalog.fields.get(firstId);
+    assert.ok(response.data, 'Response should have data');
+    assert.equal(response.data.id, firstId, 'Returned field id should match requested id');
+    assert.ok(response.data.key, 'Field should have a key');
+    assert.ok(response.data.name, 'Field should have a name');
+    assert.ok(
+      typeof response.data.usageCount === 'number',
+      'Field should include a usageCount'
+    );
+  });
+
+  test('Release Calendar - List (v3.4.2)', async () => {
+    const response = await client.releaseCalendar.list({ take: 5 });
+    assert.ok(response.data, 'Response should have data');
+    assert.ok(
+      Array.isArray(response.data.release_calendar),
+      'release_calendar should be an array'
+    );
+    assert.ok(typeof response.data.total_count === 'number', 'Response should include total_count');
+    if (response.data.release_calendar.length > 0) {
+      const entry = response.data.release_calendar[0];
+      assert.ok(entry.id, 'Calendar entry should have an id');
+      assert.ok(entry.name, 'Calendar entry should have a name');
+    }
+  });
+
 });
 
 console.log('\n✅ All integration tests passed!\n');

@@ -44,26 +44,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/health/detailed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Detailed health check with dependency status
-         * @description Returns detailed health status including database and Redis connectivity checks. Requires authentication.
-         */
-        get: operations["getDetailedHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/detect/card": {
         parameters: {
             query?: never;
@@ -511,6 +491,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/catalog/fields": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Browse and search Fields with usage counts
+         * @description Browse and search Fields with pagination and combined usage counts across cards, sets, releases, and segments
+         */
+        get: operations["getFields"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/catalog/fields/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get detailed information about a specific Field
+         * @description Get detailed information about a specific Field including combined usage count
+         */
+        get: operations["getFieldById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog/parallels": {
         parameters: {
             query?: never;
@@ -745,7 +765,6 @@ export interface paths {
          *     - Collection metadata (name, type, privacy, dates)
          *     - Associated collector information
          *     - Card count per collection
-         *     - Total value estimates (if applicable)
          *     - Pagination metadata
          *
          *     **Use Cases:**
@@ -807,7 +826,7 @@ export interface paths {
          *     - Complete collection metadata
          *     - Collector information
          *     - Creation and update timestamps
-         *     - Card count and value statistics
+         *     - Card count statistics
          *     - Collection type and privacy settings
          *
          *     **Security:**
@@ -890,22 +909,21 @@ export interface paths {
         };
         /**
          * Analyze collection breakdown
-         * @description Analyze your collection by different dimensions to identify concentration risks and opportunities.
+         * @description Analyze your collection by different dimensions to understand composition and distribution.
          *
          *     **Path Parameters:**
          *     - **collectionId**: UUID of the collection to analyze
          *
          *     **Query Parameters:**
          *     - **groupBy**: Dimension to analyze (release, year, grade, player, manufacturer)
-         *     - **sortBy**: Sort groups by count, value, roi, or percentage (default: value)
+         *     - **sortBy**: Sort groups by count or percentage (default: count)
          *     - **order**: Sort order - asc or desc (default: desc)
          *     - **page**: Page number for pagination (default: 1)
          *     - **limit**: Items per page (default: 20, max: 100)
          *     - **minCount**: Filter groups with minimum card count
-         *     - **minValue**: Filter groups with minimum total value
          *
          *     **Response includes:**
-         *     - **Summary statistics**: Total groups, cards, value, ROI, best performers
+         *     - **Summary statistics**: Total groups, cards, and top categories
          *     - **Group breakdowns**: Each group with metrics and top cards
          *     - **Pagination metadata**: For large result sets
          *
@@ -918,17 +936,15 @@ export interface paths {
          *
          *     **Metrics per Group:**
          *     - Card count and unique card count
-         *     - Total and average values
-         *     - Return on investment (ROI)
+         *     - Total invested (sum of purchase prices)
          *     - Percentage of total collection
-         *     - Top 5 most valuable cards
+         *     - Top 5 cards in the group
          *
          *     **Use Cases:**
-         *     - Identify overconcentration in specific releases or players
-         *     - Find best performing segments by ROI
+         *     - Identify concentration in specific releases or players
          *     - Analyze grade distribution for grading decisions
          *     - Discover diversification opportunities
-         *     - Portfolio risk assessment
+         *     - Understand collection composition
          */
         get: operations["getCollectionBreakdown"];
         put?: never;
@@ -948,7 +964,7 @@ export interface paths {
         };
         /**
          * Get collection analytics
-         * @description Retrieve comprehensive analytics about collection performance and composition.
+         * @description Retrieve comprehensive analytics about collection composition and purchase data.
          *
          *     **Path Parameters:**
          *     - **collectionId**: UUID of the collection to analyze
@@ -961,29 +977,18 @@ export interface paths {
          *
          *     **Financials:**
          *     - Total invested (sum of all buy prices)
-         *     - Current market value (based on latest market prices)
-         *     - Total realized gains (profit/loss from sold cards)
-         *     - Total unrealized gains (current value vs buy price for unsold cards)
-         *     - Overall ROI percentage
-         *     - Realized ROI (performance on sold cards only)
+         *     - Total realized gains (profit/loss from sold cards based on user-entered sale prices)
          *
          *     **Composition:**
          *     - Graded vs raw card counts and percentages
          *     - Cards listed for sale
          *     - Cards already sold
          *
-         *     **Performance:**
-         *     - Average card value
-         *     - Average ROI across portfolio
-         *     - Top gainer by percentage
-         *     - Most valuable card by current market price
-         *
          *     **Use Cases:**
-         *     - Portfolio performance dashboard
-         *     - Investment tracking
-         *     - Tax reporting (realized vs unrealized gains)
-         *     - Collection valuation
-         *     - Performance benchmarking
+         *     - Collection overview dashboard
+         *     - Track purchase spending
+         *     - Tax reporting (realized gains from sold cards)
+         *     - Collection composition analysis
          */
         get: operations["getCollectionAnalytics"];
         put?: never;
@@ -1009,7 +1014,7 @@ export interface paths {
          *     - **collectionId**: UUID of the collection to analyze
          *
          *     **Query Parameters:**
-         *     - **sortBy**: Sort sets by completion, missing, cost, or difficulty (default: completion)
+         *     - **sortBy**: Sort sets by completion or missing (default: completion)
          *     - **order**: Sort order - asc or desc (default: desc)
          *     - **page**: Page number for pagination (default: 1)
          *     - **limit**: Items per page (default: 20, max: 100)
@@ -1022,26 +1027,20 @@ export interface paths {
          *     - Total sets represented in collection
          *     - Number of near-complete sets (>80%)
          *     - Number of fully complete sets (100%)
-         *     - Total estimated cost to complete all sets
          *
          *     **Per Set:**
          *     - Set name, release name, and release year for context
          *     - Total cards in set vs owned cards
          *     - Completion percentage
          *     - Missing card UUIDs (only included for sets >= 85% complete; empty array otherwise)
-         *     - Estimated cost to complete (based on raw card market prices)
-         *     - Difficulty score (based on card availability)
          *
          *     **Use Cases:**
          *     - Identify which sets are close to completion
-         *     - Calculate cost to complete specific sets
-         *     - Focus buying decisions on near-complete sets
+         *     - Prioritize acquisitions for near-complete sets
          *     - Track collection completion goals
-         *     - Discover sets worth completing for investment
          *
          *     **Important Notes:**
          *     - Only base cards are considered (parallels excluded)
-         *     - Estimated costs based on raw (ungraded) card prices
          *     - Missing card UUIDs only returned for sets >= 85% complete (to avoid multi-thousand line responses)
          *     - For sets < 85% complete, use totalCards - ownedCards to get missing count
          *     - Sorted by completion percentage (highest first) by default
@@ -1075,20 +1074,15 @@ export interface paths {
          *     - Total cards in set vs owned cards
          *     - Completion percentage (0-100)
          *     - Array of missing card UUIDs
-         *     - Estimated cost to complete set
-         *     - Difficulty score (based on card availability)
-         *     - Average card value for the set
          *
          *     **Use Cases:**
          *     - Check progress on a specific set
          *     - Get list of missing cards for targeted purchasing
-         *     - Calculate exact cost to complete a set
          *     - Track progress toward set completion goal
          *     - Identify which cards are still needed
          *
          *     **Important Notes:**
          *     - Only base cards are considered (parallels excluded)
-         *     - Estimated cost based on raw (ungraded) card prices
          *     - Missing cards returned as UUIDs for easy card lookup
          *     - Returns 404 if set is not represented in collection
          */
@@ -1125,8 +1119,6 @@ export interface paths {
          *     - Total cards in set vs owned cards of this specific parallel
          *     - Completion percentage for this parallel variant (0-100)
          *     - Array of missing card UUIDs for this parallel (for targeted buying)
-         *     - Estimated cost to complete this parallel variant (based on raw card prices)
-         *     - Average card value for this parallel
          *
          *     **How it differs from base set progress:**
          *     - **Base set progress** (/set-progress/:setId): Counts card #5 as owned if you have ANY parallel (base, refractor, gold, etc.)
@@ -1134,22 +1126,18 @@ export interface paths {
          *
          *     **Use Cases:**
          *     - Track completion of premium parallel sets (Refractors, numbered parallels)
-         *     - Calculate exact cost to complete a specific parallel run
-         *     - Focus buying decisions on specific parallel variants
+         *     - Focus acquisitions on specific parallel variants
          *     - Chase rare parallel variations (e.g., Gold /10, Orange /25)
-         *     - Investment tracking for high-value parallels
          *     - Set collection goals for parallel variants
          *
          *     **Example Scenario:**
          *     You're collecting all Refractor parallels from 2023 Prizm Basketball Base Set. You own 187 of 250 Refractors. This endpoint returns:
          *     - 74.8% complete
          *     - List of 63 missing Refractor card UUIDs
-         *     - Estimated $1,247.50 to complete the Refractor parallel set
          *
          *     **Important Notes:**
          *     - Only base cards are considered (card variations where baseCardId IS NOT NULL are excluded)
          *     - Filters collection_cards by the specific parallelId provided
-         *     - Estimated costs are based on raw (ungraded) card prices for this parallel
          *     - Returns 404 if parallel doesn't belong to the specified set
          *     - Missing cards are returned as UUIDs for easy lookup via the catalog API
          */
@@ -1176,26 +1164,22 @@ export interface paths {
          *     **Query Parameters:**
          *     - **page**: Page number (default: 1)
          *     - **limit**: Items per page (default: 20, max: 100)
-         *     - **sortBy**: Sort field (name, number, value, purchaseDate, addedDate)
+         *     - **sortBy**: Sort field (name, number, purchaseDate, addedDate)
          *     - **sortOrder**: asc or desc (default: asc)
          *     - **search**: Search card names and descriptions
          *     - **binderId**: Filter by specific binder
          *     - **graded**: Filter graded cards only (true/false)
          *     - **forSale**: Filter cards marked for sale
-         *     - **minValue**: Minimum current value filter
-         *     - **maxValue**: Maximum current value filter
          *
          *     **Response includes:**
          *     - Full card catalog details (name, set, year, etc.)
          *     - Collection-specific metadata (quantity, grade, purchase info)
-         *     - Current market values
-         *     - Aggregated statistics (total value, card count)
+         *     - Aggregated statistics (card count)
          *     - Pagination metadata
          *
          *     **Use Cases:**
          *     - Browse collection inventory
          *     - Search for specific cards
-         *     - Filter high-value cards
          *     - Export collection data
          *     - Generate collection reports
          */
@@ -1216,7 +1200,6 @@ export interface paths {
          *     - **purchasePrice**: What you paid for the card
          *     - **purchaseDate**: When you acquired it
          *     - **purchaseFrom**: Where/who you bought it from
-         *     - **currentValue**: Current market value estimate
          *     - **condition**: Raw condition if ungraded (Mint, Near Mint, etc.)
          *     - **notes**: Personal notes about the card
          *     - **isForSale**: Mark card as available for sale
@@ -1232,7 +1215,6 @@ export interface paths {
          *     - Import bulk collections
          *     - Record graded cards
          *     - Build want lists
-         *     - Track investment portfolio
          */
         post: operations["addCollectionCards"];
         delete?: never;
@@ -1261,13 +1243,11 @@ export interface paths {
          *     - All collection-specific metadata
          *     - Purchase and sale information
          *     - Grading details if applicable
-         *     - Current market value
-         *     - Historical price data (if available)
          *     - Personal notes
          *
          *     **Use Cases:**
          *     - View full card details
-         *     - Check card value and grade
+         *     - Check card grade and condition
          *     - Review purchase history
          *     - Prepare for sale listing
          */
@@ -1287,7 +1267,6 @@ export interface paths {
          *     - **purchasePrice**: Correct purchase price
          *     - **purchaseDate**: Fix acquisition date
          *     - **purchaseFrom**: Update source information
-         *     - **currentValue**: Update market value estimate
          *     - **condition**: Change raw condition assessment
          *     - **notes**: Modify personal notes
          *     - **isForSale**: Toggle sale status
@@ -1303,7 +1282,6 @@ export interface paths {
          *     **Use Cases:**
          *     - Update card after grading
          *     - Adjust quantities after sales
-         *     - Update market values
          *     - Add or modify notes
          *     - Change sale status
          */
@@ -1369,7 +1347,6 @@ export interface paths {
          *     **Response includes:**
          *     - Binder metadata (name, type, description)
          *     - Card count per binder
-         *     - Total value estimates
          *     - Creation and update timestamps
          *     - Pagination metadata
          *
@@ -1435,7 +1412,6 @@ export interface paths {
          *     **Response includes:**
          *     - Complete binder metadata
          *     - Card count and list preview
-         *     - Total value calculation
          *     - Type and visibility settings
          *     - Timestamps
          *
@@ -1528,7 +1504,7 @@ export interface paths {
          *     **Query Parameters:**
          *     - **page**: Page number (default: 1)
          *     - **limit**: Items per page (default: 20, max: 100)
-         *     - **sortBy**: Sort field (name, number, value, sortOrder)
+         *     - **sortBy**: Sort field (name, number, sortOrder)
          *     - **sortOrder**: asc or desc (default: asc)
          *     - **search**: Search card names
          *
@@ -1536,13 +1512,11 @@ export interface paths {
          *     - Full card details from catalog
          *     - Collection-specific metadata
          *     - Binder-specific sort order
-         *     - Total value calculations
          *     - Pagination metadata
          *
          *     **Use Cases:**
          *     - View binder contents
          *     - Generate binder listings
-         *     - Calculate binder value
          *     - Export binder inventory
          */
         get: operations["getBinderCards"];
@@ -2310,6 +2284,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/release-calendar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List release calendar entries
+         * @description Retrieve a paginated list of upcoming and recent card product releases. Each entry includes the release name, year, release date, pre-order date, and associated segment and manufacturer identifiers. Results are sorted by release date (newest first). Filter by segment, manufacturer, or year to narrow results.
+         */
+        get: operations["getReleaseCalendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2573,22 +2567,8 @@ export interface components {
             releaseYear: string;
             /** @description Purchase price per card */
             buyPrice?: string;
-            /** @description Current market value per card */
-            currentValue?: string;
             /** @description Quantity in collection */
             quantity: number;
-        };
-        MostValuableGroupInput: {
-            /** @description Name of most valuable group */
-            name: string;
-            /** @description Total value of the group */
-            value: string;
-        };
-        BestPerformingGroupInput: {
-            /** @description Name of best performing group */
-            name: string;
-            /** @description ROI percentage */
-            roi: number;
         };
         CollectionBreakdownSummaryInput: {
             /** @description Total number of groups */
@@ -2597,18 +2577,10 @@ export interface components {
             totalCards: number;
             /** @description Total quantity including duplicates */
             totalQuantity: number;
-            /** @description Total collection value */
-            totalValue?: string;
-            /** @description Total amount invested */
+            /** @description Total amount invested (sum of buy prices) */
             totalInvested?: string;
-            /** @description Overall ROI percentage */
-            overallRoi?: number;
             /** @description The dimension used for grouping */
             groupedBy: string;
-            /** @description Group with highest total value */
-            mostValuableGroup?: components["schemas"]["MostValuableGroupInput"];
-            /** @description Group with highest ROI */
-            bestPerformingGroup?: components["schemas"]["BestPerformingGroupInput"];
         };
         BreakdownPaginationInput: {
             /** @description Total number of groups */
@@ -2635,19 +2607,13 @@ export interface components {
             totalQuantity: number;
             /** @description Total purchase price for cards in group */
             totalBuyPrice?: string;
-            /** @description Total current market value */
-            totalCurrentValue?: string;
             /** @description Total sold price for sold cards */
             totalSoldPrice?: string;
             /** @description Average purchase price per card */
             averageBuyPrice?: string;
-            /** @description Average current value per card */
-            averageCurrentValue?: string;
-            /** @description Return on investment percentage */
-            roi?: number;
             /** @description Percentage this group represents of total collection */
             percentageOfCollection: number;
-            /** @description Top 5 most valuable cards in this group */
+            /** @description Top cards in this group */
             topCards?: components["schemas"]["TopCardInGroupInput"][];
         };
         CollectionBreakdownResponseInput: {
@@ -2675,12 +2641,8 @@ export interface components {
             missingCards: string[];
             /** @description Percentage complete (0-100) */
             completionPercentage: number;
-            /** @description Estimated cost to acquire missing cards */
-            estimatedCostToComplete?: string;
             /** @description Difficulty score based on card availability (0-100) */
             difficultyScore?: number;
-            /** @description Average value per card in set */
-            averageCardValue?: string;
         };
         SetProgressSummaryInput: {
             /** @description Total number of sets represented in collection */
@@ -2689,8 +2651,6 @@ export interface components {
             nearCompleteSets: number;
             /** @description Number of fully complete sets */
             fullyCompleteSets: number;
-            /** @description Total cost to complete all sets */
-            totalEstimatedCost?: string;
         };
         SetProgressListResponseInput: {
             /** @description Aggregate statistics across all sets */
@@ -2725,10 +2685,6 @@ export interface components {
             missingCards: string[];
             /** @description Percentage complete for this parallel (0-100) */
             completionPercentage: number;
-            /** @description Estimated cost to acquire missing cards of this parallel */
-            estimatedCostToComplete?: string;
-            /** @description Average value per card for this parallel */
-            averageCardValue?: string;
         };
         CollectionOverviewInput: {
             /** @description Total number of card entries in collection */
@@ -2741,16 +2697,8 @@ export interface components {
         CollectionFinancialsInput: {
             /** @description Total amount invested (sum of buy prices) */
             totalInvested?: string;
-            /** @description Current total market value */
-            currentMarketValue?: string;
-            /** @description Total gains from sold cards */
+            /** @description Total gains from sold cards (soldPrice - buyPrice) */
             totalRealizedGains?: string;
-            /** @description Unrealized gains on unsold cards */
-            totalUnrealizedGains?: string;
-            /** @description Overall return on investment percentage */
-            overallROI?: number;
-            /** @description ROI on sold cards only */
-            realizedROI?: number;
         };
         CollectionCompositionInput: {
             /** @description Number of graded cards */
@@ -2764,57 +2712,13 @@ export interface components {
             /** @description Number of cards that have been sold */
             soldCount: number;
         };
-        TopGainerCardInput: {
-            /** @description Card UUID */
-            cardId: string;
-            /** @description Card name */
-            cardName: string;
-            /** @description Release name */
-            releaseName: string;
-            /** @description Release year */
-            releaseYear: string;
-            /** @description Purchase price */
-            buyPrice: string;
-            /** @description Current market value */
-            currentValue: string;
-            /** @description Dollar gain amount */
-            gain: string;
-            /** @description Percentage gain */
-            gainPercentage: number;
-        };
-        TopValueCardInput: {
-            /** @description Card UUID */
-            cardId: string;
-            /** @description Card name */
-            cardName: string;
-            /** @description Release name */
-            releaseName: string;
-            /** @description Release year */
-            releaseYear: string;
-            /** @description Current market value */
-            currentValue: string;
-            /** @description Quantity owned */
-            quantity: number;
-        };
-        CollectionPerformanceInput: {
-            /** @description Average current value per card */
-            averageCardValue?: string;
-            /** @description Average ROI across all cards with buy prices */
-            averageROI?: number;
-            /** @description Card with highest percentage gain */
-            topGainer?: components["schemas"]["TopGainerCardInput"];
-            /** @description Most valuable card by current market price */
-            topValue?: components["schemas"]["TopValueCardInput"];
-        };
         CollectionAnalyticsResponseInput: {
             /** @description Collection overview with basic counts */
             overview: components["schemas"]["CollectionOverviewInput"];
-            /** @description Investment and return metrics */
+            /** @description Investment and return metrics based on user-entered buy/sell data */
             financials: components["schemas"]["CollectionFinancialsInput"];
             /** @description Breakdown of collection by type and status */
             composition: components["schemas"]["CollectionCompositionInput"];
-            /** @description Performance metrics including averages and top performers */
-            performance: components["schemas"]["CollectionPerformanceInput"];
         };
         UploadCollectionCardImageResponseInput: {
             /**
@@ -2941,6 +2845,21 @@ export interface components {
              */
             image: string;
         };
+        FieldValueInput: {
+            /** @description Field key (e.g., "HP", "Rarity", "Artist") */
+            key: string;
+            /** @description Field value for the given key */
+            value: string;
+        };
+        FieldValuesInput: components["schemas"]["FieldValueInput"][];
+        CardSuggestionInput: {
+            /** @description UUID of the suggested card */
+            id?: string;
+            /** @description Set name for the suggested card */
+            setName?: string;
+            /** @description Key-value field properties for the suggested card. Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValuesInput"];
+        };
         CardDetailsInput: {
             /** @description UUID of the identified card. Present only for exact card matches. */
             id?: string;
@@ -2962,8 +2881,20 @@ export interface components {
             name?: string;
             /** @description Card number. Present only for exact card matches. */
             number?: string;
+            /** @description Descriptive text for the card when available. Omitted if no description exists. */
+            description?: string;
+            /** @description Print run for numbered cards (e.g., 25 for a /25 card). Omitted if the card is not numbered. */
+            numberedTo?: number;
+            /** @description Notable attributes of the card (e.g., ["Rookie", "Autograph"]). Omitted if the card has no attributes. */
+            attributes?: string[];
+            /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
+            variationOf?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: components["schemas"]["ParallelSummaryInput"];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValuesInput"];
+            /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
+            suggestions?: components["schemas"]["CardSuggestionInput"][];
         };
         IdentificationDataInput: {
             /**
@@ -3199,6 +3130,16 @@ export interface components {
             /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
             description?: string;
         };
+        FieldInput: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+        };
         ParallelSummaryInput: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
             id: string;
@@ -3227,6 +3168,18 @@ export interface components {
             description?: string;
             /** @description Number of cards with this attribute */
             cardCount: number;
+        };
+        FieldSummaryInput: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+            /** @description Total number of catalog entities (cards, sets, releases, and segments) that have a value for this field. */
+            usageCount: number;
         };
         ReleaseSummaryInput: {
             /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
@@ -3280,15 +3233,6 @@ export interface components {
             releaseYear?: string;
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
@@ -3300,6 +3244,8 @@ export interface components {
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
             }[];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         DetailedCardInput: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -3332,6 +3278,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         ReleaseWithSetsInput: {
             /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
@@ -3350,6 +3298,8 @@ export interface components {
             is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCountsInput"][];
+            /** @description Key-value field properties inherited from segment and release levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         ParallelWithSetInput: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -3427,6 +3377,8 @@ export interface components {
             is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCountsInput"][];
+            /** @description Key-value field properties inherited from segment and release levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         PaginatedCardsResponseInput: {
             /** @description Array of card entities with summary information */
@@ -3488,6 +3440,8 @@ export interface components {
             parallelCount: number;
             /** @description List of parallel variants in this set */
             parallels: components["schemas"]["ParallelSummaryInput"][];
+            /** @description Key-value field properties inherited from segment, release, and set levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         DetailedCardResponseInput: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -3520,6 +3474,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
+            fields?: components["schemas"]["FieldValuesInput"];
         };
         PaginatedAttributesResponseInput: {
             /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
@@ -3542,6 +3498,28 @@ export interface components {
             description?: string;
             /** @description Number of cards with this attribute */
             cardCount: number;
+        };
+        PaginatedFieldsResponseInput: {
+            /** @description Array of field definitions with total usage counts across cards, sets, releases, and segments */
+            fields: components["schemas"]["DetailedFieldResponseInput"][];
+            /** @description Total number of fields matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedFieldResponseInput: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+            /** @description Total number of catalog entities (cards, sets, releases, and segments) that have a value for this field. */
+            usageCount: number;
         };
         PaginatedParallelsResponseInput: {
             /** @description Array of parallel variants with associated set information (e.g., Refractor, Prizm, numbered parallels) */
@@ -3692,15 +3670,6 @@ export interface components {
             releaseYear?: string;
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
@@ -3712,6 +3681,8 @@ export interface components {
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
             }[];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValuesInput"];
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -4124,6 +4095,35 @@ export interface components {
                 failed: number;
             };
         };
+        ReleaseCalendarEntryInput: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the release calendar entry
+             */
+            id: string;
+            /** @description Name of the release */
+            name: string;
+            /** @description Release year */
+            year: string | null;
+            /** @description Expected or actual release date (YYYY-MM-DD) */
+            release_date: string | null;
+            /** @description Date when pre-orders open (YYYY-MM-DD) */
+            pre_order_date: string | null;
+            /** @description Unique identifier of the associated market segment */
+            segment_id: string | null;
+            /** @description Unique identifier of the associated manufacturer */
+            manufacturer_id: string | null;
+        };
+        PaginatedReleaseCalendarResponseInput: {
+            /** @description List of release calendar entries */
+            release_calendar: components["schemas"]["ReleaseCalendarEntryInput"][];
+            /** @description Total number of entries matching the query */
+            total_count: number;
+            /** @description Number of items skipped (offset) */
+            skip: number;
+            /** @description Number of items included in this page */
+            take: number;
+        };
         BasicHealthResponseInput: {
             /** @description Overall health status of the API (e.g., "healthy") */
             status: string;
@@ -4389,22 +4389,8 @@ export interface components {
             releaseYear: string;
             /** @description Purchase price per card */
             buyPrice?: string;
-            /** @description Current market value per card */
-            currentValue?: string;
             /** @description Quantity in collection */
             quantity: number;
-        };
-        MostValuableGroup: {
-            /** @description Name of most valuable group */
-            name: string;
-            /** @description Total value of the group */
-            value: string;
-        };
-        BestPerformingGroup: {
-            /** @description Name of best performing group */
-            name: string;
-            /** @description ROI percentage */
-            roi: number;
         };
         CollectionBreakdownSummary: {
             /** @description Total number of groups */
@@ -4413,18 +4399,10 @@ export interface components {
             totalCards: number;
             /** @description Total quantity including duplicates */
             totalQuantity: number;
-            /** @description Total collection value */
-            totalValue?: string;
-            /** @description Total amount invested */
+            /** @description Total amount invested (sum of buy prices) */
             totalInvested?: string;
-            /** @description Overall ROI percentage */
-            overallRoi?: number;
             /** @description The dimension used for grouping */
             groupedBy: string;
-            /** @description Group with highest total value */
-            mostValuableGroup?: components["schemas"]["MostValuableGroup"];
-            /** @description Group with highest ROI */
-            bestPerformingGroup?: components["schemas"]["BestPerformingGroup"];
         };
         BreakdownPagination: {
             /** @description Total number of groups */
@@ -4451,19 +4429,13 @@ export interface components {
             totalQuantity: number;
             /** @description Total purchase price for cards in group */
             totalBuyPrice?: string;
-            /** @description Total current market value */
-            totalCurrentValue?: string;
             /** @description Total sold price for sold cards */
             totalSoldPrice?: string;
             /** @description Average purchase price per card */
             averageBuyPrice?: string;
-            /** @description Average current value per card */
-            averageCurrentValue?: string;
-            /** @description Return on investment percentage */
-            roi?: number;
             /** @description Percentage this group represents of total collection */
             percentageOfCollection: number;
-            /** @description Top 5 most valuable cards in this group */
+            /** @description Top cards in this group */
             topCards?: components["schemas"]["TopCardInGroup"][];
         };
         CollectionBreakdownResponse: {
@@ -4491,12 +4463,8 @@ export interface components {
             missingCards: string[];
             /** @description Percentage complete (0-100) */
             completionPercentage: number;
-            /** @description Estimated cost to acquire missing cards */
-            estimatedCostToComplete?: string;
             /** @description Difficulty score based on card availability (0-100) */
             difficultyScore?: number;
-            /** @description Average value per card in set */
-            averageCardValue?: string;
         };
         SetProgressSummary: {
             /** @description Total number of sets represented in collection */
@@ -4505,8 +4473,6 @@ export interface components {
             nearCompleteSets: number;
             /** @description Number of fully complete sets */
             fullyCompleteSets: number;
-            /** @description Total cost to complete all sets */
-            totalEstimatedCost?: string;
         };
         SetProgressListResponse: {
             /** @description Aggregate statistics across all sets */
@@ -4541,10 +4507,6 @@ export interface components {
             missingCards: string[];
             /** @description Percentage complete for this parallel (0-100) */
             completionPercentage: number;
-            /** @description Estimated cost to acquire missing cards of this parallel */
-            estimatedCostToComplete?: string;
-            /** @description Average value per card for this parallel */
-            averageCardValue?: string;
         };
         CollectionOverview: {
             /** @description Total number of card entries in collection */
@@ -4557,16 +4519,8 @@ export interface components {
         CollectionFinancials: {
             /** @description Total amount invested (sum of buy prices) */
             totalInvested?: string;
-            /** @description Current total market value */
-            currentMarketValue?: string;
-            /** @description Total gains from sold cards */
+            /** @description Total gains from sold cards (soldPrice - buyPrice) */
             totalRealizedGains?: string;
-            /** @description Unrealized gains on unsold cards */
-            totalUnrealizedGains?: string;
-            /** @description Overall return on investment percentage */
-            overallROI?: number;
-            /** @description ROI on sold cards only */
-            realizedROI?: number;
         };
         CollectionComposition: {
             /** @description Number of graded cards */
@@ -4580,57 +4534,13 @@ export interface components {
             /** @description Number of cards that have been sold */
             soldCount: number;
         };
-        TopGainerCard: {
-            /** @description Card UUID */
-            cardId: string;
-            /** @description Card name */
-            cardName: string;
-            /** @description Release name */
-            releaseName: string;
-            /** @description Release year */
-            releaseYear: string;
-            /** @description Purchase price */
-            buyPrice: string;
-            /** @description Current market value */
-            currentValue: string;
-            /** @description Dollar gain amount */
-            gain: string;
-            /** @description Percentage gain */
-            gainPercentage: number;
-        };
-        TopValueCard: {
-            /** @description Card UUID */
-            cardId: string;
-            /** @description Card name */
-            cardName: string;
-            /** @description Release name */
-            releaseName: string;
-            /** @description Release year */
-            releaseYear: string;
-            /** @description Current market value */
-            currentValue: string;
-            /** @description Quantity owned */
-            quantity: number;
-        };
-        CollectionPerformance: {
-            /** @description Average current value per card */
-            averageCardValue?: string;
-            /** @description Average ROI across all cards with buy prices */
-            averageROI?: number;
-            /** @description Card with highest percentage gain */
-            topGainer?: components["schemas"]["TopGainerCard"];
-            /** @description Most valuable card by current market price */
-            topValue?: components["schemas"]["TopValueCard"];
-        };
         CollectionAnalyticsResponse: {
             /** @description Collection overview with basic counts */
             overview: components["schemas"]["CollectionOverview"];
-            /** @description Investment and return metrics */
+            /** @description Investment and return metrics based on user-entered buy/sell data */
             financials: components["schemas"]["CollectionFinancials"];
             /** @description Breakdown of collection by type and status */
             composition: components["schemas"]["CollectionComposition"];
-            /** @description Performance metrics including averages and top performers */
-            performance: components["schemas"]["CollectionPerformance"];
         };
         UploadCollectionCardImageResponse: {
             /**
@@ -4757,6 +4667,21 @@ export interface components {
              */
             image: string;
         };
+        FieldValue: {
+            /** @description Field key (e.g., "HP", "Rarity", "Artist") */
+            key: string;
+            /** @description Field value for the given key */
+            value: string;
+        };
+        FieldValues: components["schemas"]["FieldValue"][];
+        CardSuggestion: {
+            /** @description UUID of the suggested card */
+            id?: string;
+            /** @description Set name for the suggested card */
+            setName?: string;
+            /** @description Key-value field properties for the suggested card. Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValues"];
+        };
         CardDetails: {
             /** @description UUID of the identified card. Present only for exact card matches. */
             id?: string;
@@ -4778,8 +4703,20 @@ export interface components {
             name?: string;
             /** @description Card number. Present only for exact card matches. */
             number?: string;
+            /** @description Descriptive text for the card when available. Omitted if no description exists. */
+            description?: string;
+            /** @description Print run for numbered cards (e.g., 25 for a /25 card). Omitted if the card is not numbered. */
+            numberedTo?: number;
+            /** @description Notable attributes of the card (e.g., ["Rookie", "Autograph"]). Omitted if the card has no attributes. */
+            attributes?: string[];
+            /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
+            variationOf?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: components["schemas"]["ParallelSummary"];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValues"];
+            /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
+            suggestions?: components["schemas"]["CardSuggestion"][];
         };
         IdentificationData: {
             /**
@@ -5015,6 +4952,16 @@ export interface components {
             /** @description Detailed explanation of what this attribute represents, when it applies, or any special notes. May be null. */
             description?: string;
         };
+        Field: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+        };
         ParallelSummary: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
             id: string;
@@ -5043,6 +4990,18 @@ export interface components {
             description?: string;
             /** @description Number of cards with this attribute */
             cardCount: number;
+        };
+        FieldSummary: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+            /** @description Total number of catalog entities (cards, sets, releases, and segments) that have a value for this field. */
+            usageCount: number;
         };
         ReleaseSummary: {
             /** @description UUID of the manufacturer that produced this release. Links to the manufacturer entity. */
@@ -5096,15 +5055,6 @@ export interface components {
             releaseYear?: string;
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
@@ -5116,6 +5066,8 @@ export interface components {
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
             }[];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValues"];
         };
         DetailedCard: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -5148,6 +5100,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
+            fields?: components["schemas"]["FieldValues"];
         };
         ReleaseWithSets: {
             /** @description Unique identifier for the release. Format: UUID v4. This ID is permanent and used for all API operations involving this release. */
@@ -5166,6 +5120,8 @@ export interface components {
             is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCounts"][];
+            /** @description Key-value field properties inherited from segment and release levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValues"];
         };
         ParallelWithSet: {
             /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -5243,6 +5199,8 @@ export interface components {
             is_identifiable: boolean;
             /** @description Sets within this release */
             sets: components["schemas"]["SetSummaryWithCounts"][];
+            /** @description Key-value field properties inherited from segment and release levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValues"];
         };
         PaginatedCardsResponse: {
             /** @description Array of card entities with summary information */
@@ -5304,6 +5262,8 @@ export interface components {
             parallelCount: number;
             /** @description List of parallel variants in this set */
             parallels: components["schemas"]["ParallelSummary"][];
+            /** @description Key-value field properties inherited from segment, release, and set levels. Additive — duplicate keys across levels are preserved. Omitted when no fields apply. */
+            fields?: components["schemas"]["FieldValues"];
         };
         DetailedCardResponse: {
             /** @description UUID of the release this card belongs to. Provided for convenience to avoid additional lookups. */
@@ -5336,6 +5296,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
+            fields?: components["schemas"]["FieldValues"];
         };
         PaginatedAttributesResponse: {
             /** @description Array of card attribute entities (e.g., Rookie Card, Autograph, Memorabilia) */
@@ -5358,6 +5320,28 @@ export interface components {
             description?: string;
             /** @description Number of cards with this attribute */
             cardCount: number;
+        };
+        PaginatedFieldsResponse: {
+            /** @description Array of field definitions with total usage counts across cards, sets, releases, and segments */
+            fields: components["schemas"]["DetailedFieldResponse"][];
+            /** @description Total number of fields matching the query filters */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        DetailedFieldResponse: {
+            /** @description Unique identifier for the field. Format: UUID v4. This ID is permanent and used for all API operations involving this field. */
+            id: string;
+            /** @description Field key/code used when referencing this field in values and filters. Examples: "HP", "RARITY", "ARTIST". Typically uppercase. */
+            key: string;
+            /** @description Display name of the field. Examples: "Hit Points", "Rarity", "Artist". Used for display purposes. */
+            name: string;
+            /** @description Detailed explanation of what this field represents. Omitted when not provided. */
+            description?: string;
+            /** @description Total number of catalog entities (cards, sets, releases, and segments) that have a value for this field. */
+            usageCount: number;
         };
         PaginatedParallelsResponse: {
             /** @description Array of parallel variants with associated set information (e.g., Refractor, Prizm, numbered parallels) */
@@ -5508,15 +5492,6 @@ export interface components {
             releaseYear?: string;
             /** @description Array of attribute short names */
             attributes?: string[];
-            /** @description Average pricing data for the base card. Only included when price data is available. */
-            prices?: {
-                /** @description Average price for ungraded/raw condition cards. Format: USD with 2 decimal places (e.g., "10.00", "5.50") */
-                raw?: string;
-                /** @description Average price for PSA 10 (Gem Mint) graded cards. Format: USD with 2 decimal places (e.g., "100.00", "75.25") */
-                "psa-10"?: string;
-                /** @description Average price for PSA 9 (Mint) graded cards. Format: USD with 2 decimal places (e.g., "50.00", "35.75") */
-                "psa-9"?: string;
-            };
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
@@ -5528,6 +5503,8 @@ export interface components {
                 /** @description Limited print run number for this parallel */
                 numberedTo?: number;
             }[];
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            fields?: components["schemas"]["FieldValues"];
             /** @description True if this card was converted to a parallel variant through the random odds system */
             isParallel?: boolean;
             /** @description UUID of the parallel type if this card is a parallel variant */
@@ -5940,6 +5917,35 @@ export interface components {
                 failed: number;
             };
         };
+        ReleaseCalendarEntry: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the release calendar entry
+             */
+            id: string;
+            /** @description Name of the release */
+            name: string;
+            /** @description Release year */
+            year: string | null;
+            /** @description Expected or actual release date (YYYY-MM-DD) */
+            release_date: string | null;
+            /** @description Date when pre-orders open (YYYY-MM-DD) */
+            pre_order_date: string | null;
+            /** @description Unique identifier of the associated market segment */
+            segment_id: string | null;
+            /** @description Unique identifier of the associated manufacturer */
+            manufacturer_id: string | null;
+        };
+        PaginatedReleaseCalendarResponse: {
+            /** @description List of release calendar entries */
+            release_calendar: components["schemas"]["ReleaseCalendarEntry"][];
+            /** @description Total number of entries matching the query */
+            total_count: number;
+            /** @description Number of items skipped (offset) */
+            skip: number;
+            /** @description Number of items included in this page */
+            take: number;
+        };
         BasicHealthResponse: {
             /** @description Overall health status of the API (e.g., "healthy") */
             status: string;
@@ -5991,48 +5997,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BasicHealthResponse"];
-                };
-            };
-        };
-    };
-    getDetailedHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description DetailedHealthResponse */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @description Overall health status: healthy (all dependencies up), degraded (some non-critical dependencies down), unhealthy (critical dependencies down)
-                         * @enum {string}
-                         */
-                        status: "healthy" | "degraded" | "unhealthy";
-                        /** @description ISO 8601 timestamp when the health check was performed */
-                        timestamp: string;
-                        /** @description Health status of individual dependencies (database, Redis, etc.) */
-                        checks?: {
-                            [key: string]: {
-                                /**
-                                 * @description Health status of the component
-                                 * @enum {string}
-                                 */
-                                status: "healthy" | "unhealthy";
-                                /** @description Optional message describing the health status */
-                                message?: string;
-                                /** @description Response time in milliseconds */
-                                responseTime?: number;
-                            };
-                        };
-                    };
                 };
             };
         };
@@ -6333,6 +6297,8 @@ export interface operations {
                 min_year?: string;
                 /** @description Filter results up to this year (inclusive). Ignored if "year" is specified. */
                 max_year?: string;
+                /** @description Filter card results by field key/value pairs. Repeat the parameter for multiple fields — all must match (AND). Format: KEY:VALUE. Example: field=CASTING_COST:2&field=COLOR:Red. Keys are normalized to uppercase; values match case-insensitively. When this parameter is set, results are restricted to cards (other entity types are excluded), since field metadata is only modeled on cards. */
+                field?: string[];
             };
             header?: never;
             path?: never;
@@ -7227,9 +7193,11 @@ export interface operations {
                 attributeId?: string;
                 /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
                 attributeShortName?: string;
-                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
-                sort?: "name" | "release" | "set" | "year" | "price-raw";
-                /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
+                /** @description Filter cards by field key/value pairs. Repeat the parameter for multiple fields — all must match (AND). Format: KEY:VALUE. Example: field=CASTING_COST:2&field=COLOR:Red. Keys are normalized to uppercase; values match case-insensitively. */
+                field?: string[];
+                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year. */
+                sort?: "name" | "release" | "set" | "year";
+                /** @description Sort direction. "asc" for ascending, "desc" for descending. */
                 order?: "asc" | "desc";
             };
             header?: never;
@@ -7389,9 +7357,11 @@ export interface operations {
                 attributeId?: string;
                 /** @description Filter cards by attribute short name/code. Example: "RC" for Rookie Cards, "AU" for Autographs. Case-sensitive. */
                 attributeShortName?: string;
-                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year, "price-raw" = raw/ungraded card price (highest to lowest when desc). */
-                sort?: "name" | "release" | "set" | "year" | "price-raw";
-                /** @description Sort direction. "asc" for ascending (lowest to highest price), "desc" for descending (highest to lowest price). */
+                /** @description Filter cards by field key/value pairs. Repeat the parameter for multiple fields — all must match (AND). Format: KEY:VALUE. Example: field=CASTING_COST:2&field=COLOR:Red. Keys are normalized to uppercase; values match case-insensitively. */
+                field?: string[];
+                /** @description Field to sort results by. "name" = player name, "release" = release name, "set" = set name, "year" = release year. */
+                sort?: "name" | "release" | "set" | "year";
+                /** @description Sort direction. "asc" for ascending, "desc" for descending. */
                 order?: "asc" | "desc";
                 /** @description Number of random cards to return. Minimum: 1, Maximum: 200, Default: 1. If fewer cards match filters, returns all available. */
                 count?: number;
@@ -7566,6 +7536,152 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DetailedAttributeResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getFields: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Search fields by display name using partial string matching. Case-insensitive. Example: "points" matches "Hit Points", "Attack Points". */
+                name?: string;
+                /** @description Search fields by key using partial string matching. Case-insensitive. Example: "hp" matches fields with keys "HP", "SHP", etc. */
+                key?: string;
+                /** @description Field to sort results by. "name" = display name, "key" = field key, "usageCount" = total usage across cards, sets, releases, and segments. */
+                sort?: "name" | "key" | "usageCount";
+                /** @description Sort direction. "asc" for ascending (A-Z, lowest count first), "desc" for descending (Z-A, highest count first). */
+                order?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedFieldsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedFieldsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getFieldById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Field UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedFieldResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailedFieldResponse"];
                 };
             };
             /** @description Default Response */
@@ -8888,13 +9004,11 @@ export interface operations {
                 /** @description Dimension to group the collection by */
                 groupBy: "release" | "year" | "grade" | "player" | "manufacturer";
                 /** @description Metric to sort groups by */
-                sortBy?: "count" | "value" | "roi" | "percentage";
+                sortBy?: "count" | "percentage";
                 /** @description Sort order */
                 order?: "asc" | "desc";
                 /** @description Minimum card count to include in results */
                 minCount?: number;
-                /** @description Minimum total value to include in results */
-                minValue?: string;
             };
             header?: never;
             path: {
@@ -9037,7 +9151,7 @@ export interface operations {
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
                 /** @description Metric to sort sets by */
-                sortBy?: "completion" | "missing" | "cost" | "difficulty";
+                sortBy?: "completion" | "missing" | "difficulty";
                 /** @description Sort order */
                 order?: "asc" | "desc";
                 /** @description Filter sets with minimum completion percentage */
@@ -10176,13 +10290,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Binary image data (JPEG) */
+            /** @description Binary image data. Response Content-Type is either image/jpeg (most segments) or image/png (segments like Pokemon that need transparency). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "image/jpeg": string;
+                    "image/png": string;
                 };
             };
             /** @description Default Response */
@@ -10262,13 +10377,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Binary image data (JPEG) */
+            /** @description Binary image data. Response Content-Type is either image/jpeg (most segments) or image/png (segments like Pokemon that need transparency). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "image/jpeg": string;
+                    "image/png": string;
                 };
             };
             /** @description Default Response */
@@ -10874,13 +10990,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Card image in requested format. Returns binary JPEG when format=raw (default), or JSON with base64 data URI when format=json. */
+            /** @description Card image in requested format. When format=raw (default), returns binary image data with Content-Type image/jpeg or image/png depending on the card. When format=json, returns JSON with a base64 data URI (prefix reflects the actual format). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "image/jpeg": string;
+                    "image/png": string;
                     "application/json": components["schemas"]["ImageJsonResponse"];
                 };
             };
@@ -11956,6 +12073,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MarketplaceResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getReleaseCalendar: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+                /** @description Filter by segment. Accepts a UUID or segment name (case-insensitive). */
+                segment?: string;
+                /** @description Filter by manufacturer. Accepts a UUID or manufacturer name (case-insensitive). */
+                manufacturer?: string;
+                /** @description Filter by exact release year (e.g., "2026"). */
+                year?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReleaseCalendarResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReleaseCalendarResponse"];
                 };
             };
             /** @description Default Response */
