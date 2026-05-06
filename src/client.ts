@@ -997,6 +997,45 @@ export class CardSightAI {
   };
 
   /**
+   * Population report endpoints - Graded population counts by card, set, or release
+   */
+  public readonly population = {
+    /**
+     * Get the graded population report for a single card across all grading companies.
+     * Response is structured by card variant (base + parallels), nested
+     * grading company → grading type → grade with qualified/unqualified counts.
+     * @param cardId - Card UUID
+     * @param params - Optional query parameters (grading_company_id)
+     */
+    card: (cardId: string, params?: GetQueryParams<'/v1/population/card/{card_id}'>) =>
+      this.client.GET('/v1/population/card/{card_id}', {
+        params: { path: { card_id: cardId }, query: params }
+      }),
+
+    /**
+     * Get the graded population report for an entire set, sourced from each
+     * grading company's authoritative per-set figures.
+     * @param setId - Set UUID
+     * @param params - Optional query parameters (grading_company_id)
+     */
+    set: (setId: string, params?: GetQueryParams<'/v1/population/set/{set_id}'>) =>
+      this.client.GET('/v1/population/set/{set_id}', {
+        params: { path: { set_id: setId }, query: params }
+      }),
+
+    /**
+     * Get the graded population report for an entire release, with rollups
+     * across the release plus per-set breakdowns for each grading company.
+     * @param releaseId - Release UUID
+     * @param params - Optional query parameters (grading_company_id)
+     */
+    release: (releaseId: string, params?: GetQueryParams<'/v1/population/release/{release_id}'>) =>
+      this.client.GET('/v1/population/release/{release_id}', {
+        params: { path: { release_id: releaseId }, query: params }
+      })
+  };
+
+  /**
    * Direct access to the underlying OpenAPI client for advanced use cases
    */
   public get raw(): OpenAPIClient<paths> {

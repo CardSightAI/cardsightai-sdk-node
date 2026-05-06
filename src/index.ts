@@ -46,7 +46,19 @@ export type {
   // Release calendar types (v3.4.2)
   ReleaseCalendarEntry,
   PaginatedReleaseCalendarResponse,
-  ReleaseCalendarResponse
+  ReleaseCalendarResponse,
+  // Population report types (v3.5.1)
+  CardPopulationResponse,
+  SetPopulationResponse,
+  ReleasePopulationResponse,
+  PopulationGradeEntry,
+  PopulationGradingType,
+  VariantGradingCompanyPopulation,
+  CardBasePopulation,
+  CardParallelPopulation,
+  AggregatedGradingCompanyPopulation,
+  ReleaseSetRollup,
+  ReleaseGradingCompanyPopulation
 } from './types.js';
 
 // Export utility functions for working with identification results

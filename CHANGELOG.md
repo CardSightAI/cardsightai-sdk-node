@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-05-06
+
+### Added
+- **Population Report Endpoints** - New top-level `population` namespace exposing graded population reports sourced from each grading company:
+  - `population.card(cardId, params?)` - Get the population report for a single card across all grading companies. Response is structured by variant: optional `base` plus `parallels[]`, each with `grading_companies[] → grading_types[] → grades[]` and per-level `total_population` rollups.
+  - `population.set(setId, params?)` - Get the population report for an entire set, sourced from each grading company's authoritative per-set figures (matches the company's own website even when card-level matching is incomplete).
+  - `population.release(releaseId, params?)` - Get the population report for an entire release, with each grading company entry containing both an aggregated `grading_types[]` rollup across the whole release and a `sets[]` per-set breakdown.
+  - All three accept an optional `grading_company_id` query param to filter to a single grading company.
+  - Every grade defined for a present company is enumerated; grades with no recorded data are reported as `population: 0, qualified_population: 0`.
+  - Grades assigned with a qualifier (e.g. PSA "8Q") count toward `qualified_population` rather than `population`.
+  - New type exports: `CardPopulationResponse`, `SetPopulationResponse`, `ReleasePopulationResponse`, `PopulationGradeEntry`, `PopulationGradingType`, `VariantGradingCompanyPopulation`, `CardBasePopulation`, `CardParallelPopulation`, `AggregatedGradingCompanyPopulation`, `ReleaseSetRollup`, `ReleaseGradingCompanyPopulation`.
+
 ## [3.4.1] - 2026-04-01
 
 ### Changed

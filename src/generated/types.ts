@@ -2304,6 +2304,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/population/card/{card_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get population report for a single card
+         * @description Retrieve the graded population report for a specific card across every grading company that has reported data for it.
+         *
+         *     The response is structured around the card's variants:
+         *     - **base**: populations recorded against the base card (no parallel applied). Absent if no data exists for the base.
+         *     - **parallels[]**: one entry per parallel that has any population data, identified by parallel UUID and name.
+         *
+         *     Within each variant, populations are nested by **grading company → grading type → grade**. Every grade defined for a present company is enumerated; grades with no recorded data are reported as `population: 0, qualified_population: 0`. Grading companies that have no data for a given variant are omitted from that variant.
+         *
+         *     **Qualified vs unqualified**: when a grade is assigned with a qualifier (e.g. PSA "8Q"), the count is reported in `qualified_population` rather than `population`. Both are reported per grade.
+         *
+         *     **Filtering**: pass `?grading_company_id={uuid}` to limit the response to a single grading company.
+         *
+         *     **Note**: this endpoint echoes the `card_id` and `card_name` only — for full card metadata (set, release, parallels, attributes), call the catalog endpoint.
+         */
+        get: operations["getCardPopulation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/population/set/{set_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get population report for an entire set
+         * @description Retrieve graded population counts for a given set, sourced directly from each grading company's authoritative per-set figures (e.g. PSA's set-level totals). These match the grading company's own website even when CardSight's card-level matching for the set is incomplete.
+         *
+         *     Populations are reported per **grading company → grading type → grade**. Every grade defined for a present company is enumerated; grades with no recorded data are reported as `population: 0, qualified_population: 0`.
+         *
+         *     **Qualified vs unqualified**: when a grade is assigned with a qualifier (e.g. PSA "8Q"), the count is reported in `qualified_population` rather than `population`. Both are reported per grade.
+         *
+         *     **Filtering**: pass `?grading_company_id={uuid}` to limit the response to a single grading company.
+         *
+         *     **Coverage**: a grading company appears in the response only when its source set has a confirmed link to this CardSight set. If no grading company has a confirmed link, `grading_companies` is empty.
+         *
+         *     **Note**: this endpoint echoes the `set_id` and `set_name` only. For per-card population detail, call `/v1/population/card/{card_id}`. For full set metadata (cards, release, etc.), call the catalog endpoint.
+         */
+        get: operations["getSetPopulation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/population/release/{release_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get population report for an entire release
+         * @description Retrieve graded population counts across every set in a release, sourced directly from each grading company's authoritative per-set figures (e.g. PSA's set-level totals). These match the grading company's own website even when CardSight's card-level matching is incomplete.
+         *
+         *     Each grading company entry contains:
+         *     - **grading_types[]**: populations rolled up across every set in the release.
+         *     - **sets[]**: per-set rollups so consumers can see which sets within the release contributed. Sets with no confirmed link (or no recorded data) for a company are omitted.
+         *
+         *     Within each rollup, every grade defined for the company is enumerated; grades with no recorded data are reported as `population: 0, qualified_population: 0`.
+         *
+         *     **Qualified vs unqualified**: when a grade is assigned with a qualifier (e.g. PSA "8Q"), the count is reported in `qualified_population` rather than `population`. Both are reported per grade.
+         *
+         *     **Filtering**: pass `?grading_company_id={uuid}` to limit the response to a single grading company.
+         *
+         *     **Coverage**: only sets with a confirmed grading-company set link contribute to the totals. A release with no confirmed links returns an empty `grading_companies` array.
+         *
+         *     **Note**: this endpoint echoes the `release_id` and `release_name` only, plus `set_id` and `set_name` for each set rollup. For full release/set metadata (year, manufacturer, full card lists, etc.), call the catalog endpoint.
+         */
+        get: operations["getReleasePopulation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4130,6 +4226,115 @@ export interface components {
             /** @description ISO 8601 timestamp when the health check was performed */
             timestamp: string;
         };
+        PopulationGradeEntryInput: {
+            /** @description Grade UUID */
+            id: string;
+            /** @description Grade value (e.g. "10", "9.5") */
+            grade: string;
+            /** @description Condition descriptor (e.g. "Gem Mint") */
+            condition?: string | null;
+            /** @description Count of unqualified graded examples */
+            population: number;
+            /** @description Count of qualified graded examples (e.g. PSA "8Q") */
+            qualified_population: number;
+        };
+        PopulationGradingTypeInput: {
+            /** @description Grading type UUID */
+            id: string;
+            /** @description Grading type name (e.g. "Standard") */
+            name: string;
+            /** @description Sum of population + qualified_population across all grades for this type */
+            total_population: number;
+            /** @description Every grade for this type, with zero-fill for grades without data */
+            grades: components["schemas"]["PopulationGradeEntryInput"][];
+        };
+        VariantGradingCompanyPopulationInput: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name (e.g. "PSA") */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this variant (ISO 8601) */
+            last_synced_at: string;
+            /** @description Sum across all grading types for this company within this variant */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingTypeInput"][];
+        };
+        CardBasePopulationInput: {
+            /** @description Total across all grading companies for the base card */
+            total_population: number;
+            grading_companies: components["schemas"]["VariantGradingCompanyPopulationInput"][];
+        };
+        CardParallelPopulationInput: {
+            /** @description Parallel UUID */
+            parallel_id: string;
+            /** @description Parallel name (echoed for visual confirmation only) */
+            parallel_name: string;
+            /** @description Total across all grading companies for this parallel */
+            total_population: number;
+            grading_companies: components["schemas"]["VariantGradingCompanyPopulationInput"][];
+        };
+        CardPopulationResponseInput: {
+            /** @description Card UUID (echoed back from the request) */
+            card_id: string;
+            /** @description Card name (echoed for visual confirmation only) */
+            card_name: string;
+            /** @description Top-level total: base + every parallel, every company, every grade */
+            total_population: number;
+            /** @description Population data for the base card. Absent if no company has population rows for the base. */
+            base?: components["schemas"]["CardBasePopulationInput"];
+            /** @description One entry per parallel that has any population data. Parallels with no data are omitted. */
+            parallels: components["schemas"]["CardParallelPopulationInput"][];
+        };
+        AggregatedGradingCompanyPopulationInput: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this aggregation (ISO 8601) */
+            last_synced_at: string;
+            /** @description Total across all grading types for this company in the requested set/release */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingTypeInput"][];
+        };
+        SetPopulationResponseInput: {
+            /** @description Set UUID (echoed back from the request) */
+            set_id: string;
+            /** @description Set name (echoed for visual confirmation only) */
+            set_name: string;
+            /** @description One entry per grading company that has any population data for cards in this set */
+            grading_companies: components["schemas"]["AggregatedGradingCompanyPopulationInput"][];
+        };
+        ReleaseSetRollupInput: {
+            /** @description Set UUID */
+            set_id: string;
+            /** @description Set name (echoed for visual confirmation only) */
+            set_name: string;
+            /** @description Total across all grading types for this set within the company */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingTypeInput"][];
+        };
+        ReleaseGradingCompanyPopulationInput: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this release (ISO 8601) */
+            last_synced_at: string;
+            /** @description Total across all sets and grading types in this release for this company */
+            total_population: number;
+            /** @description Aggregated populations across the entire release for this company */
+            grading_types: components["schemas"]["PopulationGradingTypeInput"][];
+            /** @description Per-set rollup. Sets with no data for this company are omitted. */
+            sets: components["schemas"]["ReleaseSetRollupInput"][];
+        };
+        ReleasePopulationResponseInput: {
+            /** @description Release UUID (echoed back from the request) */
+            release_id: string;
+            /** @description Release name (echoed for visual confirmation only) */
+            release_name: string;
+            /** @description One entry per grading company that has any population data for cards in this release */
+            grading_companies: components["schemas"]["ReleaseGradingCompanyPopulationInput"][];
+        };
         ErrorResponse: {
             /** @description Error message */
             error: string;
@@ -5951,6 +6156,115 @@ export interface components {
             status: string;
             /** @description ISO 8601 timestamp when the health check was performed */
             timestamp: string;
+        };
+        PopulationGradeEntry: {
+            /** @description Grade UUID */
+            id: string;
+            /** @description Grade value (e.g. "10", "9.5") */
+            grade: string;
+            /** @description Condition descriptor (e.g. "Gem Mint") */
+            condition?: string | null;
+            /** @description Count of unqualified graded examples */
+            population: number;
+            /** @description Count of qualified graded examples (e.g. PSA "8Q") */
+            qualified_population: number;
+        };
+        PopulationGradingType: {
+            /** @description Grading type UUID */
+            id: string;
+            /** @description Grading type name (e.g. "Standard") */
+            name: string;
+            /** @description Sum of population + qualified_population across all grades for this type */
+            total_population: number;
+            /** @description Every grade for this type, with zero-fill for grades without data */
+            grades: components["schemas"]["PopulationGradeEntry"][];
+        };
+        VariantGradingCompanyPopulation: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name (e.g. "PSA") */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this variant (ISO 8601) */
+            last_synced_at: string;
+            /** @description Sum across all grading types for this company within this variant */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingType"][];
+        };
+        CardBasePopulation: {
+            /** @description Total across all grading companies for the base card */
+            total_population: number;
+            grading_companies: components["schemas"]["VariantGradingCompanyPopulation"][];
+        };
+        CardParallelPopulation: {
+            /** @description Parallel UUID */
+            parallel_id: string;
+            /** @description Parallel name (echoed for visual confirmation only) */
+            parallel_name: string;
+            /** @description Total across all grading companies for this parallel */
+            total_population: number;
+            grading_companies: components["schemas"]["VariantGradingCompanyPopulation"][];
+        };
+        CardPopulationResponse: {
+            /** @description Card UUID (echoed back from the request) */
+            card_id: string;
+            /** @description Card name (echoed for visual confirmation only) */
+            card_name: string;
+            /** @description Top-level total: base + every parallel, every company, every grade */
+            total_population: number;
+            /** @description Population data for the base card. Absent if no company has population rows for the base. */
+            base?: components["schemas"]["CardBasePopulation"];
+            /** @description One entry per parallel that has any population data. Parallels with no data are omitted. */
+            parallels: components["schemas"]["CardParallelPopulation"][];
+        };
+        AggregatedGradingCompanyPopulation: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this aggregation (ISO 8601) */
+            last_synced_at: string;
+            /** @description Total across all grading types for this company in the requested set/release */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingType"][];
+        };
+        SetPopulationResponse: {
+            /** @description Set UUID (echoed back from the request) */
+            set_id: string;
+            /** @description Set name (echoed for visual confirmation only) */
+            set_name: string;
+            /** @description One entry per grading company that has any population data for cards in this set */
+            grading_companies: components["schemas"]["AggregatedGradingCompanyPopulation"][];
+        };
+        ReleaseSetRollup: {
+            /** @description Set UUID */
+            set_id: string;
+            /** @description Set name (echoed for visual confirmation only) */
+            set_name: string;
+            /** @description Total across all grading types for this set within the company */
+            total_population: number;
+            grading_types: components["schemas"]["PopulationGradingType"][];
+        };
+        ReleaseGradingCompanyPopulation: {
+            /** @description Grading company UUID */
+            id: string;
+            /** @description Grading company name */
+            name: string;
+            /** @description Most recent population sync timestamp for this company within this release (ISO 8601) */
+            last_synced_at: string;
+            /** @description Total across all sets and grading types in this release for this company */
+            total_population: number;
+            /** @description Aggregated populations across the entire release for this company */
+            grading_types: components["schemas"]["PopulationGradingType"][];
+            /** @description Per-set rollup. Sets with no data for this company are omitted. */
+            sets: components["schemas"]["ReleaseSetRollup"][];
+        };
+        ReleasePopulationResponse: {
+            /** @description Release UUID (echoed back from the request) */
+            release_id: string;
+            /** @description Release name (echoed for visual confirmation only) */
+            release_name: string;
+            /** @description One entry per grading company that has any population data for cards in this release */
+            grading_companies: components["schemas"]["ReleaseGradingCompanyPopulation"][];
         };
     };
     responses: never;
@@ -12149,6 +12463,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedReleaseCalendarResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCardPopulation: {
+        parameters: {
+            query?: {
+                /** @description Optional. Filter the response to a single grading company by its UUID. */
+                grading_company_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Unique identifier for the card */
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardPopulationResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardPopulationResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getSetPopulation: {
+        parameters: {
+            query?: {
+                /** @description Optional. Filter the response to a single grading company by its UUID. */
+                grading_company_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Unique identifier for the set */
+                set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetPopulationResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetPopulationResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getReleasePopulation: {
+        parameters: {
+            query?: {
+                /** @description Optional. Filter the response to a single grading company by its UUID. */
+                grading_company_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Unique identifier for the release */
+                release_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleasePopulationResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleasePopulationResponse"];
                 };
             };
             /** @description Default Response */

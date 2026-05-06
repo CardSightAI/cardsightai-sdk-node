@@ -39,6 +39,7 @@ The most comprehensive baseball card identification and collection management pl
 | **Binders** | Organize collection subsets | `collections.binders.create()` |
 | **Pricing** | Completed sales data for cards | `pricing.get()`, `pricing.bulk()` |
 | **Marketplace** | Active marketplace listings for cards | `marketplace.get()` |
+| **Population Reports** | Graded population counts by card, set, or release | `population.card()`, `population.set()`, `population.release()` |
 | **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
 | **AI Search** | Natural language queries | `ai.query()` |
 | **Autocomplete** | Search suggestions for all entities | `autocomplete.cards()` |

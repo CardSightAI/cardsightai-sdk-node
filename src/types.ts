@@ -190,6 +190,22 @@ export type PaginatedReleaseCalendarResponse =
   components['schemas']['PaginatedReleaseCalendarResponse'];
 export type ReleaseCalendarResponse = GetResponseData<'/v1/release-calendar/', 'get'>;
 
+// Population report types (v3.5.1)
+export type CardPopulationResponse = components['schemas']['CardPopulationResponse'];
+export type SetPopulationResponse = components['schemas']['SetPopulationResponse'];
+export type ReleasePopulationResponse = components['schemas']['ReleasePopulationResponse'];
+export type PopulationGradeEntry = components['schemas']['PopulationGradeEntry'];
+export type PopulationGradingType = components['schemas']['PopulationGradingType'];
+export type VariantGradingCompanyPopulation =
+  components['schemas']['VariantGradingCompanyPopulation'];
+export type CardBasePopulation = components['schemas']['CardBasePopulation'];
+export type CardParallelPopulation = components['schemas']['CardParallelPopulation'];
+export type AggregatedGradingCompanyPopulation =
+  components['schemas']['AggregatedGradingCompanyPopulation'];
+export type ReleaseSetRollup = components['schemas']['ReleaseSetRollup'];
+export type ReleaseGradingCompanyPopulation =
+  components['schemas']['ReleaseGradingCompanyPopulation'];
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;
