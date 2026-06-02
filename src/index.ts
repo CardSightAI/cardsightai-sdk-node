@@ -58,7 +58,11 @@ export type {
   CardParallelPopulation,
   AggregatedGradingCompanyPopulation,
   ReleaseSetRollup,
-  ReleaseGradingCompanyPopulation
+  ReleaseGradingCompanyPopulation,
+  // Identifiable set pre-flight types (v3.6.0)
+  IdentifiableSet,
+  IdentifiableSetsResponse,
+  SetIdentifiableResponse
 } from './types.js';
 
 // Export utility functions for working with identification results

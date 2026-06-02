@@ -94,6 +94,8 @@ test('Client structure', async (t) => {
       typeof client.identify.cardBySegment === 'function',
       'Should have identify.cardBySegment()'
     );
+    assert(typeof client.identify.sets.list === 'function', 'Should have identify.sets.list()');
+    assert(typeof client.identify.sets.check === 'function', 'Should have identify.sets.check()');
   });
 
   await t.test('detect endpoints should exist', () => {

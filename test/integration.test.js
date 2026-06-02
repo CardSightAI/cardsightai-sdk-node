@@ -99,6 +99,29 @@ describe('CardSightAI SDK Integration Tests', () => {
     }
   });
 
+  test('Identify - List Identifiable Sets (v3.6.0)', async () => {
+    const response = await client.identify.sets.list({ take: 5 });
+    assert.ok(response.data, 'Response should have data');
+    assert.ok(Array.isArray(response.data.sets), 'sets should be an array');
+    assert.ok(typeof response.data.total_count === 'number', 'Response should include total_count');
+
+    if (response.data.sets.length > 0) {
+      const set = response.data.sets[0];
+      assert.ok(set.set_id, 'Identifiable set should have a set_id');
+      assert.ok(set.set_name, 'Identifiable set should have a set_name');
+
+      // Check that the same set reports as identifiable
+      const check = await client.identify.sets.check(set.set_id);
+      assert.ok(check.data, 'Check response should have data');
+      assert.strictEqual(check.data.set_id, set.set_id, 'Check should echo the set_id');
+      assert.strictEqual(
+        typeof check.data.is_identifiable,
+        'boolean',
+        'Check should return a boolean is_identifiable'
+      );
+    }
+  });
+
 });
 
 console.log('\n✅ All integration tests passed!\n');

@@ -206,6 +206,11 @@ export type ReleaseSetRollup = components['schemas']['ReleaseSetRollup'];
 export type ReleaseGradingCompanyPopulation =
   components['schemas']['ReleaseGradingCompanyPopulation'];
 
+// Identifiable set pre-flight types (v3.6.0)
+export type IdentifiableSet = components['schemas']['IdentifiableSet'];
+export type IdentifiableSetsResponse = components['schemas']['IdentifiableSetsResponse'];
+export type SetIdentifiableResponse = components['schemas']['SetIdentifiableResponse'];
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;

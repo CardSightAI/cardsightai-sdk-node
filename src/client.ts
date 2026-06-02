@@ -269,6 +269,28 @@ export class CardSightAI {
         body: formData as any,
         bodySerializer: (body: any) => body // Don't serialize FormData
       });
+    },
+
+    /**
+     * Identifiable set lookups — free pre-flight checks that do NOT count
+     * toward billed API usage. Use these to confirm support before identifying.
+     */
+    sets: {
+      /**
+       * List every set the system can identify (paginated).
+       * @param params - Optional query parameters (take, skip)
+       */
+      list: (params?: GetQueryParams<'/v1/identify/list/sets'>) =>
+        this.client.GET('/v1/identify/list/sets', { params: { query: params } }),
+
+      /**
+       * Check whether a single set is identifiable by its set ID.
+       * @param setId - Set unique ID to check
+       */
+      check: (setId: string) =>
+        this.client.GET('/v1/identify/check/set/{set_id}', {
+          params: { path: { set_id: setId } }
+        })
     }
   };
 

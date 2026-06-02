@@ -29,7 +29,7 @@ The most comprehensive baseball card identification and collection management pl
 
 | Feature | Description | Primary Methods |
 |---------|-------------|-----------------|
-| **Card Identification** | Identify multiple cards from images using AI | `identify.card()`, `identify.cardBySegment()` |
+| **Card Identification** | Identify multiple cards from images using AI; free pre-flight set identifiability lookups | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Card Detection** | Check if trading cards are present in an image | `detect.card()` |
 | **Catalog Search** | Fuzzy search across cards, sets, releases, parallels | `catalog.search()`, `catalog.cards.list()` |
 | **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
@@ -260,6 +260,25 @@ Detections may also include a `grading` object when the card is inside a graded 
   requestId: "req_def456",
   detections: [],
   processingTime: 800
+}
+```
+
+#### Checking Set Identifiability (free pre-flight)
+
+Before spending a billed identify call, you can confirm whether a set is supported. These endpoints are **free** — they do not count toward your billed API usage.
+
+```typescript
+// List every set the system can identify (paginated)
+const { data } = await client.identify.sets.list({ take: 20, skip: 0 });
+console.log(`${data.total_count} identifiable sets`);
+for (const set of data.sets) {
+  console.log(`${set.year} ${set.release_name} — ${set.set_name} (${set.segment_name})`);
+}
+
+// Check whether a specific set is identifiable by its set ID
+const { data: check } = await client.identify.sets.check(setId);
+if (check.is_identifiable) {
+  console.log(`Set ${check.set_id} is identifiable`);
 }
 ```
 
@@ -1340,7 +1359,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | Category | Endpoints | SDK Methods |
 |----------|-----------|------------|
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
-| **Identification** | 2 | `identify.card()`, `identify.cardBySegment()` |
+| **Identification** | 4 | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Detection** | 1 | `detect.card()` |
 | **Catalog** | 20 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.fields.*`, `catalog.random.*` |
 | **Release Calendar** | 1 | `releaseCalendar.list()` |

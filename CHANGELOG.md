@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-06-02
+
+### Added
+- **Identifiable Set Pre-flight Endpoints** - New nested `identify.sets` sub-namespace exposing two **free** read-only endpoints that let you confirm set identifiability before spending a billed identify call (these calls do not count toward your billed API usage):
+  - `identify.sets.list(params?)` - `GET /v1/identify/list/sets`. Paginated list of every set the system can identify. Accepts `take` (1–100, default 20) and `skip` (default 0) query params. Returns `IdentifiableSetsResponse` with `sets[]` (each `IdentifiableSet`: `year`, `release_name`, `segment_name`, `set_name`, `set_id`), `total_count`, `skip`, `take`.
+  - `identify.sets.check(setId)` - `GET /v1/identify/check/set/{set_id}`. Reports whether a single set is identifiable by its set ID (returns 404 if no set matches). Returns `SetIdentifiableResponse` with `set_id` and `is_identifiable` (boolean).
+  - New type exports: `IdentifiableSet`, `IdentifiableSetsResponse`, `SetIdentifiableResponse`.
+
 ## [3.5.1] - 2026-05-06
 
 ### Added

@@ -74,8 +74,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Identifies a card from the submitted image (defaults to baseball)
-         * @description Identify a card from an image. Defaults to the baseball segment. Use POST /card/:segment for other sports. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         * Identifies card(s) from the submitted image (automatic segment detection)
+         * @description Identify one or more cards from an image. The segment (sport/category) of each card is detected automatically, so a single image may contain cards from different segments (e.g., baseball and basketball). To force a specific segment, use POST /card/:segment instead. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
          */
         post: operations["identifyCard"];
         delete?: never;
@@ -98,6 +98,46 @@ export interface paths {
          * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID or name (case-insensitive, e.g., "football", "basketball"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
          */
         post: operations["identifyCardBySegment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/identify/list/sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all identifiable sets (free)
+         * @description Returns a paginated list of every set the system can identify, so you can pre-flight identifiability before spending an identify call. Each entry includes only the year, release name, segment name, set name, and set unique ID. Use the set unique ID with GET /identify/check/set/{set_id} or the catalog endpoints for full details. This is a free endpoint — calls do not count toward your billed API usage.
+         */
+        get: operations["listIdentifiableSets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/identify/check/set/{set_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check if a set is identifiable (free)
+         * @description Given a set unique ID, reports whether that set is identifiable by the system. Returns 404 if no set exists with the provided ID. Use this to confirm support for a specific set before submitting an identify request. This is a free endpoint — calls do not count toward your billed API usage.
+         */
+        get: operations["checkSetIdentifiable"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3015,6 +3055,34 @@ export interface components {
             /** @description Server advisory messages (e.g., image quality warnings) */
             messages?: components["schemas"]["ServerMessageInput"][];
         };
+        IdentifiableSetInput: {
+            /** @description Release year (e.g., "2024") */
+            year: string;
+            /** @description Release/product name (e.g., "Topps Chrome") */
+            release_name: string;
+            /** @description Segment (sport/category) name (e.g., "Baseball") */
+            segment_name: string;
+            /** @description Set name (e.g., "Base Set") */
+            set_name: string;
+            /** @description Set unique ID */
+            set_id: string;
+        };
+        IdentifiableSetsResponseInput: {
+            /** @description Identifiable sets for this page */
+            sets: components["schemas"]["IdentifiableSetInput"][];
+            /** @description Total number of identifiable sets matching the query */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        SetIdentifiableResponseInput: {
+            /** @description Set unique ID that was checked */
+            set_id: string;
+            /** @description Whether this set is identifiable by the system */
+            is_identifiable: boolean;
+        };
         DetectCardResponseInput: {
             /** @description Whether one or more trading cards were detected in the image */
             detected: boolean;
@@ -4946,6 +5014,34 @@ export interface components {
             /** @description Server advisory messages (e.g., image quality warnings) */
             messages?: components["schemas"]["ServerMessage"][];
         };
+        IdentifiableSet: {
+            /** @description Release year (e.g., "2024") */
+            year: string;
+            /** @description Release/product name (e.g., "Topps Chrome") */
+            release_name: string;
+            /** @description Segment (sport/category) name (e.g., "Baseball") */
+            segment_name: string;
+            /** @description Set name (e.g., "Base Set") */
+            set_name: string;
+            /** @description Set unique ID */
+            set_id: string;
+        };
+        IdentifiableSetsResponse: {
+            /** @description Identifiable sets for this page */
+            sets: components["schemas"]["IdentifiableSet"][];
+            /** @description Total number of identifiable sets matching the query */
+            total_count: number;
+            /** @description Number of results skipped (offset) for pagination */
+            skip: number;
+            /** @description Number of results included in this page */
+            take: number;
+        };
+        SetIdentifiableResponse: {
+            /** @description Set unique ID that was checked */
+            set_id: string;
+            /** @description Whether this set is identifiable by the system */
+            is_identifiable: boolean;
+        };
         DetectCardResponse: {
             /** @description Whether one or more trading cards were detected in the image */
             detected: boolean;
@@ -6543,6 +6639,144 @@ export interface operations {
             };
             /** @description Default Response */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listIdentifiableSets: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                take?: number;
+                /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
+                skip?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentifiableSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentifiableSetsResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    checkSetIdentifiable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Set unique ID to check */
+                set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetIdentifiableResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetIdentifiableResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
