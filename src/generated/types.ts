@@ -95,7 +95,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies a card from the submitted image for a specific segment (sport)
-         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID or name (case-insensitive, e.g., "football", "basketball"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID, name, or shortname (case-insensitive, e.g., "football", "basketball", "magic"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
          */
         post: operations["identifyCardBySegment"];
         delete?: never;
@@ -2272,8 +2272,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get completed sales pricing for a card
-         * @description Returns completed sales data for a single card, grouped into raw (ungraded) and graded sections. Graded results are organized by grading company and grade value. Supports filtering by parallel variant, grade, time period, and listing type.
+         * Get price history (bid/ask) for a card
+         * @description Returns historical pricing for a single card as a bid/ask spread: completed auction sales (the "bid" side — what cards actually sold for) alongside Buy It Now listings (the "ask" side — what sellers were asking, which is not necessarily a completed sale). Results are grouped into raw (ungraded) and graded sections, with graded results organized by grading company and grade value. Supports filtering by parallel variant, grade, time period, and listing type.
          */
         get: operations["getCardPricing"];
         put?: never;
@@ -2294,10 +2294,30 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Get pricing for multiple cards
-         * @description Returns completed sales data for up to 100 cards in a single request. Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint.
+         * Get price history (bid/ask) for multiple cards
+         * @description Returns price history as a bid/ask spread for up to 100 cards in a single request — completed auction sales (bid) and Buy It Now asking prices (ask, not necessarily a completed sale). Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint.
          */
         post: operations["getBulkPricing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/pricing/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search price history by listing title
+         * @description Free-text fuzzy search over marketplace listing titles for historical pricing — completed auction sales (the "bid" side) and Buy It Now asking prices (the "ask" side, not necessarily a completed sale). Surfaces raw listing data including listings that were never matched to a canonical card — useful for cards our matcher struggles with or sellers who use unusual titles. Returns a flat list of results ranked by title relevance; each result carries the canonical card it matched (when any). Supports filtering by listing type and time period.
+         */
+        get: operations["searchPricingByTitle"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2316,6 +2336,26 @@ export interface paths {
          * @description Returns currently active marketplace listings for a single card, grouped into raw (ungraded) and graded sections. Includes a marketplace search link as the last record in the raw section. Supports filtering by parallel variant, grade, and listing type.
          */
         get: operations["getCardMarketplace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/marketplace/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search active listings by listing title
+         * @description Free-text fuzzy search over marketplace listing titles for currently active listings. Surfaces raw listing data including listings that were never matched to a canonical card — useful for cards our matcher struggles with or sellers who use unusual titles. Returns a flat list of results ranked by title relevance; each result carries the canonical card it matched (when any). Supports filtering by listing type.
+         */
+        get: operations["searchMarketplaceByTitle"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3214,6 +3254,8 @@ export interface components {
             id: string;
             /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
             name: string;
+            /** @description Short, URL-friendly key for the segment, usable in place of the name or UUID on segment-specific routes such as /v1/identify/card/{segment} (e.g. "magic" for "Magic: The Gathering"). Null when no shortname is set. */
+            shortname: string | null;
             /** @description Whether cards in this segment can be identified by the CardSightAI identification service. */
             is_identifiable: boolean;
         };
@@ -4021,7 +4063,7 @@ export interface components {
              */
             period: string;
             /**
-             * @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all
+             * @description Filter by listing type. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side), both=all
              * @default both
              * @enum {string}
              */
@@ -4032,13 +4074,13 @@ export interface components {
         PricingRecordInput: {
             /** @description Listing title from marketplace */
             title?: string | null;
-            /** @description Sale price in USD */
+            /** @description Price in USD. For auctions this is the final sale price (the "bid" side); for fixed/Buy It Now this is the seller's asking price (the "ask" side) and is NOT necessarily a completed sale. */
             price: number;
-            /** @description Sale date in ISO 8601 format */
+            /** @description Date the listing ended, in ISO 8601 format */
             date?: string | null;
             /** @description Data source (e.g., "ebay") */
             source: string;
-            /** @description Type of listing: auction or fixed price */
+            /** @description Listing type: "auction" = a completed auction sale (bid side), "fixed" = a Buy It Now asking price (ask side). */
             listing_type?: ("auction" | "fixed") | null;
             /** @description URL to the original listing */
             url?: string | null;
@@ -4073,6 +4115,19 @@ export interface components {
             /** @description Parallel variant name. Null for base card listings. */
             parallel_name?: string | null;
         };
+        CardSetContextInput: {
+            /**
+             * Format: uuid
+             * @description Set UUID
+             */
+            set_id: string;
+            /** @description Set name */
+            name: string;
+            /** @description Release year */
+            year: string;
+            /** @description Release name */
+            release: string;
+        };
         PricingCardContextInput: {
             /**
              * Format: uuid
@@ -4084,19 +4139,7 @@ export interface components {
             /** @description Card number in set */
             number?: string | null;
             /** @description Set context */
-            set: {
-                /**
-                 * Format: uuid
-                 * @description Set UUID
-                 */
-                set_id: string;
-                /** @description Set name */
-                name: string;
-                /** @description Release year */
-                year: string;
-                /** @description Release name */
-                release: string;
-            };
+            set: components["schemas"]["CardSetContextInput"];
             /** @description Parallel context if filtered by parallel */
             parallel?: {
                 /**
@@ -4258,6 +4301,131 @@ export interface components {
                 /** @description Number of cards that failed */
                 failed: number;
             };
+        };
+        SearchMatchedCardInput: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Card name/subject */
+            name: string;
+            /** @description Card number in set */
+            number?: string | null;
+            /** @description Set context */
+            set: components["schemas"]["CardSetContextInput"];
+        };
+        SearchGradeInput: {
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+        };
+        PricingSearchRecordInput: {
+            /** @description Listing title from marketplace */
+            title?: string | null;
+            /** @description Price in USD. For auctions this is the final sale price (the "bid" side); for fixed/Buy It Now this is the seller's asking price (the "ask" side) and is NOT necessarily a completed sale. */
+            price: number;
+            /** @description Date the listing ended, in ISO 8601 format */
+            date?: string | null;
+            /** @description Data source (e.g., "ebay") */
+            source: string;
+            /** @description Listing type: "auction" = a completed auction sale (bid side), "fixed" = a Buy It Now asking price (ask side). */
+            listing_type?: ("auction" | "fixed") | null;
+            /** @description URL to the original listing */
+            url?: string | null;
+            /** @description Primary image URL for the listing */
+            image_url?: string | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+            /** @description Canonical card this listing matched. Omitted when the listing is unmatched. */
+            matched_card?: components["schemas"]["SearchMatchedCardInput"];
+            /** @description Grade context for graded listings. Omitted for ungraded listings. */
+            grade?: components["schemas"]["SearchGradeInput"];
+        };
+        MarketplaceSearchRecordInput: {
+            /** @description Listing title */
+            title: string;
+            /** @description Current price or starting bid in USD */
+            price?: number | null;
+            /** @description Marketplace source */
+            source: string;
+            /** @description Type of listing */
+            listing_type?: ("auction" | "fixed" | "search") | null;
+            /** @description URL to the listing */
+            url?: string | null;
+            /** @description Primary image URL */
+            image_url?: string | null;
+            /** @description Condition description from seller */
+            condition?: string | null;
+            /** @description Listing end date in ISO 8601 format */
+            end_date?: string | null;
+            /** @description Number of bids (auctions only) */
+            bid_count?: number | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+            /** @description Canonical card this listing matched. Omitted when the listing is unmatched. */
+            matched_card?: components["schemas"]["SearchMatchedCardInput"];
+            /** @description Grade context for graded listings. Omitted for ungraded listings. */
+            grade?: components["schemas"]["SearchGradeInput"];
+        };
+        PricingSearchQueryEchoInput: {
+            /** @description Search query applied */
+            q: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Period filter applied */
+            period?: string;
+            /** @description Result limit applied */
+            limit?: number;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        MarketplaceSearchQueryEchoInput: {
+            /** @description Search query applied */
+            q: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Result limit applied */
+            limit?: number;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        SearchMetaInput: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItemInput"][];
+            /** @description Total records returned */
+            total_records: number;
+        };
+        PricingSearchResponseInput: {
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingSearchQueryEchoInput"];
+            /** @description Flat list of matched listings, ranked by title relevance. Spans multiple cards and may include unmatched listings. */
+            results: components["schemas"]["PricingSearchRecordInput"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["SearchMetaInput"];
+        };
+        MarketplaceSearchResponseInput: {
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["MarketplaceSearchQueryEchoInput"];
+            /** @description Flat list of matched active listings, ranked by title relevance. Spans multiple cards and may include unmatched listings. */
+            results: components["schemas"]["MarketplaceSearchRecordInput"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["SearchMetaInput"];
         };
         ReleaseCalendarEntryInput: {
             /**
@@ -5173,6 +5341,8 @@ export interface components {
             id: string;
             /** @description Display name of the segment. Examples: "Sports", "Entertainment", "Gaming". Used for categorizing releases and filtering. */
             name: string;
+            /** @description Short, URL-friendly key for the segment, usable in place of the name or UUID on segment-specific routes such as /v1/identify/card/{segment} (e.g. "magic" for "Magic: The Gathering"). Null when no shortname is set. */
+            shortname: string | null;
             /** @description Whether cards in this segment can be identified by the CardSightAI identification service. */
             is_identifiable: boolean;
         };
@@ -5980,7 +6150,7 @@ export interface components {
              */
             period: string;
             /**
-             * @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all
+             * @description Filter by listing type. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side), both=all
              * @default both
              * @enum {string}
              */
@@ -5991,13 +6161,13 @@ export interface components {
         PricingRecord: {
             /** @description Listing title from marketplace */
             title?: string | null;
-            /** @description Sale price in USD */
+            /** @description Price in USD. For auctions this is the final sale price (the "bid" side); for fixed/Buy It Now this is the seller's asking price (the "ask" side) and is NOT necessarily a completed sale. */
             price: number;
-            /** @description Sale date in ISO 8601 format */
+            /** @description Date the listing ended, in ISO 8601 format */
             date?: string | null;
             /** @description Data source (e.g., "ebay") */
             source: string;
-            /** @description Type of listing: auction or fixed price */
+            /** @description Listing type: "auction" = a completed auction sale (bid side), "fixed" = a Buy It Now asking price (ask side). */
             listing_type?: ("auction" | "fixed") | null;
             /** @description URL to the original listing */
             url?: string | null;
@@ -6032,6 +6202,19 @@ export interface components {
             /** @description Parallel variant name. Null for base card listings. */
             parallel_name?: string | null;
         };
+        CardSetContext: {
+            /**
+             * Format: uuid
+             * @description Set UUID
+             */
+            set_id: string;
+            /** @description Set name */
+            name: string;
+            /** @description Release year */
+            year: string;
+            /** @description Release name */
+            release: string;
+        };
         PricingCardContext: {
             /**
              * Format: uuid
@@ -6043,19 +6226,7 @@ export interface components {
             /** @description Card number in set */
             number?: string | null;
             /** @description Set context */
-            set: {
-                /**
-                 * Format: uuid
-                 * @description Set UUID
-                 */
-                set_id: string;
-                /** @description Set name */
-                name: string;
-                /** @description Release year */
-                year: string;
-                /** @description Release name */
-                release: string;
-            };
+            set: components["schemas"]["CardSetContext"];
             /** @description Parallel context if filtered by parallel */
             parallel?: {
                 /**
@@ -6217,6 +6388,131 @@ export interface components {
                 /** @description Number of cards that failed */
                 failed: number;
             };
+        };
+        SearchMatchedCard: {
+            /**
+             * Format: uuid
+             * @description Card UUID
+             */
+            card_id: string;
+            /** @description Card name/subject */
+            name: string;
+            /** @description Card number in set */
+            number?: string | null;
+            /** @description Set context */
+            set: components["schemas"]["CardSetContext"];
+        };
+        SearchGrade: {
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+        };
+        PricingSearchRecord: {
+            /** @description Listing title from marketplace */
+            title?: string | null;
+            /** @description Price in USD. For auctions this is the final sale price (the "bid" side); for fixed/Buy It Now this is the seller's asking price (the "ask" side) and is NOT necessarily a completed sale. */
+            price: number;
+            /** @description Date the listing ended, in ISO 8601 format */
+            date?: string | null;
+            /** @description Data source (e.g., "ebay") */
+            source: string;
+            /** @description Listing type: "auction" = a completed auction sale (bid side), "fixed" = a Buy It Now asking price (ask side). */
+            listing_type?: ("auction" | "fixed") | null;
+            /** @description URL to the original listing */
+            url?: string | null;
+            /** @description Primary image URL for the listing */
+            image_url?: string | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+            /** @description Canonical card this listing matched. Omitted when the listing is unmatched. */
+            matched_card?: components["schemas"]["SearchMatchedCard"];
+            /** @description Grade context for graded listings. Omitted for ungraded listings. */
+            grade?: components["schemas"]["SearchGrade"];
+        };
+        MarketplaceSearchRecord: {
+            /** @description Listing title */
+            title: string;
+            /** @description Current price or starting bid in USD */
+            price?: number | null;
+            /** @description Marketplace source */
+            source: string;
+            /** @description Type of listing */
+            listing_type?: ("auction" | "fixed" | "search") | null;
+            /** @description URL to the listing */
+            url?: string | null;
+            /** @description Primary image URL */
+            image_url?: string | null;
+            /** @description Condition description from seller */
+            condition?: string | null;
+            /** @description Listing end date in ISO 8601 format */
+            end_date?: string | null;
+            /** @description Number of bids (auctions only) */
+            bid_count?: number | null;
+            /** @description Parallel variant UUID. Null for base card listings. */
+            parallel_id?: string | null;
+            /** @description Parallel variant name. Null for base card listings. */
+            parallel_name?: string | null;
+            /** @description Canonical card this listing matched. Omitted when the listing is unmatched. */
+            matched_card?: components["schemas"]["SearchMatchedCard"];
+            /** @description Grade context for graded listings. Omitted for ungraded listings. */
+            grade?: components["schemas"]["SearchGrade"];
+        };
+        PricingSearchQueryEcho: {
+            /** @description Search query applied */
+            q: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Period filter applied */
+            period?: string;
+            /** @description Result limit applied */
+            limit?: number;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        MarketplaceSearchQueryEcho: {
+            /** @description Search query applied */
+            q: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Result limit applied */
+            limit?: number;
+            /** @description Date the data was retrieved */
+            as_of_date: string;
+        };
+        SearchMeta: {
+            /** @description Breakdown by data source */
+            sources: components["schemas"]["SourceBreakdownItem"][];
+            /** @description Total records returned */
+            total_records: number;
+        };
+        PricingSearchResponse: {
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["PricingSearchQueryEcho"];
+            /** @description Flat list of matched listings, ranked by title relevance. Spans multiple cards and may include unmatched listings. */
+            results: components["schemas"]["PricingSearchRecord"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["SearchMeta"];
+        };
+        MarketplaceSearchResponse: {
+            /** @description Echo of query parameters applied */
+            query: components["schemas"]["MarketplaceSearchQueryEcho"];
+            /** @description Flat list of matched active listings, ranked by title relevance. Spans multiple cards and may include unmatched listings. */
+            results: components["schemas"]["MarketplaceSearchRecord"][];
+            /** @description Response metadata */
+            meta: components["schemas"]["SearchMeta"];
         };
         ReleaseCalendarEntry: {
             /**
@@ -6569,7 +6865,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Segment identifier - either a UUID or segment name (e.g., "football", "baseball") */
+                /** @description Segment identifier — a UUID, segment name, or shortname (case-insensitive, e.g., "football", "baseball", "magic") */
                 segment: string;
             };
             cookie?: never;
@@ -12445,7 +12741,7 @@ export interface operations {
                 grade_id?: string;
                 /** @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit. */
                 period?: string;
-                /** @description Filter by listing type. auction=completed auctions, fixed=buy-it-now, both=all */
+                /** @description Filter by listing type. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side), both=all */
                 listing_type?: "auction" | "fixed" | "both";
                 /** @description Maximum number of records to return per card */
                 limit?: number;
@@ -12584,6 +12880,80 @@ export interface operations {
             };
         };
     };
+    searchPricingByTitle: {
+        parameters: {
+            query: {
+                /** @description Free-text search over marketplace listing titles. Surfaces historical pricing — completed auction sales (bid) and Buy It Now asking prices (ask) — including listings never matched to a canonical card. 3–300 characters. */
+                q: string;
+                /** @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit. */
+                period?: string;
+                /** @description Filter by listing type. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side), both=all */
+                listing_type?: "auction" | "fixed" | "both";
+                /** @description Maximum number of records to return. Default 100, hard cap 500. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingSearchResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingSearchResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     getCardMarketplace: {
         parameters: {
             query?: {
@@ -12621,6 +12991,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MarketplaceResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    searchMarketplaceByTitle: {
+        parameters: {
+            query: {
+                /** @description Free-text search over marketplace listing titles. Surfaces active listings, including ones never matched to a canonical card. 3–300 characters. */
+                q: string;
+                /** @description Filter by listing type. auction=auctions, fixed=buy-it-now, both=all */
+                listing_type?: "auction" | "fixed" | "both";
+                /** @description Maximum number of records to return. Default 100, hard cap 500. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceSearchResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceSearchResponse"];
                 };
             };
             /** @description Default Response */

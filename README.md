@@ -8,7 +8,7 @@
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
 The most comprehensive baseball card identification and collection management platform.
-**7M+ Cards** • **AI-Powered Recognition** • **Free Tier Available**
+**12M+ Cards** • **AI-Powered Recognition** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -37,8 +37,8 @@ The most comprehensive baseball card identification and collection management pl
 | **Collectors** | Manage collector profiles with names | `collectors.create()`, `collectors.update()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `lists.cards.add()` |
 | **Binders** | Organize collection subsets | `collections.binders.create()` |
-| **Pricing** | Completed sales data for cards | `pricing.get()`, `pricing.bulk()` |
-| **Marketplace** | Active marketplace listings for cards | `marketplace.get()` |
+| **Pricing** | Completed sales data for cards; free-text title search | `pricing.get()`, `pricing.bulk()`, `pricing.search()` |
+| **Marketplace** | Active marketplace listings for cards; free-text title search | `marketplace.get()`, `marketplace.search()` |
 | **Population Reports** | Graded population counts by card, set, or release | `population.card()`, `population.set()`, `population.release()` |
 | **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
 | **AI Search** | Natural language queries | `ai.query()` |
@@ -799,6 +799,43 @@ if (bulk.data) {
 }
 ```
 
+### Pricing Search (Free-Text Title)
+
+Search completed sales by listing title when you don't have a card ID. Returns a flat,
+relevance-ranked list that spans multiple cards and may include listings never matched to a
+canonical card:
+
+```typescript
+const results = await client.pricing.search({
+  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 3–300 characters
+  period: '90d',                         // Optional: "7d", "2w", "3m", "1y", "all"
+  listing_type: 'both',                  // Optional: auction, fixed, both
+  limit: 25                              // Optional: default 100, max 500
+});
+
+if (results.data) {
+  console.log(`Found ${results.data.meta.total_records} sales`);
+
+  for (const sale of results.data.results) {
+    console.log(`$${sale.price} - ${sale.title ?? 'Untitled'} (${sale.source})`);
+
+    // matched_card is present when the listing was matched to a canonical card
+    if (sale.matched_card) {
+      console.log(`  ${sale.matched_card.name} - ${sale.matched_card.set.name}`);
+    }
+    // grade is present for graded sales
+    if (sale.grade) {
+      console.log(`  ${sale.grade.company_name} ${sale.grade.grade_value}`);
+    }
+  }
+
+  // Breakdown by data source
+  for (const source of results.data.meta.sources) {
+    console.log(`${source.source}: ${source.count}`);
+  }
+}
+```
+
 ### Marketplace (Active Listings)
 
 Get currently active marketplace listings for cards:
@@ -832,6 +869,32 @@ const filtered = await client.marketplace.get('card_uuid', {
   listing_type: 'fixed',  // auction, fixed (buy-it-now), both
   limit: 25
 });
+```
+
+### Marketplace Search (Free-Text Title)
+
+Search active marketplace listings by title when you don't have a card ID. Same flat,
+relevance-ranked shape as pricing search (active listings instead of completed sales):
+
+```typescript
+const results = await client.marketplace.search({
+  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 3–300 characters
+  listing_type: 'both',                  // Optional: auction, fixed, both
+  limit: 25                              // Optional: default 100, max 500
+});
+
+if (results.data) {
+  console.log(`Found ${results.data.meta.total_records} active listings`);
+
+  for (const listing of results.data.results) {
+    console.log(`$${listing.price} - ${listing.title} (${listing.source})`);
+    if (listing.url) console.log(`  ${listing.url}`);
+    if (listing.bid_count) console.log(`  Bids: ${listing.bid_count}`);
+    if (listing.matched_card) {
+      console.log(`  ${listing.matched_card.name} - ${listing.matched_card.set.name}`);
+    }
+  }
+}
 ```
 
 ### Catalog Operations
@@ -1240,6 +1303,10 @@ import {
   BulkPricingResponse,
   MarketplaceResponse,
   MarketplaceRecord,
+  PricingSearchResponse,
+  PricingSearchRecord,
+  MarketplaceSearchResponse,
+  MarketplaceSearchRecord,
   Card,
   Set,
   Collection
@@ -1366,8 +1433,8 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |
-| **Pricing** | 2 | `pricing.get()`, `pricing.bulk()` |
-| **Marketplace** | 1 | `marketplace.get()` |
+| **Pricing** | 3 | `pricing.get()`, `pricing.bulk()`, `pricing.search()` |
+| **Marketplace** | 2 | `marketplace.get()`, `marketplace.search()` |
 | **Grades** | 3 | `grades.companies.*` |
 | **Autocomplete** | 6 | `autocomplete.*` |
 | **AI** | 1 | `ai.query()` |

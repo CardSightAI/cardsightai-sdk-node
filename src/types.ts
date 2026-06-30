@@ -174,6 +174,18 @@ export type BulkPricingResult = components['schemas']['BulkPricingResult'];
 export type MarketplaceResponse = components['schemas']['MarketplaceResponse'];
 export type MarketplaceRecord = components['schemas']['MarketplaceRecord'];
 
+// Pricing & marketplace search types (free-text title search, v3.7.0)
+export type PricingSearchResponse = components['schemas']['PricingSearchResponse'];
+export type PricingSearchRecord = components['schemas']['PricingSearchRecord'];
+export type PricingSearchQueryEcho = components['schemas']['PricingSearchQueryEcho'];
+export type MarketplaceSearchResponse = components['schemas']['MarketplaceSearchResponse'];
+export type MarketplaceSearchRecord = components['schemas']['MarketplaceSearchRecord'];
+export type MarketplaceSearchQueryEcho = components['schemas']['MarketplaceSearchQueryEcho'];
+// Shared search sub-types (used by both pricing and marketplace search)
+export type SearchMatchedCard = components['schemas']['SearchMatchedCard'];
+export type SearchGrade = components['schemas']['SearchGrade'];
+export type SearchMeta = components['schemas']['SearchMeta'];
+
 // Field catalog types (v3.4.2) — flexible card metadata system
 export type FieldValue = components['schemas']['FieldValue'];
 export type FieldValues = components['schemas']['FieldValues'];

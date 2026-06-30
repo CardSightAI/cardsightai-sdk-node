@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] - 2026-06-30
+
+### Added
+- **Pricing & Marketplace Title Search Endpoints** - Two new free-text search methods for finding listings by title when you don't have a canonical card ID. Both return a flat, relevance-ranked list (spanning multiple cards, including listings never matched to a card) rather than the raw/graded grouping of the existing `get()`/`bulk()` methods:
+  - `pricing.search(params)` - `GET /v1/pricing/search`. Completed sales search. Query: `q` (required, 3–300 chars), `period?` ("7d", "2w", "3m", "1y", "all"), `listing_type?` (auction/fixed/both), `limit?` (default 100, cap 500). Returns `PricingSearchResponse` with `query` (echo), `results[]` (`PricingSearchRecord`), and `meta` (`SearchMeta` with `sources[]` and `total_records`).
+  - `marketplace.search(params)` - `GET /v1/marketplace/search`. Active listings search. Same params as pricing search except no `period`. Returns `MarketplaceSearchResponse` with the same `query`/`results[]`/`meta` shape (`MarketplaceSearchRecord`).
+  - Each result record may include an optional `matched_card` (`SearchMatchedCard`, omitted when unmatched) and `grade` (`SearchGrade`, omitted when ungraded).
+  - New type exports: `PricingSearchResponse`, `PricingSearchRecord`, `PricingSearchQueryEcho`, `MarketplaceSearchResponse`, `MarketplaceSearchRecord`, `MarketplaceSearchQueryEcho`, and the shared `SearchMatchedCard`, `SearchGrade`, `SearchMeta`.
+
 ## [3.6.0] - 2026-06-02
 
 ### Added

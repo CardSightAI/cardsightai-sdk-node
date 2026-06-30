@@ -122,6 +122,28 @@ describe('CardSightAI SDK Integration Tests', () => {
     }
   });
 
+  test('Pricing - Title Search (v3.7.0)', async () => {
+    const response = await client.pricing.search({ q: 'Ken Griffey Jr', limit: 5 });
+    assert.ok(response.data, 'Response should have data');
+    assert.ok(Array.isArray(response.data.results), 'results should be an array');
+    assert.ok(response.data.query, 'Response should echo the query');
+    assert.ok(
+      typeof response.data.meta.total_records === 'number',
+      'meta.total_records should be a number'
+    );
+  });
+
+  test('Marketplace - Title Search (v3.7.0)', async () => {
+    const response = await client.marketplace.search({ q: 'Ken Griffey Jr', limit: 5 });
+    assert.ok(response.data, 'Response should have data');
+    assert.ok(Array.isArray(response.data.results), 'results should be an array');
+    assert.ok(response.data.query, 'Response should echo the query');
+    assert.ok(
+      typeof response.data.meta.total_records === 'number',
+      'meta.total_records should be a number'
+    );
+  });
+
 });
 
 console.log('\n✅ All integration tests passed!\n');

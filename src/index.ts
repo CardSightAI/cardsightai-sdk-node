@@ -34,6 +34,16 @@ export type {
   BulkPricingResult,
   MarketplaceResponse,
   MarketplaceRecord,
+  // Pricing & marketplace search types (v3.7.0)
+  PricingSearchResponse,
+  PricingSearchRecord,
+  PricingSearchQueryEcho,
+  MarketplaceSearchResponse,
+  MarketplaceSearchRecord,
+  MarketplaceSearchQueryEcho,
+  SearchMatchedCard,
+  SearchGrade,
+  SearchMeta,
   // Field catalog types (v3.4.2)
   FieldValue,
   FieldValues,

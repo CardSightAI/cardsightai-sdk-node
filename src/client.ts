@@ -1000,7 +1000,16 @@ export class CardSightAI {
      * Get pricing for multiple cards in bulk (up to 100)
      * @param data - Request body with card_ids and optional filters
      */
-    bulk: (data: PostBody<'/v1/pricing/'>) => this.client.POST('/v1/pricing/', { body: data })
+    bulk: (data: PostBody<'/v1/pricing/'>) => this.client.POST('/v1/pricing/', { body: data }),
+
+    /**
+     * Search completed sales pricing by free-text listing title.
+     * Returns a flat, relevance-ranked list spanning multiple cards (including
+     * listings never matched to a canonical card).
+     * @param params - Query parameters (q required; period, listing_type, limit optional)
+     */
+    search: (params: GetQueryParams<'/v1/pricing/search'>) =>
+      this.client.GET('/v1/pricing/search', { params: { query: params } })
   };
 
   /**
@@ -1015,7 +1024,16 @@ export class CardSightAI {
     get: (cardId: string, params?: GetQueryParams<'/v1/marketplace/{card_id}'>) =>
       this.client.GET('/v1/marketplace/{card_id}', {
         params: { path: { card_id: cardId }, query: params }
-      })
+      }),
+
+    /**
+     * Search active marketplace listings by free-text listing title.
+     * Returns a flat, relevance-ranked list spanning multiple cards (including
+     * listings never matched to a canonical card).
+     * @param params - Query parameters (q required; listing_type, limit optional)
+     */
+    search: (params: GetQueryParams<'/v1/marketplace/search'>) =>
+      this.client.GET('/v1/marketplace/search', { params: { query: params } })
   };
 
   /**

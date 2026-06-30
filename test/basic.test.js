@@ -79,6 +79,8 @@ test('Client structure', async (t) => {
     assert(client.collections, 'Should have collections endpoints');
     assert(client.autocomplete, 'Should have autocomplete endpoints');
     assert(client.ai, 'Should have AI endpoints');
+    assert(client.pricing, 'Should have pricing endpoints');
+    assert(client.marketplace, 'Should have marketplace endpoints');
     assert(client.feedback, 'Should have feedback endpoints');
     assert(client.raw, 'Should have raw client access');
   });
@@ -118,6 +120,14 @@ test('Client structure', async (t) => {
       typeof client.releaseCalendar.list === 'function',
       'Should have releaseCalendar.list()'
     );
+  });
+
+  await t.test('pricing & marketplace endpoints should exist', () => {
+    assert(typeof client.pricing.get === 'function', 'Should have pricing.get()');
+    assert(typeof client.pricing.bulk === 'function', 'Should have pricing.bulk()');
+    assert(typeof client.pricing.search === 'function', 'Should have pricing.search()');
+    assert(typeof client.marketplace.get === 'function', 'Should have marketplace.get()');
+    assert(typeof client.marketplace.search === 'function', 'Should have marketplace.search()');
   });
 });
 

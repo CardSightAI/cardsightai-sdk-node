@@ -25,11 +25,14 @@ npm run test:integration
 
 ### What Gets Tested
 
-The integration tests verify three core endpoints:
+The integration tests verify core endpoints, including:
 
 1. **Health Check** - Verifies the API is reachable
 2. **Authenticated Health Check** - Verifies your API key is valid
 3. **Catalog Card Search** - Verifies basic card search functionality
+4. **Catalog Fields / Release Calendar / Identifiable Sets** - Verifies paginated list endpoints
+5. **Pricing Title Search** - Verifies free-text pricing search (`pricing.search()`)
+6. **Marketplace Title Search** - Verifies free-text marketplace search (`marketplace.search()`)
 
 ### Expected Output
 
@@ -38,6 +41,9 @@ The integration tests verify three core endpoints:
   ✓ Health Check - Basic (XXXms)
   ✓ Health Check - Authenticated (XXXms)
   ✓ Catalog - Card Search (XXXms)
+  ...
+  ✓ Pricing - Title Search (v3.7.0) (XXXms)
+  ✓ Marketplace - Title Search (v3.7.0) (XXXms)
 
 ✅ All integration tests passed!
 ```
