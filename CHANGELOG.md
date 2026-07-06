@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.1] - 2026-07-06
+
+### Fixed
+- **Documentation** — Corrected inaccurate code examples throughout the README so every example type-checks against the actual SDK surface and generated types. Documentation only; no runtime or API changes. Highlights:
+  - **Catalog** — `catalog.cards.list` filters by player/subject via `name` (not `player`); `catalog.manufacturers()`, `catalog.segments()`, and `catalog.statistics()` are direct callables (not `.list()`/`.get()`); `year`/`min_year`/`max_year` are string-typed; `releases.list` uses `min_year`/`max_year` (not `yearFrom`/`yearTo`); statistics totals read from `data.cards.total` / `data.sets.total`.
+  - **Random** — `catalog.random.cards()` filters use `name` and `manufacturer` (not `playerName`/`manufacturerId`).
+  - **Collections / Binders / Lists** — Corrected positional arguments and request-body shapes for `collections.cards.add`, `collections.breakdown`, `binders.cards.add` (`collectionCardId`), `lists.create` (requires `collectorId`), and `lists.cards.add`; analytics fields read from `data.overview` / `data.financials`.
+  - **Feedback** — Request bodies use `feedback_type` + `message`.
+  - **Autocomplete** — Methods take a bare query string; removed the non-existent `autocomplete.parallels`.
+  - **Types** — Import only exported members (`paths` / `components`); advanced type access is path-based; card response fields are `releaseYear` / `releaseName`; `CardSightAIError` exposes `request` (not `requestId`).
+  - **Node image input** — Convert a `Buffer` to an `ArrayBuffer` (e.g. `new Uint8Array(buffer).buffer`) before passing it to `identify.card()` / `detect.card()`.
+
 ## [3.7.0] - 2026-06-30
 
 ### Added
