@@ -8,7 +8,7 @@
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
 The most comprehensive baseball card identification and collection management platform.
-**12M+ Cards** • **AI-Powered Recognition** • **Free Tier Available**
+**12M+ Trading Cards** • **AI-Powered Recognition** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -80,7 +80,7 @@ import { CardSightAI } from 'cardsightai';
 const client = new CardSightAI({ apiKey: 'your_api_key_here' });
 
 // 2. Identify a card from an image
-const imageFile = // ... File, Blob, Buffer, or ArrayBuffer
+const imageFile = // ... a File, Blob, or ArrayBuffer
 const result = await client.identify.card(imageFile);
 
 // 3. Access the identification results
@@ -115,8 +115,8 @@ const fileInput = document.querySelector('input[type="file"]');
 const file = fileInput.files[0];
 const result = await client.identify.card(file);
 
-// From a Buffer (Node.js)
-const imageBuffer = readFileSync('path/to/card.jpg');
+// From a file on disk (Node.js) — convert the Buffer to an ArrayBuffer
+const imageBuffer = new Uint8Array(readFileSync('path/to/card.jpg')).buffer;
 const result = await client.identify.card(imageBuffer);
 
 // From a Blob (browser/fetch)
@@ -293,7 +293,7 @@ import { readFileSync } from 'fs';
 const client = new CardSightAI({ apiKey: 'your_api_key' });
 
 // Check if an image contains trading cards
-const imageBuffer = readFileSync('path/to/image.jpg');
+const imageBuffer = new Uint8Array(readFileSync('path/to/image.jpg')).buffer;
 const result = await client.detect.card(imageBuffer);
 
 if (result.data) {
@@ -411,7 +411,7 @@ if (hasSuggestions(detection)) {
 }
 ```
 
-See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon and Magic: The Gathering examples.
+See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon, One Piece, and Magic: The Gathering examples.
 
 #### Parallel Variant Detection
 
@@ -628,15 +628,15 @@ const results = await client.catalog.search({
 const cardResults = await client.catalog.search({
   q: 'Topps Chrome',
   type: 'set',          // 'card' | 'set' | 'release' | 'parallel'
-  year: 2023
+  year: '2023'
 });
 
 // Filter by segment, manufacturer, year range
 const footballCards = await client.catalog.search({
   q: 'Patrick Mahomes',
   segment: 'football',
-  min_year: 2020,
-  max_year: 2024
+  min_year: '2020',
+  max_year: '2024'
 });
 
 // Process results
@@ -904,9 +904,9 @@ Search and retrieve cards, sets, releases, and other catalog data:
 ```typescript
 // Search for specific cards
 const cards = await client.catalog.cards.list({
-  year: 2023,
+  year: '2023',
   manufacturer: 'Topps',
-  player: 'Aaron Judge',
+  name: 'Aaron Judge',
   take: 10,  // Limit results
   skip: 0    // Pagination offset
 });
@@ -916,7 +916,7 @@ const card = await client.catalog.cards.get('card_uuid');
 
 // Search sets
 const sets = await client.catalog.sets.list({
-  year: 2023,
+  year: '2023',
   manufacturer: 'Topps',
   take: 20
 });
@@ -927,15 +927,15 @@ const setCards = await client.catalog.sets.cards('set_uuid');
 // Search releases (product lines like "Chrome", "Series 1")
 const releases = await client.catalog.releases.list({
   name: 'Chrome',
-  yearFrom: 2020,
-  yearTo: 2024
+  min_year: '2020',
+  max_year: '2024'
 });
 
 // Get manufacturers
-const manufacturers = await client.catalog.manufacturers.list();
+const manufacturers = await client.catalog.manufacturers();
 
 // Get segments (Baseball, Football, etc.)
-const segments = await client.catalog.segments.list();
+const segments = await client.catalog.segments();
 
 // Get all parallels/variations
 const parallels = await client.catalog.parallels.list();
@@ -957,9 +957,9 @@ if (card?.parallels && card.parallels.length > 0) {
 }
 
 // Get catalog statistics
-const stats = await client.catalog.statistics.get();
-console.log(`Total cards: ${stats.data?.totalCards}`);
-console.log(`Total sets: ${stats.data?.totalSets}`);
+const stats = await client.catalog.statistics();
+console.log(`Total cards: ${stats.data?.cards.total}`);
+console.log(`Total sets: ${stats.data?.sets.total}`);
 ```
 
 ### Release Calendar
@@ -1014,7 +1014,7 @@ if (pack.data?.cards) {
 // Discovery feature - Get 5 random releases from 2023
 const randomReleases = await client.catalog.random.releases({
   count: 5,
-  year: 2023
+  year: '2023'
 });
 
 // Get random sets from a specific release
@@ -1025,14 +1025,14 @@ const randomSets = await client.catalog.random.sets({
 
 // Player collection building - Get random player cards
 const randomPlayerCards = await client.catalog.random.cards({
-  playerName: 'Mike Trout',
+  name: 'Mike Trout',
   count: 3
 });
 
 // Random cards with filters (no parallels)
 const randomCards = await client.catalog.random.cards({
-  year: 2024,
-  manufacturerId: 'manufacturer_uuid',
+  year: '2024',
+  manufacturer: 'manufacturer_uuid',
   count: 20
 });
 ```
@@ -1062,23 +1062,20 @@ Manage personal card collections with full CRUD operations:
 const collection = await client.collections.create({
   name: 'My Vintage Cards',
   description: 'Pre-1980 baseball cards',
-  isPublic: false,
   collectorId: 'collector_uuid'  // Required: links to a collector profile
 });
 
-// Add cards to collection with detailed information
-await client.collections.cards.add({
-  collectionId: collection.data.id,
-  cards: [{
+// Add cards to collection with detailed information.
+// Signature: add(collectionId, cardItem | cardItem[])
+await client.collections.cards.add(collection.data!.id, [
+  {
     cardId: 'card_uuid',
     quantity: 1,
     buyPrice: '50.00',    // Store purchase price
     buyDate: '2024-01-15', // Track purchase date
-    gradeId: 'grade_uuid', // Optional: PSA 10, BGS 9.5, etc.
-    condition: 'NM',       // Near Mint, Excellent, etc.
-    notes: 'Pulled from pack'
-  }]
-});
+    gradeId: 'grade_uuid'  // Optional: PSA 10, BGS 9.5, etc.
+  }
+]);
 
 // Update collection card (e.g., after selling)
 await client.collections.cards.update(
@@ -1092,14 +1089,13 @@ await client.collections.cards.update(
 
 // Get collection analytics
 const analytics = await client.collections.analytics('collection_uuid');
-console.log(`Total cards: ${analytics.data?.totalCards}`);
-console.log(`Total value: ${analytics.data?.totalValue}`);
-console.log(`Total spent: ${analytics.data?.totalSpent}`);
+console.log(`Total cards: ${analytics.data?.overview.totalCards}`);
+console.log(`Total invested: ${analytics.data?.financials.totalInvested}`);
+console.log(`Total realized gains: ${analytics.data?.financials.totalRealizedGains}`);
 
 // Get collection breakdown by various categories
-const breakdown = await client.collections.breakdown({
-  collectionId: 'collection_uuid',
-  groupBy: 'year'  // Options: 'year', 'manufacturer', 'set', 'grade'
+const breakdown = await client.collections.breakdown('collection_uuid', {
+  groupBy: 'year'  // Options: 'release', 'year', 'grade', 'player', 'manufacturer'
 });
 
 // List all collections for a collector
@@ -1123,12 +1119,12 @@ const binder = await client.collections.binders.create(
   }
 );
 
-// Add collection cards to binder
+// Add a collection card to a binder
 await client.collections.binders.cards.add(
   'collection_uuid',
   'binder_uuid',
   {
-    collectionCardIds: ['card1_uuid', 'card2_uuid']
+    collectionCardId: 'card1_uuid'
   }
 );
 
@@ -1146,17 +1142,16 @@ Track cards you want to acquire:
 ```typescript
 // Create a want list
 const list = await client.lists.create({
+  collectorId: 'collector_uuid',
   name: 'Rookies to Find',
   description: '2024 rookie cards I need'
 });
 
 // Add cards to the list
-await client.lists.cards.add('list_uuid', {
-  cards: [
-    { cardId: 'card_uuid_1' },
-    { cardId: 'card_uuid_2' }
-  ]
-});
+await client.lists.cards.add('list_uuid', [
+  { cardId: 'card_uuid_1' },
+  { cardId: 'card_uuid_2' }
+]);
 
 // Get all cards in a list
 const listCards = await client.lists.cards.list('list_uuid');
@@ -1194,8 +1189,7 @@ Use natural language to search the catalog:
 ```typescript
 // Ask questions in natural language
 const response = await client.ai.query({
-  query: 'Show me Mike Trout rookie cards worth over $100',
-  maxResults: 10
+  query: 'Show me Mike Trout rookie cards worth over $100'
 });
 
 // The AI understands context and intent
@@ -1209,19 +1203,16 @@ const response2 = await client.ai.query({
 Provide search suggestions for users:
 
 ```typescript
-// Get card name suggestions
-const suggestions = await client.autocomplete.cards({
-  query: 'aaron',  // User typed "aaron"
-  take: 5
-});
+// Get card name suggestions (pass the query string directly)
+const suggestions = await client.autocomplete.cards('aaron'); // User typed "aaron"
 // Returns: ["Aaron Judge", "Hank Aaron", "Aaron Nola", ...]
 
 // Autocomplete for other entities
-const sets = await client.autocomplete.sets({ query: 'chrome' });
-const manufacturers = await client.autocomplete.manufacturers({ query: 'top' });
-const releases = await client.autocomplete.releases({ query: 'series' });
-const segments = await client.autocomplete.segments({ query: 'base' });
-const parallels = await client.autocomplete.parallels({ query: 'ref' });
+const sets = await client.autocomplete.sets('chrome');
+const manufacturers = await client.autocomplete.manufacturers('top');
+const releases = await client.autocomplete.releases('series');
+const segments = await client.autocomplete.segments('base');
+const years = await client.autocomplete.years('2023');
 ```
 
 ### Image Retrieval
@@ -1258,24 +1249,20 @@ Submit feedback to improve the platform:
 ```typescript
 // Report identification issues
 await client.feedback.identify('identification_request_id', {
-  correct: false,
-  suggestedCardId: 'correct_card_uuid',
-  comments: 'Wrong year detected'
+  feedback_type: 'data_error',  // 'data_error' | 'missing_data' | 'suggestion' | 'bug' | 'other'
+  message: 'Wrong year detected'
 });
 
 // Submit general feedback
 await client.feedback.general({
-  type: 'bug',  // 'bug', 'feature', 'improvement', 'other'
-  title: 'Search not finding parallel cards',
-  description: 'Detailed description here...',
-  email: 'user@example.com'  // Optional
+  feedback_type: 'bug',  // 'data_error' | 'missing_data' | 'suggestion' | 'bug' | 'other'
+  message: 'Search not finding parallel cards'
 });
 
 // Report issues with specific entities
 await client.feedback.card('card_uuid', {
-  type: 'incorrect',  // 'incorrect', 'missing', 'duplicate', 'other'
-  description: 'Player name is misspelled',
-  suggestedCorrection: 'Correct spelling here'
+  feedback_type: 'data_error',  // 'data_error' | 'missing_data' | 'suggestion' | 'bug' | 'other'
+  message: 'Player name is misspelled'
 });
 ```
 
@@ -1306,10 +1293,7 @@ import {
   PricingSearchResponse,
   PricingSearchRecord,
   MarketplaceSearchResponse,
-  MarketplaceSearchRecord,
-  Card,
-  Set,
-  Collection
+  MarketplaceSearchRecord
 } from 'cardsightai';
 
 // All methods are fully typed
@@ -1320,8 +1304,8 @@ const result = await client.catalog.cards.get('id');
 if (result.data) {
   // TypeScript knows all available fields
   console.log(result.data.name);
-  console.log(result.data.year);
-  console.log(result.data.manufacturer);
+  console.log(result.data.releaseYear);
+  console.log(result.data.releaseName);
 }
 
 // Use types in your functions
@@ -1337,7 +1321,7 @@ function processDetection(detection: CardDetection): void {
 The SDK provides access to all OpenAPI-generated types for advanced use cases:
 
 ```typescript
-import type { paths, components, operations } from 'cardsightai';
+import type { paths, components } from 'cardsightai';
 
 // Access named component schemas
 type Card = components['schemas']['Card'];
@@ -1345,15 +1329,16 @@ type Set = components['schemas']['Set'];
 type Release = components['schemas']['Release'];
 type IdentifyResponse = components['schemas']['IdentifyCardResponse'];
 
-// Access operation types directly by operationId
-type IdentifyCardOperation = operations['identifyCard'];
-type GetCardsOperation = operations['getCards'];
+// The SDK is path-based (consistent with openapi-fetch): access request and
+// response types straight from `paths` by URL + HTTP method.
+type IdentifyCardOperation = paths['/v1/identify/card']['post'];
+type GetCardsOperation = paths['/v1/catalog/cards']['get'];
 
-// Extract specific response types from operations
-type HealthResponse = operations['getHealth']['responses']['200']['content']['application/json'];
-type CardsListResponse = operations['getCards']['responses']['200']['content']['application/json'];
+// Extract a specific response type from a path
+type HealthResponse = paths['/health']['get']['responses']['200']['content']['application/json'];
+type CardsListResponse = paths['/v1/catalog/cards']['get']['responses']['200']['content']['application/json'];
 
-// The SDK uses path-based type helpers internally for consistency with openapi-fetch
+// Extract the query params for an endpoint
 type CardListParams = paths['/v1/catalog/cards']['get']['parameters']['query'];
 ```
 
@@ -1375,7 +1360,7 @@ try {
     console.error(`API Error ${error.status}: ${error.message}`);
 
     // Access detailed error information
-    console.error('Request ID:', error.requestId);
+    console.error('Request details:', error.request);
     console.error('Response:', error.response);
 
     // Some errors are retryable
