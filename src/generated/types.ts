@@ -220,7 +220,7 @@ export interface paths {
         };
         /**
          * Search across cards, sets, releases, and parallels
-         * @description Global fuzzy search endpoint that searches across card names, set names, release names, parallel names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps", "1952 mickey mantle", or "refractor". Uses PostgreSQL full-text search combined with trigram similarity for typo-tolerant matching. Results are ranked by relevance and returned as a mixed list of cards, sets, releases, and parallels. Cards and sets that match a parallel name (e.g., "Refractor") are boosted in relevance and include the matching parallelName in the response. Use the "type" parameter to filter to a specific entity type.
+         * @description Global fuzzy search endpoint that searches across card names, set names, release names, parallel names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps", "1952 mickey mantle", or "refractor". Uses PostgreSQL full-text search combined with trigram similarity for typo-tolerant matching. Results are ranked by relevance and returned as a mixed list of cards, sets, releases, and parallels. Cards and sets that match a parallel name (e.g., "Refractor") are boosted in relevance and include the matching parallelName in the response. Slash notation is supported: append a standalone term like "/25" (e.g. "aaron judge /25") to hard-filter results to cards and parallels whose applicable parallel is serial-numbered to that value; matched results include the numberedTo field. Use the "type" parameter to filter to a specific entity type.
          */
         get: operations["searchCatalog"];
         put?: never;
@@ -579,7 +579,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Search for parallels across sets and releases
+         * Search for parallels across sets and releases (free)
          * @description Search for parallels by name and filter by release. Returns all sets containing the parallel with release information
          */
         get: operations["getParallels"];
@@ -599,7 +599,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get detailed parallel information
+         * Get detailed parallel information (free)
          * @description Retrieve detailed information about a specific Parallel, including set and release context. For partial parallels (isPartial=true), the response includes an array of Card IDs that have this Parallel.
          */
         get: operations["getParallel"];
@@ -2273,7 +2273,7 @@ export interface paths {
         };
         /**
          * Get price history (bid/ask) for a card
-         * @description Returns historical pricing for a single card as a bid/ask spread: completed auction sales (the "bid" side — what cards actually sold for) alongside Buy It Now listings (the "ask" side — what sellers were asking, which is not necessarily a completed sale). Results are grouped into raw (ungraded) and graded sections, with graded results organized by grading company and grade value. Supports filtering by parallel variant, grade, time period, and listing type.
+         * @description Returns historical pricing for a single card as a bid/ask spread: completed auction sales (the "bid" side — what cards actually sold for) alongside Buy It Now listings (the "ask" side — what sellers were asking, which is not necessarily a completed sale). Results are grouped into raw (ungraded) and graded sections, with graded results organized by grading company and grade value. Supports filtering by parallel variant, grade, time period, and listing type. Each call returns the most-recent listings for the card, up to a cap of 500 rows ending at `as_of_date` (default today, US Eastern). If that cap is hit a warning is returned in `messages`; to page further back through history, set `as_of_date` to the oldest `date` in the response and query again (the boundary day may repeat a few rows — duplicates, never gaps).
          */
         get: operations["getCardPricing"];
         put?: never;
@@ -2295,7 +2295,7 @@ export interface paths {
         put?: never;
         /**
          * Get price history (bid/ask) for multiple cards
-         * @description Returns price history as a bid/ask spread for up to 100 cards in a single request — completed auction sales (bid) and Buy It Now asking prices (ask, not necessarily a completed sale). Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint.
+         * @description Returns price history as a bid/ask spread for up to 100 cards in a single request — completed auction sales (bid) and Buy It Now asking prices (ask, not necessarily a completed sale). Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint. This endpoint is a recent market snapshot: it returns the most-recent listings per card up to `limit` (default 25, max 100). A single request covers up to 100 cards, so the default returns up to 2,500 datapoints and the maximum up to 10,000. When a card hits that cap a warning is returned in its `messages`; for a card's full history use GET /pricing/{card_id} with `as_of_date` to page backward.
          */
         post: operations["getBulkPricing"];
         delete?: never;
@@ -3595,6 +3595,8 @@ export interface components {
             skip: number;
             /** @description Number of results included in this page */
             take: number;
+            /** @description Optional server advisory messages, e.g. a warning that an unrecognized query parameter was ignored. Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         PaginatedSetsResponseInput: {
             /** @description Array of set entities with card counts and release information */
@@ -3957,6 +3959,8 @@ export interface components {
             manufacturerName?: string;
             /** @description Name of the matching parallel variant. Present when a parallel name contributed to this result's relevance. */
             parallelName?: string;
+            /** @description Serial print-run limit of the matching parallel (e.g. 25 for a /25). Present on parallel results, and on card results matched via `/N` slash notation. */
+            numberedTo?: number;
         };
         CatalogSearchResponseInput: {
             /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
@@ -3967,6 +3971,8 @@ export interface components {
             skip: number;
             /** @description Number of results included in this page. */
             take: number;
+            /** @description Optional server advisory messages, e.g. a warning that an unrecognized query parameter was ignored. Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         AutocompleteResponseInput: {
             /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
@@ -4068,7 +4074,7 @@ export interface components {
              * @enum {string}
              */
             listing_type: "auction" | "fixed" | "both";
-            /** @description Maximum number of records per card */
+            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Max 100 (up to 10,000 datapoints per request). For a card's full history use GET /pricing/{card_id} with as_of_date. */
             limit?: number;
         };
         PricingRecordInput: {
@@ -4160,7 +4166,7 @@ export interface components {
             period?: string;
             /** @description Listing type filter applied */
             listing_type?: string;
-            /** @description Date the data was retrieved */
+            /** @description Anchor date (US Eastern Time) the lookback window ends on — echoes the as_of_date input, or today when omitted. */
             as_of_date: string;
         };
         SourceBreakdownItemInput: {
@@ -4222,6 +4228,8 @@ export interface components {
             graded: components["schemas"]["PricingCompanyGroupInput"][];
             /** @description Response metadata */
             meta: components["schemas"]["PricingMetaInput"];
+            /** @description Server advisory messages (e.g. the requested period was truncated, or the row cap was hit and more listings may exist within the window). Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         RawMarketplaceSectionInput: {
             /** @description Number of active listings */
@@ -5682,6 +5690,8 @@ export interface components {
             skip: number;
             /** @description Number of results included in this page */
             take: number;
+            /** @description Optional server advisory messages, e.g. a warning that an unrecognized query parameter was ignored. Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         PaginatedSetsResponse: {
             /** @description Array of set entities with card counts and release information */
@@ -6044,6 +6054,8 @@ export interface components {
             manufacturerName?: string;
             /** @description Name of the matching parallel variant. Present when a parallel name contributed to this result's relevance. */
             parallelName?: string;
+            /** @description Serial print-run limit of the matching parallel (e.g. 25 for a /25). Present on parallel results, and on card results matched via `/N` slash notation. */
+            numberedTo?: number;
         };
         CatalogSearchResponse: {
             /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
@@ -6054,6 +6066,8 @@ export interface components {
             skip: number;
             /** @description Number of results included in this page. */
             take: number;
+            /** @description Optional server advisory messages, e.g. a warning that an unrecognized query parameter was ignored. Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         AutocompleteResponse: {
             /** @description List of autocomplete suggestions, maximum 10 items, sorted alphabetically */
@@ -6155,7 +6169,7 @@ export interface components {
              * @enum {string}
              */
             listing_type: "auction" | "fixed" | "both";
-            /** @description Maximum number of records per card */
+            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Max 100 (up to 10,000 datapoints per request). For a card's full history use GET /pricing/{card_id} with as_of_date. */
             limit?: number;
         };
         PricingRecord: {
@@ -6247,7 +6261,7 @@ export interface components {
             period?: string;
             /** @description Listing type filter applied */
             listing_type?: string;
-            /** @description Date the data was retrieved */
+            /** @description Anchor date (US Eastern Time) the lookback window ends on — echoes the as_of_date input, or today when omitted. */
             as_of_date: string;
         };
         SourceBreakdownItem: {
@@ -6309,6 +6323,8 @@ export interface components {
             graded: components["schemas"]["PricingCompanyGroup"][];
             /** @description Response metadata */
             meta: components["schemas"]["PricingMeta"];
+            /** @description Server advisory messages (e.g. the requested period was truncated, or the row cap was hit and more listings may exist within the window). Omitted when there are none. */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         RawMarketplaceSection: {
             /** @description Number of active listings */
@@ -7127,7 +7143,7 @@ export interface operations {
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
-                /** @description Free-text search query. Searches across card names, set names, release names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps" or "1952 mickey mantle". Minimum 2 characters. */
+                /** @description Free-text search query. Searches across card names, set names, release names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps" or "1952 mickey mantle". Append a standalone slash term like "/25" to filter to cards and parallels whose parallel is numbered to that value (e.g. "aaron judge /25"). Minimum 2 characters. */
                 q: string;
                 /** @description Filter results to a specific entity type. When omitted, returns mixed results across all types. */
                 type?: "card" | "set" | "release" | "parallel";
@@ -12741,6 +12757,8 @@ export interface operations {
                 grade_id?: string;
                 /** @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit. */
                 period?: string;
+                /** @description Anchor date (US Eastern Time, YYYY-MM-DD) marking the most-recent day of the window; results are the most-recent listings on or before this date (up to the per-card row cap). Defaults to today. To page further back through history, set as_of_date to the oldest `date` in the previous response and query again. A future date is clamped to today. */
+                as_of_date?: string;
                 /** @description Filter by listing type. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side), both=all */
                 listing_type?: "auction" | "fixed" | "both";
                 /** @description Maximum number of records to return per card */

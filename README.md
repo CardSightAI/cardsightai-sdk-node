@@ -639,6 +639,12 @@ const footballCards = await client.catalog.search({
   max_year: '2024'
 });
 
+// Slash notation: append a standalone "/N" term to hard-filter to cards and
+// parallels serial-numbered to that value. Matched results expose `numberedTo`.
+const numbered = await client.catalog.search({
+  q: 'aaron judge /25'   // only cards/parallels numbered to /25
+});
+
 // Process results
 if (results.data) {
   console.log(`Found ${results.data.total_count} results`);
@@ -646,6 +652,12 @@ if (results.data) {
     console.log(`[${result.type}] ${result.name} (relevance: ${result.relevance})`);
     if (result.setName) console.log(`  Set: ${result.setName}`);
     if (result.year) console.log(`  Year: ${result.year}`);
+    if (result.numberedTo) console.log(`  Numbered to /${result.numberedTo}`);
+  }
+
+  // Advisory messages (e.g. an unrecognized query parameter was ignored)
+  for (const msg of results.data.messages ?? []) {
+    console.log(`[${msg.type}] ${msg.message}`);
   }
 }
 ```
@@ -777,11 +789,35 @@ const filtered = await client.pricing.get('card_uuid', {
   limit: 50                       // Max records per section
 });
 
+// Page backward through price history
+// Each call returns the most-recent listings up to a 500-row cap ending at `as_of_date`
+// (default: today, US Eastern). When the cap is hit, a warning is returned in `messages`.
+const firstPage = await client.pricing.get('card_uuid', { period: 'all' });
+
+if (firstPage.data) {
+  // Advisory messages (e.g. the row cap was hit and more listings exist in the window)
+  for (const msg of firstPage.data.messages ?? []) {
+    console.log(`[${msg.type}] ${msg.message}`);
+  }
+
+  // To fetch older listings, anchor the next call at the oldest date returned
+  // (records are most-recent first, so the oldest raw record is last).
+  // The boundary day may repeat a few rows (duplicates, never gaps).
+  const oldest = firstPage.data.raw.records.at(-1)?.date;
+  if (oldest) {
+    const olderPage = await client.pricing.get('card_uuid', {
+      period: 'all',
+      as_of_date: oldest    // 'YYYY-MM-DD'; future dates are clamped to today
+    });
+  }
+}
+
 // Bulk pricing for multiple cards (up to 100)
 const bulk = await client.pricing.bulk({
   card_ids: ['card_uuid_1', 'card_uuid_2', 'card_uuid_3'],
   period: '90d',
-  listing_type: 'both'
+  listing_type: 'both',
+  limit: 25                       // Optional: most-recent listings per card (default 25, max 100)
 });
 
 if (bulk.data) {

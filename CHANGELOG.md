@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] - 2026-07-14
+
+### Added
+- **Pricing history paging** — `pricing.get()` now accepts an optional `as_of_date` query param (`GET /v1/pricing/{card_id}`). Each call returns the most-recent listings up to a 500-row cap ending at `as_of_date` ("YYYY-MM-DD", US Eastern; default today, future dates clamped). To page further back through history, set `as_of_date` to the oldest `date` in the previous response (the boundary day may repeat a few rows — duplicates, never gaps).
+- **Catalog search slash notation** — `catalog.search()` `q` now supports a standalone `/N` term (e.g. `"aaron judge /25"`) to hard-filter results to cards and parallels serial-numbered to that value. Matching `SearchResult` rows expose a new optional `numberedTo` field (also present on parallel results generally).
+- **Server advisory messages** — Added optional `messages` arrays (`ServerMessage[]`) to the `catalog.cards.list`, `catalog.search`, and `pricing.get` responses (`PaginatedCardsResponse`, `CatalogSearchResponse`, `PricingResponse`). These surface non-fatal advisories such as an ignored query parameter or a row-cap warning. The `ServerMessage` type was already exported.
+
+### Changed
+- Regenerated types from the latest OpenAPI spec; parallel catalog endpoints (`getParallels`, `getParallel`) are now marked free, and pricing endpoint descriptions were expanded to document the row caps and paging behavior. `pricing.bulk()`'s `limit` remains optional (its server-applied default of 25 is now documented in the field description).
+
 ## [3.7.1] - 2026-07-06
 
 ### Fixed
