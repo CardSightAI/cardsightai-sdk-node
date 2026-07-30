@@ -3000,10 +3000,10 @@ export interface components {
             /** @description The feedback message */
             message: string;
             /**
-             * @description Current review status of the feedback
+             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team.
              * @enum {string}
              */
-            status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            status: "new" | "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
             /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
             /** @description ISO 8601 timestamp when the feedback was last updated */
@@ -3067,7 +3067,7 @@ export interface components {
             variationOf?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: components["schemas"]["ParallelSummaryInput"];
-            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
             fields?: components["schemas"]["FieldValuesInput"];
             /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
             suggestions?: components["schemas"]["CardSuggestionInput"][];
@@ -5095,10 +5095,10 @@ export interface components {
             /** @description The feedback message */
             message: string;
             /**
-             * @description Current review status of the feedback
+             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team.
              * @enum {string}
              */
-            status: "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            status: "new" | "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
             /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
             /** @description ISO 8601 timestamp when the feedback was last updated */
@@ -5162,7 +5162,7 @@ export interface components {
             variationOf?: string;
             /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
             parallel?: components["schemas"]["ParallelSummary"];
-            /** @description Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
             fields?: components["schemas"]["FieldValues"];
             /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
             suggestions?: components["schemas"]["CardSuggestion"][];
@@ -12901,7 +12901,7 @@ export interface operations {
     searchPricingByTitle: {
         parameters: {
             query: {
-                /** @description Free-text search over marketplace listing titles. Surfaces historical pricing — completed auction sales (bid) and Buy It Now asking prices (ask) — including listings never matched to a canonical card. 3–300 characters. */
+                /** @description Free-text search over marketplace listing titles. Surfaces historical pricing — completed auction sales (bid) and Buy It Now asking prices (ask) — including listings never matched to a canonical card. 2–300 characters. */
                 q: string;
                 /** @description Lookback period. Examples: "7d", "14d", "2w", "3m", "1y", "all". Omit or "all" for no time limit. */
                 period?: string;
@@ -13052,7 +13052,7 @@ export interface operations {
     searchMarketplaceByTitle: {
         parameters: {
             query: {
-                /** @description Free-text search over marketplace listing titles. Surfaces active listings, including ones never matched to a canonical card. 3–300 characters. */
+                /** @description Free-text search over marketplace listing titles. Surfaces active listings, including ones never matched to a canonical card. 2–300 characters. */
                 q: string;
                 /** @description Filter by listing type. auction=auctions, fixed=buy-it-now, both=all */
                 listing_type?: "auction" | "fixed" | "both";

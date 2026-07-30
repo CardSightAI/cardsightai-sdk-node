@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.1] - 2026-07-30
+
+### Added
+- **Card language detection** — identification detections may now include a `CARD_LANGUAGE` entry in `card.fields` holding the **ISO 639-1** code of the scanned card's language (e.g. `"ja"`, `"en"`). Read it with the existing helper: `getFieldValue(detection, 'CARD_LANGUAGE')`, and map it to a display name with `new Intl.DisplayNames(['en'], { type: 'language' }).of(code)`. No new types or methods.
+- **`"new"` feedback status** — `FeedbackResponse.status` gained a `"new"` value. Newly submitted feedback now comes back as `"new"` rather than `"not_reviewed"`; the remaining values are still set by the review team. Runtime-additive, but note that a hard `status === 'not_reviewed'` check on a fresh submission no longer matches, and an exhaustive TypeScript `switch` over `status` will need a `"new"` branch.
+
+### Changed
+- **Title search minimum query length relaxed** — `pricing.search()` and `marketplace.search()` now accept a `q` of **2–300** characters (was 3–300).
+- Regenerated types from the latest OpenAPI spec. No endpoints, methods, parameters, or response fields were added, removed, or renamed; no `client.ts` / `utils.ts` / `types.ts` changes were required.
+
 ## [3.8.0] - 2026-07-14
 
 ### Added

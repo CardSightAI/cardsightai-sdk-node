@@ -374,7 +374,7 @@ if (hasDetections(result.data)) {
 Every detection's `card` now optionally includes three additional fields:
 
 - `numberedTo?: number` — print run for numbered base cards (e.g. `25` for a `/25`), independent of parallels
-- `fields?: FieldValue[]` — key/value metadata tailored to the TCG (e.g. `HP`, `RARITY`, `ARTIST`, `MANA_COST`)
+- `fields?: FieldValue[]` — key/value metadata tailored to the TCG (e.g. `HP`, `RARITY`, `ARTIST`, `MANA_COST`), plus a `CARD_LANGUAGE` entry holding the **ISO 639-1** code of the scanned card's language (e.g. `"ja"`, `"en"`) when it is detected (v3.8.1+)
 - `suggestions?: CardSuggestion[]` — alternative card candidates when multiple reprints scored similarly
 
 ```typescript
@@ -392,6 +392,14 @@ if (!detection) return;
 
 // Pull a specific metadata value (case-insensitive key lookup)
 const artist = getFieldValue(detection, 'ARTIST');
+
+// Detected language of the scanned card as an ISO 639-1 code, when available
+const language = getFieldValue(detection, 'CARD_LANGUAGE');  // e.g. "ja"
+if (language && language !== 'en') {
+  // Map the code to a display name with the built-in Intl API
+  const label = new Intl.DisplayNames(['en'], { type: 'language' }).of(language);
+  console.log(`Non-English printing: ${label} (${language})`);  // "Japanese (ja)"
+}
 
 // Format all metadata for display
 console.log(formatFieldValues(detection, ' · '));
@@ -698,8 +706,9 @@ const detection = result.data?.detections?.[0];
 if (detection && isExactMatch(detection)) {
   const rarity = getFieldValue(detection, 'RARITY');
   const hp = getFieldValue(detection, 'HP');
-  console.log(`${detection.card.name} — ${rarity} (HP: ${hp})`);
-  // e.g. "Charizard — Holo Rare (HP: 120)"
+  const language = getFieldValue(detection, 'CARD_LANGUAGE');  // ISO 639-1, e.g. "ja"
+  console.log(`${detection.card.name} — ${rarity} (HP: ${hp}) [${language}]`);
+  // e.g. "Charizard — Holo Rare (HP: 120) [ja]"
 
   if (rarity?.toLowerCase().includes('rare')) {
     // Route to a higher-value pricing lookup, flag for user review, etc.
@@ -843,7 +852,7 @@ canonical card:
 
 ```typescript
 const results = await client.pricing.search({
-  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 3–300 characters
+  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 2–300 characters
   period: '90d',                         // Optional: "7d", "2w", "3m", "1y", "all"
   listing_type: 'both',                  // Optional: auction, fixed, both
   limit: 25                              // Optional: default 100, max 500
@@ -914,7 +923,7 @@ relevance-ranked shape as pricing search (active listings instead of completed s
 
 ```typescript
 const results = await client.marketplace.search({
-  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 3–300 characters
+  q: 'Ken Griffey Jr 1989 Upper Deck',  // Required, 2–300 characters
   listing_type: 'both',                  // Optional: auction, fixed, both
   limit: 25                              // Optional: default 100, max 500
 });
@@ -1300,7 +1309,24 @@ await client.feedback.card('card_uuid', {
   feedback_type: 'data_error',  // 'data_error' | 'missing_data' | 'suggestion' | 'bug' | 'other'
   message: 'Player name is misspelled'
 });
+
+// Look up a previously submitted item by its unique_id
+const submitted = await client.feedback.get('feedback_unique_id');
+console.log(submitted.data?.data.status);  // e.g. 'new'
 ```
+
+Each response carries a review `status`. Newly submitted feedback starts as `'new'`; every
+other value is set by the review team:
+
+| Status | Meaning |
+|--------|---------|
+| `new` | Just submitted, not yet triaged (v3.8.1+) |
+| `not_reviewed` | Queued, awaiting review |
+| `under_review` | Actively being investigated |
+| `fixed` | Resolved — the reported issue was corrected |
+| `wont_fix` | Reviewed and intentionally not being changed |
+| `duplicate` | Already tracked under another report |
+| `need_info` | More detail is needed before it can be actioned |
 
 ## TypeScript Support
 
