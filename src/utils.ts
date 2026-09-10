@@ -8,7 +8,8 @@ import type {
   DetectedCard,
   CardParallel,
   FieldValue,
-  CardSuggestion
+  CardSuggestion,
+  ParallelSuggestion
 } from './types.js';
 
 /**
@@ -179,44 +180,146 @@ export function formatCardDisplay(card: DetectedCard): string {
   return parts.join(' ') || 'Unknown Card';
 }
 
+// ============================================================================
+// Parallel Suggestion Utilities (v4.0.0, beta — CardDetails.parallelSuggestions)
+// ============================================================================
+
 /**
- * Check if a detection is a parallel variant
+ * Check if a detection carries any parallel evidence (one or more parallel suggestions).
+ * This is true for a single confirmed parallel as well as for several possible candidates —
+ * inspect each entry's `confidence` to tell them apart.
  * @param detection - The card detection
- * @returns True if the detected card is a parallel variant
+ * @returns True if at least one parallel suggestion is present
+ */
+export function hasParallelSuggestions(detection: CardDetection): boolean {
+  return Boolean(
+    detection.card.parallelSuggestions && detection.card.parallelSuggestions.length > 0
+  );
+}
+
+/**
+ * Get all parallel suggestions from a detection, in the engine's ranking (best match first)
+ * @param detection - The card detection
+ * @returns Array of parallel suggestions, or empty array if none
+ */
+export function getParallelSuggestions(detection: CardDetection): ParallelSuggestion[] {
+  return detection.card.parallelSuggestions || [];
+}
+
+/**
+ * Get the best-match parallel suggestion (the first entry in the engine's ranking).
+ * Ranking and per-entry `confidence` are independent: a later entry may carry a higher
+ * confidence tier than the first. Use `filterParallelSuggestionsByConfidence()` when you
+ * need to gate on confidence instead of rank.
+ * @param detection - The card detection
+ * @returns The top-ranked parallel suggestion, or undefined if none
+ */
+export function getBestParallelSuggestion(
+  detection: CardDetection
+): ParallelSuggestion | undefined {
+  return detection.card.parallelSuggestions?.[0];
+}
+
+/**
+ * Filter parallel suggestions by minimum confidence tier, preserving the engine's ranking.
+ * Entries without a `confidence` value (not yet assessed) are excluded — a missing value
+ * means "not assessed", not "Low".
+ * @param detection - The card detection
+ * @param minConfidence - Minimum confidence tier to include
+ * @returns Array of parallel suggestions meeting the confidence threshold
+ */
+export function filterParallelSuggestionsByConfidence(
+  detection: CardDetection,
+  minConfidence: 'High' | 'Medium' | 'Low'
+): ParallelSuggestion[] {
+  const suggestions = detection.card.parallelSuggestions;
+  if (!suggestions) {
+    return [];
+  }
+
+  const confidenceOrder = { High: 3, Medium: 2, Low: 1 };
+  const minScore = confidenceOrder[minConfidence] || 0;
+
+  return suggestions.filter((suggestion) => {
+    if (!suggestion.confidence) {
+      return false;
+    }
+    const score = confidenceOrder[suggestion.confidence] || 0;
+    return score >= minScore;
+  });
+}
+
+/**
+ * Format a parallel suggestion as a display string
+ * @param suggestion - A parallel suggestion entry
+ * @returns Formatted string with name, print run, and confidence tier when assessed
+ * @example
+ * // "Gold Refractor /50 - High confidence"
+ * // "Black Prizm - Medium confidence"
+ * // "Refractor"   (confidence not assessed)
+ */
+export function formatParallelSuggestion(suggestion: ParallelSuggestion): string {
+  const parts = [suggestion.name];
+  if (suggestion.numberedTo) {
+    parts.push(`/${suggestion.numberedTo}`);
+  }
+  const label = parts.join(' ');
+  return suggestion.confidence ? `${label} - ${suggestion.confidence} confidence` : label;
+}
+
+// ----------------------------------------------------------------------------
+// Legacy single-parallel helpers. The API replaced `card.parallel` with the ranked
+// `card.parallelSuggestions` array in v4.0.0; these now read the best-match entry.
+// ----------------------------------------------------------------------------
+
+/**
+ * Check if a detection has parallel evidence.
+ * @deprecated Reads `card.parallelSuggestions` (the API removed `card.parallel`). Returns true
+ * for *any* parallel evidence, including lower-confidence candidates. Use
+ * `hasParallelSuggestions()`, and check `getBestParallelSuggestion(detection)?.confidence`
+ * if you only want confirmed parallels.
+ * @param detection - The card detection
+ * @returns True if at least one parallel suggestion is present
  */
 export function hasParallel(detection: CardDetection): boolean {
-  return Boolean(detection.card.parallel);
+  return hasParallelSuggestions(detection);
 }
 
 /**
- * Get parallel information from a detection
+ * Get the best-match parallel from a detection.
+ * @deprecated Use `getBestParallelSuggestion()`. Returns the first entry of
+ * `card.parallelSuggestions` (the API removed `card.parallel`).
  * @param detection - The card detection
- * @returns Parallel information if available, undefined otherwise
+ * @returns The top-ranked parallel suggestion, or undefined if none
  */
-export function getParallelInfo(detection: CardDetection): DetectedCard['parallel'] {
-  return detection.card.parallel;
+export function getParallelInfo(detection: CardDetection): ParallelSuggestion | undefined {
+  return getBestParallelSuggestion(detection);
 }
 
 /**
- * Check if a detection is a numbered parallel (limited print run)
+ * Check if the best-match parallel is numbered (limited print run).
+ * @deprecated Use `getBestParallelSuggestion(detection)?.numberedTo`. Reads the first entry
+ * of `card.parallelSuggestions` (the API removed `card.parallel`).
  * @param detection - The card detection
- * @returns True if the card is a numbered parallel (has numberedTo value)
+ * @returns True if the best-match parallel has a numberedTo value
  */
 export function isNumberedParallel(detection: CardDetection): boolean {
-  return Boolean(detection.card.parallel?.numberedTo);
+  return Boolean(getBestParallelSuggestion(detection)?.numberedTo);
 }
 
 /**
- * Format parallel information as a display string
+ * Format the best-match parallel as a display string (name and print run only).
+ * @deprecated Use `formatParallelSuggestion(getBestParallelSuggestion(detection))`, which also
+ * includes the confidence tier. Reads the first entry of `card.parallelSuggestions`.
  * @param detection - The card detection
- * @returns Formatted string with parallel details, or empty string if not a parallel
+ * @returns Formatted string with parallel details, or empty string if no parallel evidence
  * @example
  * // "Gold Refractor /50"
  * // "Black Prizm"
  * // "Orange /25"
  */
 export function formatParallelDisplay(detection: CardDetection): string {
-  const parallel = detection.card.parallel;
+  const parallel = getBestParallelSuggestion(detection);
   if (!parallel) {
     return '';
   }
@@ -393,11 +496,12 @@ export function formatFieldValues(detection: CardDetection, separator: string = 
 }
 
 // ============================================================================
-// Card Suggestion Utilities (v3.4.2 — alternative matches on similar reprints)
+// Card Suggestion Utilities (v3.4.2 — alternative card matches)
 // ============================================================================
 
 /**
- * Check if a detection provides alternative card suggestions
+ * Check if a detection provides alternative card suggestions.
+ * Suggestions are only returned for Medium/Low confidence detections (v4.0.0+).
  * @param detection - The card detection
  * @returns True if one or more suggestions are present
  */
@@ -406,7 +510,8 @@ export function hasSuggestions(detection: CardDetection): boolean {
 }
 
 /**
- * Get alternative card suggestions from a detection
+ * Get alternative card suggestions from a detection, best match first.
+ * Each entry is a full card record (same fields as `card`), so `formatCardDisplay()` works on it.
  * @param detection - The card detection
  * @returns Array of alternative card suggestions, or empty array if none
  */

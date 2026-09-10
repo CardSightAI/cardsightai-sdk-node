@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-09-10
+
+### Breaking
+
+- **`card.parallel` replaced by `card.parallelSuggestions[]` (beta)** — Identification detections no longer carry a single `parallel` object. The API now returns a ranked array of parallel candidates, best match first, each with an optional `confidence` tier (`"High" | "Medium" | "Low"`; a missing value means "not assessed", not Low). The array is present whenever there is any parallel evidence: a single High-confidence entry when one parallel was identified, or several entries when more than one remains possible. Ranking and confidence are independent — a later entry may carry a higher confidence than an earlier one. Parallel identification has launched in beta for baseball.
+  - `DetectedCard.parallel` was removed from the SDK types; `DetectedCard.parallelSuggestions?: ParallelSuggestion[]` was added. New exported type `ParallelSuggestion`.
+  - New helpers: `hasParallelSuggestions()`, `getParallelSuggestions()`, `getBestParallelSuggestion()`, `filterParallelSuggestionsByConfidence(detection, minConfidence)` (preserves ranking, drops unassessed entries), and `formatParallelSuggestion(suggestion)` (e.g. `"Gold Refractor /50 - High confidence"`).
+  - The legacy helpers `hasParallel()`, `getParallelInfo()`, `isNumberedParallel()`, and `formatParallelDisplay()` still work but are **deprecated**: they now read the best-match entry (`parallelSuggestions[0]`). Note the semantic shift — `hasParallel()` is now true for _any_ parallel evidence, including lower-confidence candidates. To keep the old "confirmed parallel" behaviour, check `getBestParallelSuggestion(detection)?.confidence === 'High'`.
+
+### Added
+
+- **Pricing time series** — `pricing.timeseries(cardId, params)` calls the new `GET /v1/pricing/{card_id}/timeseries` endpoint (operation `getCardPricingTimeseries`) and returns candlestick rollups (mean, median, high, low, count per bucket). `interval` (`"daily" | "weekly" | "monthly"`) is required; `periods`, `as_of_date`, `listing_type`, `parallel_id`, and `grade_id` are optional. The response (`TimeseriesResponse`) is split into `raw` (ungraded) and `graded` (company → grade) series, each further keyed by listing type (`auction` = completed sales, `fixed` = Buy It Now asking prices). Empty buckets, types, and grades are omitted rather than zero-filled, and the `query` echo reports the effective (defaulted or clamped) values. New exported types: `TimeseriesResponse`, `TimeseriesQueryEcho`, `RawTimeseriesSection`, `TimeseriesCompanyGroup`, `TimeseriesGradeGroup`, `TimeseriesTypeTotals`, `CandlePeriod`, `CandleStats`.
+- **Full card records in `suggestions`** — `CardSuggestion` entries now carry the same fields as `card` (`segmentId`, `releaseId`, `setId`, `year`, `manufacturer`, `releaseName`, `setName`, `name`, `number`, `description`, `numberedTo`, `attributes`, `variationOf`, `fields`), so `formatCardDisplay(suggestion)` works directly. Suggestions are now only included when the detection `confidence` is Medium or Low.
+- **New feedback statuses** — `FeedbackResponse.status` gained `"confirmed_bug"`, `"enhancement_backlog"`, `"enhancement_planned"`, `"released"`, `"not_an_issue"`, and `"closed"`. The values `"not_reviewed"`, `"fixed"`, `"wont_fix"`, `"duplicate"`, and `"need_info"` are deprecated and only appear on feedback submitted before August 2026. New exported types `FeedbackResponse` and `FeedbackStatus`.
+- **Catalog search result fields** — `SearchResult` gained optional `segmentName`, `cardNumber`, and `matchKind` (`"exact" | "fuzzy"`; present on every result of the page only when fuzzy matching engaged, and exact results always sort first). `SearchResult` is now exported from the package root.
+- Documented error responses: `409` on all feedback submit endpoints; `408` and `503` on `catalog.search()`.
+
+### Changed
+
+- Regenerated types from the latest OpenAPI spec. `SearchResult.relevance` is now documented as opaque and order-only (its magnitude may change between backend versions). `catalog.search()` trims surrounding whitespace before applying the 2-character minimum. The parallel catalog endpoints (`getParallels`, `getParallel`) are no longer labelled free in the spec.
+- **Runtime dependency** — `openapi-fetch` 0.17.0 (from 0.14.1). No changes to the client or middleware APIs the SDK uses; 0.15.2 improved handling of empty response bodies.
+- **Toolchain** — TypeScript 6.0.3 (from 5.9.3), ESLint 10.10.0 and `@eslint/js` 10.0.1 (from 9.x), `lint-staged` 17.5.1 (from 16.x; requires Node ≥ 22.22.1), `typescript-eslint` 8.70.0, Prettier 3.9.6, `@types/node` 24.13.4. `tsconfig.json` now uses `moduleResolution: "bundler"`; the CommonJS build keeps `node10` resolution under `ignoreDeprecations: "6.0"`. `openapi-typescript` 7.13.0 still declares a `typescript@^5.x` peer, so `package.json` carries an `overrides` entry pointing that edge at the project's TypeScript — its generated output is byte-identical under 6.0.3. Consumers are unaffected: the published declarations still work with TypeScript 5.0+.
+
+### Fixed
+
+- **CommonJS entry point** — `require('cardsightai')` failed with `Cannot find module './client.js'` because the root `package.json` declares `"type": "module"` and `dist/cjs/` carried no override, so Node treated the CommonJS output as ES modules. The `build:cjs` script now writes a `dist/cjs/package.json` with `"type": "commonjs"`, and a unit test loads the CJS build via `require()`. This predates 4.0.0.
+
 ## [3.8.1] - 2026-07-30
 
 ### Added

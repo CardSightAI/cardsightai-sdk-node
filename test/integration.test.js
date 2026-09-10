@@ -133,6 +133,21 @@ describe('CardSightAI SDK Integration Tests', () => {
     );
   });
 
+  test('Pricing - Time Series (v4.0.0)', async () => {
+    // Anchor on a real catalog card so the request is valid
+    const cards = await client.catalog.cards.list({ take: 1 });
+    const cardId = cards.data?.cards?.[0]?.id;
+    assert.ok(cardId, 'Need at least one catalog card to exercise the timeseries endpoint');
+
+    const response = await client.pricing.timeseries(cardId, { interval: 'monthly', periods: 6 });
+    assert.ok(response.data, 'Response should have data');
+    assert.equal(response.data.query.interval, 'monthly', 'Query echo should report the interval');
+    assert.ok(typeof response.data.query.periods === 'number', 'Query echo should report effective periods');
+    assert.ok(Array.isArray(response.data.raw.candles), 'raw.candles should be an array');
+    assert.ok(response.data.raw.totals, 'raw.totals should be present');
+    assert.ok(Array.isArray(response.data.graded), 'graded should be an array');
+  });
+
   test('Marketplace - Title Search (v3.7.0)', async () => {
     const response = await client.marketplace.search({ q: 'Ken Griffey Jr', limit: 5 });
     assert.ok(response.data, 'Response should have data');

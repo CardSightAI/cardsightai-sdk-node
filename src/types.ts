@@ -153,6 +153,7 @@ export type CardDetectionResponse = GetResponseData<'/v1/detect/card', 'post'>;
 
 // Catalog search types
 export type CatalogSearchResponse = GetResponseData<'/v1/catalog/search', 'get'>;
+export type SearchResult = components['schemas']['SearchResult'];
 
 // Grading/slab detection types (from identify responses)
 export type SlabGradingDetail = components['schemas']['SlabGradingDetail'];
@@ -170,6 +171,16 @@ export type PricingRecord = components['schemas']['PricingRecord'];
 export type BulkPricingResponse = components['schemas']['BulkPricingResponse'];
 export type BulkPricingResult = components['schemas']['BulkPricingResult'];
 
+// Pricing time series types (candlestick rollups, v4.0.0)
+export type TimeseriesResponse = components['schemas']['TimeseriesResponse'];
+export type TimeseriesQueryEcho = components['schemas']['TimeseriesQueryEcho'];
+export type RawTimeseriesSection = components['schemas']['RawTimeseriesSection'];
+export type TimeseriesCompanyGroup = components['schemas']['TimeseriesCompanyGroup'];
+export type TimeseriesGradeGroup = components['schemas']['TimeseriesGradeGroup'];
+export type TimeseriesTypeTotals = components['schemas']['TimeseriesTypeTotals'];
+export type CandlePeriod = components['schemas']['CandlePeriod'];
+export type CandleStats = components['schemas']['CandleStats'];
+
 // Marketplace types (active listings)
 export type MarketplaceResponse = components['schemas']['MarketplaceResponse'];
 export type MarketplaceRecord = components['schemas']['MarketplaceRecord'];
@@ -186,10 +197,17 @@ export type SearchMatchedCard = components['schemas']['SearchMatchedCard'];
 export type SearchGrade = components['schemas']['SearchGrade'];
 export type SearchMeta = components['schemas']['SearchMeta'];
 
+// Feedback types (v4.0.0) — review status on submitted feedback
+export type FeedbackResponse = components['schemas']['FeedbackResponse'];
+export type FeedbackStatus = FeedbackResponse['status'];
+
 // Field catalog types (v3.4.2) — flexible card metadata system
 export type FieldValue = components['schemas']['FieldValue'];
 export type FieldValues = components['schemas']['FieldValues'];
+/** Alternative card match (full card record). Only present on Medium/Low confidence detections. */
 export type CardSuggestion = components['schemas']['CardSuggestion'];
+/** Ranked parallel candidate on identification detections (beta, v4.0.0) */
+export type ParallelSuggestion = components['schemas']['ParallelSuggestion'];
 export type Field = components['schemas']['Field'];
 export type FieldSummary = components['schemas']['FieldSummary'];
 export type DetailedFieldResponse = components['schemas']['DetailedFieldResponse'];
@@ -266,17 +284,18 @@ export interface DetectedCard {
   attributes?: string[];
   /** UUID of the parent card when this card is a variation */
   variationOf?: string;
-  parallel?: {
-    id: string;
-    name: string;
-    description?: string;
-    isPartial?: true;
-    numberedTo?: number;
-    cards?: string[];
-  };
   /** Key-value field properties (e.g., HP, Rarity, Artist). Omitted when the card has no fields. */
   fields?: FieldValue[];
-  /** Alternative card matches when multiple reprints score similarly */
+  /**
+   * (beta) Possible parallels for this card, best match first, each with an optional
+   * `confidence` tier. Ranking and confidence are independent: a later entry may carry a
+   * higher confidence than an earlier one. Omitted when there is no parallel evidence.
+   */
+  parallelSuggestions?: ParallelSuggestion[];
+  /**
+   * Alternative card matches, best match first. Each entry is a full card record with the
+   * same fields as `card`. Only present when the detection confidence is Medium or Low.
+   */
   suggestions?: CardSuggestion[];
 }
 

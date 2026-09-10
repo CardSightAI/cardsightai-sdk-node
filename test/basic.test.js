@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
+import { createRequire } from 'node:module';
 import {
   init,
   CardSightAIError,
@@ -14,7 +15,17 @@ import {
   hasSuggestions,
   getSuggestions,
   isNumberedCard,
-  getNumberedTo
+  getNumberedTo,
+  formatCardDisplay,
+  hasParallel,
+  getParallelInfo,
+  isNumberedParallel,
+  formatParallelDisplay,
+  hasParallelSuggestions,
+  getParallelSuggestions,
+  getBestParallelSuggestion,
+  filterParallelSuggestionsByConfidence,
+  formatParallelSuggestion
 } from '../dist/esm/index.js';
 
 test('SDK initialization', async (t) => {
@@ -65,6 +76,16 @@ test('Error classes', async (t) => {
     const error = new AuthenticationError();
     assert.strictEqual(error.name, 'AuthenticationError');
     assert(error.message.includes('API key'), 'Error message should mention API key');
+  });
+});
+
+test('CommonJS build', async (t) => {
+  await t.test('dist/cjs loads via require() despite the root "type": "module"', () => {
+    const require = createRequire(import.meta.url);
+    const cjs = require('../dist/cjs/index.js');
+    assert.strictEqual(typeof cjs.CardSightAI, 'function', 'CardSightAI class should be exported');
+    assert.strictEqual(typeof cjs.init, 'function', 'init() should be exported');
+    assert.strictEqual(typeof cjs.hasParallelSuggestions, 'function', 'utilities should be exported');
   });
 });
 
@@ -126,6 +147,7 @@ test('Client structure', async (t) => {
     assert(typeof client.pricing.get === 'function', 'Should have pricing.get()');
     assert(typeof client.pricing.bulk === 'function', 'Should have pricing.bulk()');
     assert(typeof client.pricing.search === 'function', 'Should have pricing.search()');
+    assert(typeof client.pricing.timeseries === 'function', 'Should have pricing.timeseries()');
     assert(typeof client.marketplace.get === 'function', 'Should have marketplace.get()');
     assert(typeof client.marketplace.search === 'function', 'Should have marketplace.search()');
   });
@@ -196,6 +218,90 @@ test('Card suggestion utility functions (v3.4.2)', async (t) => {
   await t.test('getSuggestions returns the array or empty', () => {
     assert.strictEqual(getSuggestions(withSuggestions).length, 2);
     assert.deepStrictEqual(getSuggestions(without), []);
+  });
+});
+
+test('Card suggestions are full card records (v4.0.0)', async (t) => {
+  await t.test('formatCardDisplay works on a CardSuggestion entry', () => {
+    const alt = {
+      id: 'uuid-b',
+      year: '1989',
+      manufacturer: 'Upper Deck',
+      releaseName: 'Upper Deck',
+      setName: 'Base Set',
+      name: 'Ken Griffey Jr.',
+      number: '1'
+    };
+    assert.strictEqual(formatCardDisplay(alt), '1989 Upper Deck Upper Deck Base Set Ken Griffey Jr. #1');
+  });
+});
+
+test('Parallel suggestion utility functions (v4.0.0, beta)', async (t) => {
+  const gold = { id: 'p1', name: 'Gold Refractor', numberedTo: 50, confidence: 'Medium' };
+  const orange = { id: 'p2', name: 'Orange Refractor', numberedTo: 25, confidence: 'High' };
+  const plain = { id: 'p3', name: 'Refractor' }; // confidence not assessed
+  const multi = { confidence: 'High', card: { id: 'u', parallelSuggestions: [gold, orange, plain] } };
+  const single = {
+    confidence: 'High',
+    card: { id: 'u', parallelSuggestions: [{ id: 'p9', name: 'Black Prizm', confidence: 'High' }] }
+  };
+  const none = { confidence: 'High', card: { id: 'u' } };
+  const emptyList = { confidence: 'High', card: { id: 'u', parallelSuggestions: [] } };
+
+  await t.test('hasParallelSuggestions detects any parallel evidence', () => {
+    assert.strictEqual(hasParallelSuggestions(multi), true);
+    assert.strictEqual(hasParallelSuggestions(single), true);
+    assert.strictEqual(hasParallelSuggestions(none), false);
+    assert.strictEqual(hasParallelSuggestions(emptyList), false);
+  });
+
+  await t.test('getParallelSuggestions returns the array or empty', () => {
+    assert.strictEqual(getParallelSuggestions(multi).length, 3);
+    assert.deepStrictEqual(getParallelSuggestions(none), []);
+    assert.deepStrictEqual(getParallelSuggestions(emptyList), []);
+  });
+
+  await t.test('getBestParallelSuggestion returns the first (engine-ranked) entry', () => {
+    // Ranking and confidence are independent: the first entry wins even though a later
+    // entry carries a higher confidence tier.
+    assert.strictEqual(getBestParallelSuggestion(multi), gold);
+    assert.strictEqual(getBestParallelSuggestion(none), undefined);
+    assert.strictEqual(getBestParallelSuggestion(emptyList), undefined);
+  });
+
+  await t.test('filterParallelSuggestionsByConfidence keeps order and drops unassessed entries', () => {
+    assert.deepStrictEqual(filterParallelSuggestionsByConfidence(multi, 'High'), [orange]);
+    assert.deepStrictEqual(filterParallelSuggestionsByConfidence(multi, 'Medium'), [gold, orange]);
+    // "Low" still excludes entries with no confidence value (not assessed is not Low)
+    assert.deepStrictEqual(filterParallelSuggestionsByConfidence(multi, 'Low'), [gold, orange]);
+    assert.deepStrictEqual(filterParallelSuggestionsByConfidence(none, 'Low'), []);
+  });
+
+  await t.test('formatParallelSuggestion formats name, print run, and confidence', () => {
+    assert.strictEqual(formatParallelSuggestion(gold), 'Gold Refractor /50 - Medium confidence');
+    assert.strictEqual(formatParallelSuggestion(orange), 'Orange Refractor /25 - High confidence');
+    assert.strictEqual(formatParallelSuggestion(plain), 'Refractor');
+    assert.strictEqual(
+      formatParallelSuggestion(single.card.parallelSuggestions[0]),
+      'Black Prizm - High confidence'
+    );
+  });
+
+  await t.test('legacy parallel helpers read the best-match suggestion', () => {
+    assert.strictEqual(hasParallel(multi), true);
+    assert.strictEqual(hasParallel(none), false);
+    assert.strictEqual(hasParallel(emptyList), false);
+
+    assert.strictEqual(getParallelInfo(multi), gold);
+    assert.strictEqual(getParallelInfo(none), undefined);
+
+    assert.strictEqual(isNumberedParallel(multi), true);
+    assert.strictEqual(isNumberedParallel(single), false);
+    assert.strictEqual(isNumberedParallel(none), false);
+
+    assert.strictEqual(formatParallelDisplay(multi), 'Gold Refractor /50');
+    assert.strictEqual(formatParallelDisplay(single), 'Black Prizm');
+    assert.strictEqual(formatParallelDisplay(none), '');
   });
 });
 

@@ -8,7 +8,7 @@
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
 The most comprehensive baseball card identification and collection management platform.
-**12M+ Trading Cards** • **AI-Powered Recognition** • **Free Tier Available**
+**14M+ Trading Cards** • **8,250+ Identifiable Sets** • **AI-Powered Recognition** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -18,10 +18,11 @@ The most comprehensive baseball card identification and collection management pl
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
+- **Parallel Identification (beta)** - Ranked parallel variant candidates with per-entry confidence tiers, launched for baseball
 - **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
 - **Universal Compatibility** - Works in Node.js, browsers, and edge runtimes
 - **Dual Module System** - Supports both ESM and CommonJS
-- **Smart Error Handling** - Detailed error types with retry capabilities
+- **Smart Error Handling** - Typed errors carrying the HTTP status, response body, and request context
 - **Minimal Dependencies** - Only one runtime dependency (openapi-fetch)
 - **100% API Coverage** - All CardSight AI endpoints fully implemented
 
@@ -37,7 +38,7 @@ The most comprehensive baseball card identification and collection management pl
 | **Collectors** | Manage collector profiles with names | `collectors.create()`, `collectors.update()` |
 | **Lists** | Track wanted cards (wishlists) | `lists.create()`, `lists.cards.add()` |
 | **Binders** | Organize collection subsets | `collections.binders.create()` |
-| **Pricing** | Completed sales data for cards; free-text title search | `pricing.get()`, `pricing.bulk()`, `pricing.search()` |
+| **Pricing** | Completed sales data for cards; candlestick price time series; free-text title search | `pricing.get()`, `pricing.bulk()`, `pricing.timeseries()`, `pricing.search()` |
 | **Marketplace** | Active marketplace listings for cards; free-text title search | `marketplace.get()`, `marketplace.search()` |
 | **Population Reports** | Graded population counts by card, set, or release | `population.card()`, `population.set()`, `population.release()` |
 | **Grading** | PSA, TAG, BGS, SGC grade information | `grades.companies.list()` |
@@ -111,17 +112,19 @@ import { readFileSync } from 'fs';
 const client = new CardSightAI({ apiKey: 'your_api_key' });
 
 // From a File object (browser)
-const fileInput = document.querySelector('input[type="file"]');
-const file = fileInput.files[0];
-const result = await client.identify.card(file);
+const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+const file = fileInput?.files?.[0];
+if (file) {
+  await client.identify.card(file);
+}
+
+// From a Blob (browser/fetch)
+const blob = await fetch('https://example.com/card.jpg').then(r => r.blob());
+await client.identify.card(blob);
 
 // From a file on disk (Node.js) — convert the Buffer to an ArrayBuffer
 const imageBuffer = new Uint8Array(readFileSync('path/to/card.jpg')).buffer;
 const result = await client.identify.card(imageBuffer);
-
-// From a Blob (browser/fetch)
-const blob = await fetch(imageUrl).then(r => r.blob());
-const result = await client.identify.card(blob);
 
 // Process the results
 if (result.data?.success && result.data.detections) {
@@ -178,7 +181,7 @@ const basketballResult = await client.identify.cardBySegment('basketball', blob)
 
 Each detection has a `confidence` level and a `card` object. The `card` is always present, but its fields are populated based on the match level:
 
-- **Exact match**: `card.id` present — all fields populated including `name`, `number`, and optionally `parallel`
+- **Exact match**: `card.id` present — all fields populated including `name`, `number`, and optionally `parallelSuggestions` (beta)
 - **Set-level match**: `card.setId` present but no `card.id` — release/set info available but no specific card
 - **No match**: `card` is an empty object `{}` — a card was detected in the image but couldn't be identified
 
@@ -203,11 +206,14 @@ Detections may also include a `grading` object when the card is inside a graded 
         setName: "Base Set",
         name: "Aaron Judge",
         number: "99",
-        parallel: {
-          id: "par_uuid",
-          name: "Gold Refractor",
-          numberedTo: 50
-        }
+        parallelSuggestions: [
+          {
+            id: "par_uuid",
+            name: "Gold Refractor",
+            numberedTo: 50,
+            confidence: "High"
+          }
+        ]
       }
     }
   ],
@@ -270,14 +276,16 @@ Before spending a billed identify call, you can confirm whether a set is support
 ```typescript
 // List every set the system can identify (paginated)
 const { data } = await client.identify.sets.list({ take: 20, skip: 0 });
-console.log(`${data.total_count} identifiable sets`);
-for (const set of data.sets) {
-  console.log(`${set.year} ${set.release_name} — ${set.set_name} (${set.segment_name})`);
+if (data) {
+  console.log(`${data.total_count} identifiable sets`);
+  for (const set of data.sets) {
+    console.log(`${set.year} ${set.release_name} — ${set.set_name} (${set.segment_name})`);
+  }
 }
 
 // Check whether a specific set is identifiable by its set ID
 const { data: check } = await client.identify.sets.check(setId);
-if (check.is_identifiable) {
+if (check?.is_identifiable) {
   console.log(`Set ${check.set_id} is identifiable`);
 }
 ```
@@ -309,7 +317,7 @@ if (result.data) {
 }
 
 // Works with the same image types as identify
-const blob = await fetch(imageUrl).then(r => r.blob());
+const blob = await fetch('https://example.com/card.jpg').then(r => r.blob());
 const blobResult = await client.detect.card(blob);
 ```
 
@@ -375,7 +383,7 @@ Every detection's `card` now optionally includes three additional fields:
 
 - `numberedTo?: number` — print run for numbered base cards (e.g. `25` for a `/25`), independent of parallels
 - `fields?: FieldValue[]` — key/value metadata tailored to the TCG (e.g. `HP`, `RARITY`, `ARTIST`, `MANA_COST`), plus a `CARD_LANGUAGE` entry holding the **ISO 639-1** code of the scanned card's language (e.g. `"ja"`, `"en"`) when it is detected (v3.8.1+)
-- `suggestions?: CardSuggestion[]` — alternative card candidates when multiple reprints scored similarly
+- `suggestions?: CardSuggestion[]` — alternative card candidates, best match first. Each entry is a full card record with the same fields as `card`. Only present when the detection `confidence` is Medium or Low (v4.0.0+)
 
 ```typescript
 import {
@@ -384,7 +392,8 @@ import {
   hasSuggestions,
   getSuggestions,
   isNumberedCard,
-  getNumberedTo
+  getNumberedTo,
+  formatCardDisplay
 } from 'cardsightai';
 
 const detection = result.data?.detections?.[0];
@@ -410,65 +419,71 @@ if (isNumberedCard(detection)) {
   console.log(`Limited to /${getNumberedTo(detection)}`);
 }
 
-// Alternative matches when reprints score similarly
+// Alternative matches (only on Medium/Low confidence detections), best match first.
+// Each suggestion is a full card record, so the display helpers work on it directly.
 if (hasSuggestions(detection)) {
   console.log('Could also be:');
   for (const alt of getSuggestions(detection)) {
-    console.log(`  • ${alt.setName ?? 'Unknown set'} (${alt.id ?? 'no id'})`);
+    console.log(`  • ${formatCardDisplay(alt)} (${alt.id ?? 'set-level only'})`);
+    // e.g. "  • 1989 Upper Deck Upper Deck Base Set Ken Griffey Jr. #1 (card-uuid)"
   }
 }
 ```
 
 See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon, One Piece, and Magic: The Gathering examples.
 
-#### Parallel Variant Detection
+#### Parallel Variant Detection (beta)
 
-The identify endpoint can detect parallel variants (special editions like Refractors, Prizms, numbered parallels, etc.). When a parallel is detected, the card object includes detailed parallel information:
+The identify endpoint reports parallel variants (Refractors, Prizms, numbered parallels, etc.) as a ranked list of candidates in `card.parallelSuggestions`. The list is best match first, and each entry carries an optional `confidence` tier (`"High" | "Medium" | "Low"`). Ranking and confidence are independent — the engine's top pick is not always the entry with the highest confidence — and a missing `confidence` means "not assessed", not Low. When exactly one parallel was identified you get a single High-confidence entry; when several remain possible you get all of them. Base cards with no parallel evidence have no `parallelSuggestions` at all. Parallel identification is currently in beta and has launched for **baseball**.
 
 ```typescript
 import {
   isExactMatch,
-  hasParallel,
-  getParallelInfo,
-  isNumberedParallel,
-  formatParallelDisplay
+  getParallelSuggestions,
+  getBestParallelSuggestion,
+  filterParallelSuggestionsByConfidence,
+  formatParallelSuggestion
 } from 'cardsightai';
 
 const result = await client.identify.card(imageFile);
 
 for (const detection of result.data?.detections || []) {
-  if (isExactMatch(detection)) {
-    console.log(`Card: ${detection.card.name}`);
+  if (!isExactMatch(detection)) continue;
+  console.log(`Card: ${detection.card.name}`);
 
-    // Check if it's a parallel variant
-    if (hasParallel(detection)) {
-      const parallel = getParallelInfo(detection);
-      console.log(`  Parallel: ${formatParallelDisplay(detection)}`);
-      // Output: "Gold Refractor /50" or "Black Prizm"
+  // The engine's top-ranked parallel (undefined when there is no parallel evidence —
+  // hasParallelSuggestions(detection) is the boolean form of the same check)
+  const best = getBestParallelSuggestion(detection);
+  if (!best) {
+    console.log('  Type: Base Card');
+    continue;
+  }
+  console.log(`  Best match: ${formatParallelSuggestion(best)}`);
+  // Output: "Gold Refractor /50 - High confidence"
 
-      // Access detailed parallel information
-      console.log(`  Parallel Name: ${parallel.name}`);
-      console.log(`  Parallel ID: ${parallel.id}`);
-
-      if (parallel.description) {
-        console.log(`  Description: ${parallel.description}`);
-      }
-
-      // Check if it's a numbered parallel (limited print run)
-      if (isNumberedParallel(detection)) {
-        console.log(`  🔥 NUMBERED: Only ${parallel.numberedTo} exist!`);
-      }
-    } else {
-      console.log(`  Type: Base Card`);
+  // Only act on confirmed parallels
+  if (best.confidence === 'High') {
+    console.log(`  Parallel ID: ${best.id}`);
+    if (best.numberedTo) {
+      console.log(`  🔥 NUMBERED: Only ${best.numberedTo} exist!`);
     }
   }
+
+  // Show every candidate the engine considered, in its ranking
+  for (const candidate of getParallelSuggestions(detection)) {
+    console.log(`  • ${formatParallelSuggestion(candidate)}`);
+  }
+
+  // Or only the ones assessed at Medium confidence or better
+  // (entries with no confidence value are dropped — unassessed is not Low)
+  const likely = filterParallelSuggestionsByConfidence(detection, 'Medium');
 }
 ```
 
-**Parallel Object Structure:**
+**Parallel Suggestion Structure:**
 
 ```typescript
-// When a parallel variant is detected (exact match)
+// Exact match with parallel evidence
 {
   confidence: "High",
   card: {
@@ -479,28 +494,34 @@ for (const detection of result.data?.detections || []) {
     name: "Mike Trout",
     year: "2023",
     // ... other card fields
-    parallel?: {
-      id: "parallel_uuid",        // UUID of the parallel type
-      name: "Gold Refractor",     // Human-readable name
-      description?: "...",        // Optional additional details
-      isPartial?: true,           // True if parallel only applies to specific cards
-      numberedTo?: 50,            // Print run for numbered parallels
-      cards?: ["uuid1", "uuid2"]  // Card UUIDs (only when isPartial is true)
-    }
+    parallelSuggestions: [
+      {
+        id: "parallel_uuid",        // UUID of the parallel type
+        name: "Gold Refractor",     // Human-readable name
+        description?: "...",        // Optional additional details
+        isPartial?: true,           // True if the parallel only applies to specific cards
+        numberedTo?: 50,            // Print run for numbered parallels
+        cards?: ["uuid1", "uuid2"], // Card UUIDs (only when isPartial is true)
+        confidence?: "High"         // "High" | "Medium" | "Low"; omitted = not assessed
+      }
+      // ... further candidates, in the engine's ranking
+    ]
   }
 }
 
-// Base cards have no parallel object
+// Base cards have no parallelSuggestions array
 {
   confidence: "High",
   card: {
     id: "card_uuid",
     name: "Aaron Judge",
     // ... other fields
-    // parallel is undefined
+    // parallelSuggestions is undefined
   }
 }
 ```
+
+**Migrating from `card.parallel` (pre-4.0):** the single `parallel` object is gone. The old helpers `hasParallel()`, `getParallelInfo()`, `isNumberedParallel()`, and `formatParallelDisplay()` still work — they now read the best-match entry (`parallelSuggestions[0]`) — but are deprecated. Note that `hasParallel()` is now true for _any_ parallel evidence, including lower-confidence candidates; use `getBestParallelSuggestion(detection)?.confidence === 'High'` to keep the old "confirmed parallel" behaviour.
 
 #### Grading/Slab Detection
 
@@ -516,9 +537,10 @@ import {
 const result = await client.identify.card(imageFile);
 
 for (const detection of result.data?.detections || []) {
-  // Check if the card is in a graded slab
-  if (hasGrading(detection)) {
-    const grading = getGradingInfo(detection);
+  // Check if the card is in a graded slab — hasGrading(detection) is the boolean form;
+  // reading the value lets TypeScript narrow the optional `grading` for the block below
+  const grading = getGradingInfo(detection);
+  if (grading) {
     console.log(`Grading Company: ${grading.company.name}`);
     console.log(`Detection Confidence: ${grading.confidence}`);
     console.log(`Display: ${formatGradingDisplay(detection)}`);
@@ -595,7 +617,7 @@ import {
 const { data: card } = await client.catalog.cards.get('card_uuid');
 
 // Check if the card has any parallel variants
-if (hasCardParallels(card)) {
+if (card && hasCardParallels(card)) {
   // Get all parallels
   const parallels = getCardParallels(card);
   console.log(`This card has ${parallels.length} parallel variants`);
@@ -618,7 +640,7 @@ if (hasCardParallels(card)) {
 }
 ```
 
-**Note**: These utilities are for catalog cards (`card.parallels[]`). For identification results, use `hasParallel()`, `getParallelInfo()`, etc. which work with the detected `card.parallel` object.
+**Note**: These utilities are for catalog cards (`card.parallels[]`). For identification results, use `hasParallelSuggestions()`, `getBestParallelSuggestion()`, etc. which work with the detected `card.parallelSuggestions` array (see [Parallel Variant Detection](#parallel-variant-detection-beta)). A `ParallelSuggestion` has the same `id` / `name` / `numberedTo` shape as a `CardParallel`, so `formatCardParallel()` accepts either.
 
 ### Catalog Search
 
@@ -657,10 +679,16 @@ const numbered = await client.catalog.search({
 if (results.data) {
   console.log(`Found ${results.data.total_count} results`);
   for (const result of results.data.results) {
+    // `relevance` is opaque and order-only — compare it between results, not across requests
     console.log(`[${result.type}] ${result.name} (relevance: ${result.relevance})`);
+    if (result.segmentName) console.log(`  Segment: ${result.segmentName}`);
     if (result.setName) console.log(`  Set: ${result.setName}`);
     if (result.year) console.log(`  Year: ${result.year}`);
+    if (result.cardNumber) console.log(`  Card #${result.cardNumber}`);
     if (result.numberedTo) console.log(`  Numbered to /${result.numberedTo}`);
+    // Present on every result only when close-spelling (fuzzy) matching engaged;
+    // "exact" results always sort before "fuzzy" ones
+    if (result.matchKind === 'fuzzy') console.log('  (fuzzy match)');
   }
 
   // Advisory messages (e.g. an unrecognized query parameter was ignored)
@@ -747,12 +775,12 @@ if (detection) {
 | `getFields(detection)` | Return the full `FieldValue[]` array |
 | `getFieldValue(detection, key)` | Look up a single value by key (case-insensitive) |
 | `formatFieldValues(detection, separator?)` | Format all fields as a display string |
-| `hasSuggestions(detection)` | Check for alternative reprint candidates |
-| `getSuggestions(detection)` | Get the `CardSuggestion[]` array |
+| `hasSuggestions(detection)` | Check for alternative card candidates (Medium/Low confidence only) |
+| `getSuggestions(detection)` | Get the `CardSuggestion[]` array — full card records, best match first |
 | `isNumberedCard(detection)` | Check for a base-card print run (independent of parallels) |
 | `getNumberedTo(detection)` | Get the base-card print run number |
 
-The `CardDetails` type on every detection also exposes `numberedTo` (e.g. `25` for a `/25` card) and `suggestions` (alternative matches when reprints score similarly) alongside the new `fields` array — see [Working with Identification Results](#working-with-identification-results) for full details.
+The `CardDetails` type on every detection also exposes `numberedTo` (e.g. `25` for a `/25` card) and `suggestions` (alternative full card records on Medium/Low confidence detections) alongside the new `fields` array — see [Working with Identification Results](#working-with-identification-results) for full details.
 
 ### Pricing (Completed Sales)
 
@@ -843,6 +871,54 @@ if (bulk.data) {
   }
 }
 ```
+
+### Price Time Series (Candlestick Rollups)
+
+Chart price trends over time with per-bucket descriptive statistics (mean, median, high, low, count). Series are split by grade — `raw` for ungraded listings and `graded` per company → grade — so graded and ungraded prices never blend into one candle. Within each series, candles are keyed by listing type: `auction` (completed sales, the bid side) and `fixed` (Buy It Now asking prices, the ask side). Statistics are summaries of listings, not valuations.
+
+```typescript
+// Daily candles for the last 90 days (the default period count for "daily")
+const series = await client.pricing.timeseries('card_uuid', { interval: 'daily' });
+
+if (series.data) {
+  // Effective values (after defaults and clamping) are echoed back
+  const { interval, periods, as_of_date } = series.data.query;
+  console.log(`${interval} × ${periods} buckets ending ${as_of_date}`);
+
+  // Ungraded (raw) candles, oldest first
+  for (const candle of series.data.raw.candles) {
+    const auction = candle.types.auction;   // absent when the bucket has no auction listings
+    if (auction) {
+      console.log(`${candle.period_start}: median $${auction.median} (n=${auction.count})`);
+    }
+  }
+
+  // Whole-window counts, including how many listings the outlier filter removed
+  for (const [type, totals] of Object.entries(series.data.raw.totals)) {
+    console.log(`${type}: ${totals.total_count} kept, ${totals.filtered_count} filtered`);
+  }
+
+  // Graded candles, grouped by company → grade
+  for (const company of series.data.graded) {
+    for (const grade of company.grades) {
+      console.log(`${company.company_name} ${grade.grade_value}: ${grade.candles.length} candles`);
+    }
+  }
+}
+
+// Weekly candles for one year: base card only, one grade, auctions only
+const weekly = await client.pricing.timeseries('card_uuid', {
+  interval: 'weekly',        // 'daily' | 'weekly' | 'monthly' (required)
+  periods: 52,               // Defaults: daily 90, weekly 52, monthly 24.
+                             // Values above 365 are rejected; weekly > 156 and monthly > 120 are clamped.
+  as_of_date: '2026-09-01',  // Newest bucket is the one containing this date (UTC); defaults to today
+  listing_type: 'auction',   // 'auction' | 'fixed' | 'both'
+  parallel_id: 'null',       // UUID for one parallel, 'null' for base card only, omit for all
+  grade_id: 'grade_uuid'     // UUID for one grade, 'null' for ungraded only, omit for all
+});
+```
+
+Buckets, listing types, and grades with no listings are omitted rather than zero-filled. A card with no listings in the window returns an empty `raw` section and an empty `graded` array as a success. Pinning `grade_id` to a specific grade excludes ungraded listings, so `raw` comes back empty in that case.
 
 ### Pricing Search (Free-Text Title)
 
@@ -990,11 +1066,11 @@ const parallel = await client.catalog.parallels.get('parallel_uuid');
 // Returns: id, name, description, numberedTo, isPartial, setId, setName,
 //          releaseId, releaseName, releaseYear, cards (for partial parallels)
 
-// Cards now include their available parallels directly
-const { data: card } = await client.catalog.cards.get('card_uuid');
-if (card?.parallels && card.parallels.length > 0) {
+// Cards include their available parallels directly
+const { data: cardDetail } = await client.catalog.cards.get('card_uuid');
+if (cardDetail?.parallels && cardDetail.parallels.length > 0) {
   console.log('Available parallels:');
-  card.parallels.forEach(p => {
+  cardDetail.parallels.forEach(p => {
     // Each parallel has: id, name, numberedTo (optional)
     const display = p.numberedTo ? `${p.name} /${p.numberedTo}` : p.name;
     console.log(`- ${display}`);
@@ -1320,13 +1396,16 @@ other value is set by the review team:
 
 | Status | Meaning |
 |--------|---------|
-| `new` | Just submitted, not yet triaged (v3.8.1+) |
-| `not_reviewed` | Queued, awaiting review |
+| `new` | Just submitted, not yet triaged |
 | `under_review` | Actively being investigated |
-| `fixed` | Resolved — the reported issue was corrected |
-| `wont_fix` | Reviewed and intentionally not being changed |
-| `duplicate` | Already tracked under another report |
-| `need_info` | More detail is needed before it can be actioned |
+| `confirmed_bug` | Confirmed as a bug |
+| `enhancement_backlog` | Accepted as an enhancement; in the backlog |
+| `enhancement_planned` | Accepted as an enhancement; planned |
+| `released` | The resulting change has been released |
+| `not_an_issue` | Reviewed and determined not to be an issue |
+| `closed` | Closed with no further action |
+
+The values `not_reviewed`, `fixed`, `wont_fix`, `duplicate`, and `need_info` are deprecated and only appear on feedback submitted before August 2026. They remain in the exported `FeedbackStatus` union so an exhaustive `switch` still compiles.
 
 ## TypeScript Support
 
@@ -1339,8 +1418,11 @@ import {
   IdentifyResult,
   CardDetection,
   DetectedCard,
+  ParallelSuggestion,
+  CardSuggestion,
   DetailedParallel,
   CatalogSearchResponse,
+  SearchResult,
   SlabGradingDetail,
   SlabCompany,
   SlabGrade,
@@ -1352,10 +1434,15 @@ import {
   BulkPricingResponse,
   MarketplaceResponse,
   MarketplaceRecord,
+  TimeseriesResponse,
+  CandlePeriod,
+  CandleStats,
   PricingSearchResponse,
   PricingSearchRecord,
   MarketplaceSearchResponse,
-  MarketplaceSearchRecord
+  MarketplaceSearchRecord,
+  FeedbackResponse,
+  FeedbackStatus
 } from 'cardsightai';
 
 // All methods are fully typed
@@ -1439,12 +1526,12 @@ try {
 import { CardSightAI } from 'cardsightai';
 
 // Basic configuration
-const client = new CardSightAI({
+const basicClient = new CardSightAI({
   apiKey: 'your_api_key'  // Required
 });
 
 // Advanced configuration
-const client = new CardSightAI({
+const advancedClient = new CardSightAI({
   apiKey: 'your_api_key',
   baseUrl: 'https://api.cardsight.ai',  // Custom API endpoint
   timeout: 30000,  // Request timeout in milliseconds
@@ -1455,7 +1542,7 @@ const client = new CardSightAI({
 
 // Using environment variables
 // Set CARDSIGHTAI_API_KEY in your environment
-const client = new CardSightAI();  // Automatically uses env variable
+const envClient = new CardSightAI();  // Automatically uses env variable
 ```
 
 ## Environment Variables
@@ -1480,7 +1567,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |
 | **Collectors** | 5 | `collectors.*` |
 | **Lists** | 8 | `lists.*`, `lists.cards.*` |
-| **Pricing** | 3 | `pricing.get()`, `pricing.bulk()`, `pricing.search()` |
+| **Pricing** | 4 | `pricing.get()`, `pricing.bulk()`, `pricing.timeseries()`, `pricing.search()` |
 | **Marketplace** | 2 | `marketplace.get()`, `marketplace.search()` |
 | **Grades** | 3 | `grades.companies.*` |
 | **Autocomplete** | 6 | `autocomplete.*` |
@@ -1539,6 +1626,8 @@ The SDK works in modern browsers with native fetch support:
 The SDK is compatible with edge runtimes like Cloudflare Workers and Vercel Edge Functions:
 
 ```typescript
+import { CardSightAI } from 'cardsightai';
+
 // Cloudflare Worker example
 export default {
   async fetch(request: Request) {

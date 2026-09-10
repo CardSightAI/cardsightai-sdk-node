@@ -17,6 +17,7 @@ export type {
   CardIdentificationBySegmentResponse,
   CardDetectionResponse,
   CatalogSearchResponse,
+  SearchResult,
   CardDetection,
   DetectedCard,
   IdentifyResult,
@@ -34,6 +35,18 @@ export type {
   BulkPricingResult,
   MarketplaceResponse,
   MarketplaceRecord,
+  // Pricing time series types (v4.0.0)
+  TimeseriesResponse,
+  TimeseriesQueryEcho,
+  RawTimeseriesSection,
+  TimeseriesCompanyGroup,
+  TimeseriesGradeGroup,
+  TimeseriesTypeTotals,
+  CandlePeriod,
+  CandleStats,
+  // Feedback types (v4.0.0)
+  FeedbackResponse,
+  FeedbackStatus,
   // Pricing & marketplace search types (v3.7.0)
   PricingSearchResponse,
   PricingSearchRecord,
@@ -48,6 +61,7 @@ export type {
   FieldValue,
   FieldValues,
   CardSuggestion,
+  ParallelSuggestion,
   Field,
   FieldSummary,
   DetailedFieldResponse,
@@ -88,6 +102,13 @@ export {
   getFirstDetection,
   countByConfidence,
   formatCardDisplay,
+  // Parallel suggestion utilities (v4.0.0, beta)
+  hasParallelSuggestions,
+  getParallelSuggestions,
+  getBestParallelSuggestion,
+  filterParallelSuggestionsByConfidence,
+  formatParallelSuggestion,
+  // Legacy single-parallel helpers (deprecated; read the best-match suggestion)
   hasParallel,
   getParallelInfo,
   isNumberedParallel,

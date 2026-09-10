@@ -1003,6 +1003,19 @@ export class CardSightAI {
     bulk: (data: PostBody<'/v1/pricing/'>) => this.client.POST('/v1/pricing/', { body: data }),
 
     /**
+     * Get listing price time series (candlestick rollups) for a single card.
+     * Returns per-bucket mean/median/high/low/count, split into raw (ungraded) and
+     * graded (per company → per grade) series, each further split by listing type.
+     * Statistics are descriptive summaries of listings — not valuations.
+     * @param cardId - Card UUID
+     * @param params - Query parameters (interval required; periods, as_of_date, listing_type, parallel_id, grade_id optional)
+     */
+    timeseries: (cardId: string, params: GetQueryParams<'/v1/pricing/{card_id}/timeseries'>) =>
+      this.client.GET('/v1/pricing/{card_id}/timeseries', {
+        params: { path: { card_id: cardId }, query: params }
+      }),
+
+    /**
      * Search completed sales pricing by free-text listing title.
      * Returns a flat, relevance-ranked list spanning multiple cards (including
      * listings never matched to a canonical card).

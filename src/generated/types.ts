@@ -75,7 +75,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies card(s) from the submitted image (automatic segment detection)
-         * @description Identify one or more cards from an image. The segment (sport/category) of each card is detected automatically, so a single image may contain cards from different segments (e.g., baseball and basketball). To force a specific segment, use POST /card/:segment instead. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         * @description Identify one or more cards from an image. The segment (sport/category) of each card is detected automatically, so a single image may contain cards from different segments (e.g., baseball and basketball). To force a specific segment, use POST /card/:segment instead. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available.
          */
         post: operations["identifyCard"];
         delete?: never;
@@ -95,7 +95,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies a card from the submitted image for a specific segment (sport)
-         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID, name, or shortname (case-insensitive, e.g., "football", "basketball", "magic"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC.
+         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID, name, or shortname (case-insensitive, e.g., "football", "basketball", "magic"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available.
          */
         post: operations["identifyCardBySegment"];
         delete?: never;
@@ -220,7 +220,7 @@ export interface paths {
         };
         /**
          * Search across cards, sets, releases, and parallels
-         * @description Global fuzzy search endpoint that searches across card names, set names, release names, parallel names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps", "1952 mickey mantle", or "refractor". Uses PostgreSQL full-text search combined with trigram similarity for typo-tolerant matching. Results are ranked by relevance and returned as a mixed list of cards, sets, releases, and parallels. Cards and sets that match a parallel name (e.g., "Refractor") are boosted in relevance and include the matching parallelName in the response. Slash notation is supported: append a standalone term like "/25" (e.g. "aaron judge /25") to hard-filter results to cards and parallels whose applicable parallel is serial-numbered to that value; matched results include the numberedTo field. Use the "type" parameter to filter to a specific entity type.
+         * @description Global fuzzy search endpoint that searches across card names, set names, release names, parallel names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps", "1952 mickey mantle", or "refractor". Matching is typo-tolerant. Results are ranked by relevance and returned as a mixed list of cards, sets, releases, and parallels. Cards and sets that match a parallel name (e.g., "Refractor") are boosted in relevance and include the matching parallelName in the response. Slash notation is supported: append a standalone term like "/25" (e.g. "aaron judge /25") to hard-filter results to cards and parallels whose applicable parallel is serial-numbered to that value; matched results include the numberedTo field. Use the "type" parameter to filter to a specific entity type.
          */
         get: operations["searchCatalog"];
         put?: never;
@@ -579,7 +579,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Search for parallels across sets and releases (free)
+         * Search for parallels across sets and releases
          * @description Search for parallels by name and filter by release. Returns all sets containing the parallel with release information
          */
         get: operations["getParallels"];
@@ -599,7 +599,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get detailed parallel information (free)
+         * Get detailed parallel information
          * @description Retrieve detailed information about a specific Parallel, including set and release context. For partial parallels (isPartial=true), the response includes an array of Card IDs that have this Parallel.
          */
         get: operations["getParallel"];
@@ -2304,6 +2304,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/pricing/{card_id}/timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get listing price time series (candlestick rollups) for a card
+         * @description Returns per-period descriptive statistics — mean, median, high, low, and count — aggregated over a card's marketplace listings, grouped into daily, weekly, or monthly buckets. Statistics are split by grade: `raw` holds candles for ungraded listings, and `graded` holds one candle series per grade, grouped by grading company — so graded and ungraded prices never blend into one candle range. Within each series, candles are further split by listing type, following the same bid/ask semantics as GET /pricing/{card_id}: auction candles summarize completed auction sales (the "bid" side), while fixed candles summarize Buy It Now asking prices (the "ask" side — listed prices, not necessarily completed sales). The parallel dimension is request-controlled: omit parallel_id and each grade's series blends all parallels of that grade; pass "null" for base-card-only candles or a UUID for one parallel. Use this to chart price trends over time. The viewpoint is `as_of_date` looking backward: the newest bucket is the one containing that date (default today, UTC) and the window extends back `periods` buckets (defaults: daily 90, weekly 52, monthly 24; `periods` above 365 is rejected, while weekly values above 156 and monthly values above 120 are clamped to those per-interval caps — the response echoes the effective values). Buckets, listing types, and grades with no listings are omitted rather than returned as zeros, and a card with no listings in the window returns an empty raw section and empty graded array as a success. A grouped outlier filter is applied over the whole window per grade/parallel variant — a listing is only ever judged against other listings of its own variant; per-type filtered counts are reported in each series' totals. Statistics are descriptive summaries of raw listings — not valuations.
+         */
+        get: operations["getCardPricingTimeseries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/pricing/search": {
         parameters: {
             query?: never;
@@ -3000,10 +3020,10 @@ export interface components {
             /** @description The feedback message */
             message: string;
             /**
-             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team.
+             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team. The values not_reviewed, fixed, wont_fix, duplicate, and need_info are deprecated and appear only on feedback submitted before August 2026.
              * @enum {string}
              */
-            status: "new" | "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            status: "new" | "under_review" | "confirmed_bug" | "enhancement_backlog" | "enhancement_planned" | "released" | "not_an_issue" | "closed" | "not_reviewed" | "fixed" | "wont_fix" | "duplicate" | "need_info";
             /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
             /** @description ISO 8601 timestamp when the feedback was last updated */
@@ -3029,15 +3049,7 @@ export interface components {
         };
         FieldValuesInput: components["schemas"]["FieldValueInput"][];
         CardSuggestionInput: {
-            /** @description UUID of the suggested card */
-            id?: string;
-            /** @description Set name for the suggested card */
-            setName?: string;
-            /** @description Key-value field properties for the suggested card. Omitted when the card has no fields. */
-            fields?: components["schemas"]["FieldValuesInput"];
-        };
-        CardDetailsInput: {
-            /** @description UUID of the identified card. Present only for exact card matches. */
+            /** @description UUID of the card. Present only for exact card matches. */
             id?: string;
             /** @description UUID of the segment. Present for both exact card and set-level matches. */
             segmentId?: string;
@@ -3065,11 +3077,65 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
             variationOf?: string;
-            /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
-            parallel?: components["schemas"]["ParallelSummaryInput"];
             /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
             fields?: components["schemas"]["FieldValuesInput"];
-            /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
+        };
+        ParallelSuggestionInput: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
+            /**
+             * @description How strongly this parallel is supported for the scanned card. Assessed per entry, independent of the entry's position in the list. Present when available while this field is in beta; a missing value means not assessed, not Low.
+             * @enum {string}
+             */
+            confidence?: "High" | "Medium" | "Low";
+        };
+        CardDetailsInput: {
+            /** @description UUID of the card. Present only for exact card matches. */
+            id?: string;
+            /** @description UUID of the segment. Present for both exact card and set-level matches. */
+            segmentId?: string;
+            /** @description UUID of the release. Present for both exact card and set-level matches. */
+            releaseId?: string;
+            /** @description UUID of the set. Present for both exact card and set-level matches. */
+            setId?: string;
+            /** @description Release year from catalog (e.g., "2023", "1989") */
+            year?: string;
+            /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
+            manufacturer?: string;
+            /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
+            releaseName?: string;
+            /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
+            setName?: string;
+            /** @description Player or subject name. Present only for exact card matches. */
+            name?: string;
+            /** @description Card number. Present only for exact card matches. */
+            number?: string;
+            /** @description Descriptive text for the card when available. Omitted if no description exists. */
+            description?: string;
+            /** @description Print run for numbered cards (e.g., 25 for a /25 card). Omitted if the card is not numbered. */
+            numberedTo?: number;
+            /** @description Notable attributes of the card (e.g., ["Rookie", "Autograph"]). Omitted if the card has no attributes. */
+            attributes?: string[];
+            /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
+            variationOf?: string;
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
+            fields?: components["schemas"]["FieldValuesInput"];
+            /** @description (beta) Possible parallels for this card, each carrying a `confidence` tier when available. Order is the identification engine's ranking, best match first; `confidence` is the strength of evidence behind that individual entry and does not re-order the list. The two are independent, so a later entry may carry a higher confidence than an earlier one. Present whenever there is any parallel evidence: a single High-confidence entry when one parallel was identified, or several entries when more than one remains possible. Omitted when there is nothing to suggest. */
+            parallelSuggestions?: components["schemas"]["ParallelSuggestionInput"][];
+            /** @description Possible alternative card matches, best match first. Each entry is a full card record with the same fields as `card`. Included only when `confidence` is Medium or Low; omitted for High-confidence identifications and when there are no alternatives. */
             suggestions?: components["schemas"]["CardSuggestionInput"][];
         };
         IdentificationDataInput: {
@@ -3947,7 +4013,7 @@ export interface components {
             id: string;
             /** @description Primary name of the entity. Player/subject name for cards, set name for sets, release name for releases. */
             name: string;
-            /** @description Relevance score combining full-text search rank and fuzzy similarity. Higher values indicate stronger matches. Results are sorted by this score descending. */
+            /** @description Relevance score for ordering results. Higher values indicate stronger matches; results are sorted by this score descending. The value is opaque and order-only — its magnitude is not an absolute scale and may change between backend versions. */
             relevance: number;
             /** @description Release year associated with this result. */
             year?: string;
@@ -3961,6 +4027,15 @@ export interface components {
             parallelName?: string;
             /** @description Serial print-run limit of the matching parallel (e.g. 25 for a /25). Present on parallel results, and on card results matched via `/N` slash notation. */
             numberedTo?: number;
+            /** @description Segment name for this result (e.g. "Baseball"). */
+            segmentName?: string;
+            /** @description Printed card number. Present on card results when available. */
+            cardNumber?: string;
+            /**
+             * @description Present on every result of the page only when close-spelling (fuzzy) matching engaged for this request: "exact" results matched the query directly and always sort before "fuzzy" results. Omitted entirely when fuzzy matching did not engage.
+             * @enum {string}
+             */
+            matchKind?: "exact" | "fuzzy";
         };
         CatalogSearchResponseInput: {
             /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
@@ -4434,6 +4509,90 @@ export interface components {
             results: components["schemas"]["MarketplaceSearchRecordInput"][];
             /** @description Response metadata */
             meta: components["schemas"]["SearchMetaInput"];
+        };
+        CandleStatsInput: {
+            /** @description Arithmetic mean listing price in USD for this bucket. For auction candles this aggregates final sale prices; for fixed candles it aggregates Buy It Now asking prices (not necessarily completed sales). */
+            mean: number;
+            /** @description Median listing price in USD for this bucket */
+            median: number;
+            /** @description Highest listing price in USD in this bucket */
+            high: number;
+            /** @description Lowest listing price in USD in this bucket */
+            low: number;
+            /** @description Number of listings in this bucket for this listing type (after outlier filtering) */
+            count: number;
+        };
+        CandlePeriodInput: {
+            /** @description Bucket start date (YYYY-MM-DD): the UTC calendar day, the Monday of the ISO week, or the 1st of the month, depending on interval. */
+            period_start: string;
+            /** @description Stats keyed by listing type; new listing types appear as additive keys. Currently "auction" (completed auction sales — the bid side) and "fixed" (Buy It Now asking prices — the ask side, not necessarily completed sales). A type with no listings in this bucket is absent from the map. */
+            types: {
+                [key: string]: components["schemas"]["CandleStatsInput"];
+            };
+        };
+        TimeseriesTypeTotalsInput: {
+            /** @description Listings included across all candles for this listing type (after outlier filtering); equals the sum of the per-candle counts. */
+            total_count: number;
+            /** @description Listings removed by the outlier filter for this listing type. Pre-filter total = total_count + filtered_count. */
+            filtered_count: number;
+        };
+        TimeseriesQueryEchoInput: {
+            /** @description Rollup bucket size applied */
+            interval: string;
+            /** @description Effective bucket count (the service applies per-interval defaults when omitted and clamps oversized values) */
+            periods: number;
+            /** @description Effective viewpoint date (UTC) the window ends on */
+            as_of_date: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Parallel UUID filter applied */
+            parallel_id?: string | null;
+            /** @description Grade UUID filter applied */
+            grade_id?: string | null;
+        };
+        RawTimeseriesSectionInput: {
+            /** @description Chronological buckets computed from ungraded listings only, oldest first. A bucket with no listings in any requested type is omitted entirely; empty when the card has no ungraded listings in the window, or when the grade_id filter pins a specific grade (which excludes ungraded listings). */
+            candles: components["schemas"]["CandlePeriodInput"][];
+            /** @description Whole-window counts for ungraded listings, keyed by listing type. A type with no listings across the window is omitted; a type can appear with total_count 0 when all of its listings were removed by the outlier filter. */
+            totals: {
+                [key: string]: components["schemas"]["TimeseriesTypeTotalsInput"];
+            };
+        };
+        TimeseriesGradeGroupInput: {
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Chronological buckets computed from this grade's listings only, oldest first. A bucket with no listings in any requested type is omitted entirely. */
+            candles: components["schemas"]["CandlePeriodInput"][];
+            /** @description Whole-window counts for this grade, keyed by listing type. A type with no listings across the window is omitted; a type can appear with total_count 0 when all of its listings were removed by the outlier filter. */
+            totals: {
+                [key: string]: components["schemas"]["TimeseriesTypeTotalsInput"];
+            };
+        };
+        TimeseriesCompanyGroupInput: {
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Per-grade candle series for this company */
+            grades: components["schemas"]["TimeseriesGradeGroupInput"][];
+        };
+        TimeseriesResponseInput: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContextInput"];
+            /** @description Echo of query parameters applied (effective values) */
+            query: components["schemas"]["TimeseriesQueryEchoInput"];
+            /** @description Candle series computed from ungraded listings only. Always present; empty candles/totals when the card has no ungraded listings in the window, or when the grade_id filter pins a specific grade (which excludes ungraded listings — pass grade_id "null" for ungraded only). */
+            raw: components["schemas"]["RawTimeseriesSectionInput"];
+            /** @description Per-grade candle series grouped by grading company, so graded and ungraded prices never blend into one candle range. Grades with no listings in the window are omitted; empty when the card has no graded listings in the window. When the grade_id filter pins a specific grade, this contains at most that one grade. */
+            graded: components["schemas"]["TimeseriesCompanyGroupInput"][];
         };
         ReleaseCalendarEntryInput: {
             /**
@@ -5095,10 +5254,10 @@ export interface components {
             /** @description The feedback message */
             message: string;
             /**
-             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team.
+             * @description Current review status of the feedback. Newly submitted feedback starts as new; the remaining values are set by our review team. The values not_reviewed, fixed, wont_fix, duplicate, and need_info are deprecated and appear only on feedback submitted before August 2026.
              * @enum {string}
              */
-            status: "new" | "not_reviewed" | "under_review" | "fixed" | "wont_fix" | "duplicate" | "need_info";
+            status: "new" | "under_review" | "confirmed_bug" | "enhancement_backlog" | "enhancement_planned" | "released" | "not_an_issue" | "closed" | "not_reviewed" | "fixed" | "wont_fix" | "duplicate" | "need_info";
             /** @description ISO 8601 timestamp when the feedback was submitted */
             created_at: string;
             /** @description ISO 8601 timestamp when the feedback was last updated */
@@ -5124,15 +5283,7 @@ export interface components {
         };
         FieldValues: components["schemas"]["FieldValue"][];
         CardSuggestion: {
-            /** @description UUID of the suggested card */
-            id?: string;
-            /** @description Set name for the suggested card */
-            setName?: string;
-            /** @description Key-value field properties for the suggested card. Omitted when the card has no fields. */
-            fields?: components["schemas"]["FieldValues"];
-        };
-        CardDetails: {
-            /** @description UUID of the identified card. Present only for exact card matches. */
+            /** @description UUID of the card. Present only for exact card matches. */
             id?: string;
             /** @description UUID of the segment. Present for both exact card and set-level matches. */
             segmentId?: string;
@@ -5160,11 +5311,65 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
             variationOf?: string;
-            /** @description Parallel variant info. Present only for exact card matches with an identified parallel. */
-            parallel?: components["schemas"]["ParallelSummary"];
             /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
             fields?: components["schemas"]["FieldValues"];
-            /** @description Alternative card matches when multiple reprints score similarly. Omitted when there are no suggestions. */
+        };
+        ParallelSuggestion: {
+            /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
+            id: string;
+            /** @description Name of the parallel variant. Examples: "Gold Refractor", "Black Prizm", "Orange". Describes the visual variant or rarity tier. */
+            name: string;
+            /** @description Additional details about the parallel such as print run, special features, or visual description. May be null. */
+            description?: string;
+            /**
+             * @description Present and true only if this parallel applies to specific cards (e.g., cards 1-400 of a 800-card set). Omitted if parallel applies to the entire set.
+             * @constant
+             */
+            isPartial?: true;
+            /** @description Limited print run number for this parallel */
+            numberedTo?: number;
+            /** @description Card UUIDs that have this parallel. Only present when isPartial is true. */
+            cards?: string[];
+            /**
+             * @description How strongly this parallel is supported for the scanned card. Assessed per entry, independent of the entry's position in the list. Present when available while this field is in beta; a missing value means not assessed, not Low.
+             * @enum {string}
+             */
+            confidence?: "High" | "Medium" | "Low";
+        };
+        CardDetails: {
+            /** @description UUID of the card. Present only for exact card matches. */
+            id?: string;
+            /** @description UUID of the segment. Present for both exact card and set-level matches. */
+            segmentId?: string;
+            /** @description UUID of the release. Present for both exact card and set-level matches. */
+            releaseId?: string;
+            /** @description UUID of the set. Present for both exact card and set-level matches. */
+            setId?: string;
+            /** @description Release year from catalog (e.g., "2023", "1989") */
+            year?: string;
+            /** @description Card manufacturer from catalog (e.g., "Topps", "Panini", "Upper Deck") */
+            manufacturer?: string;
+            /** @description Release/product name from catalog (e.g., "Topps Chrome", "Prizm Basketball") */
+            releaseName?: string;
+            /** @description Set name from catalog (e.g., "Base Set", "Rookie Variations") */
+            setName?: string;
+            /** @description Player or subject name. Present only for exact card matches. */
+            name?: string;
+            /** @description Card number. Present only for exact card matches. */
+            number?: string;
+            /** @description Descriptive text for the card when available. Omitted if no description exists. */
+            description?: string;
+            /** @description Print run for numbered cards (e.g., 25 for a /25 card). Omitted if the card is not numbered. */
+            numberedTo?: number;
+            /** @description Notable attributes of the card (e.g., ["Rookie", "Autograph"]). Omitted if the card has no attributes. */
+            attributes?: string[];
+            /** @description UUID of the parent card when this card is a variation. Omitted if the card is not a variation. */
+            variationOf?: string;
+            /** @description Key-value field properties (e.g., HP, Rarity, Artist). May include a "CARD_LANGUAGE" entry with the ISO 639-1 code of the scanned card language (e.g., "ja"). Omitted when there are no fields. */
+            fields?: components["schemas"]["FieldValues"];
+            /** @description (beta) Possible parallels for this card, each carrying a `confidence` tier when available. Order is the identification engine's ranking, best match first; `confidence` is the strength of evidence behind that individual entry and does not re-order the list. The two are independent, so a later entry may carry a higher confidence than an earlier one. Present whenever there is any parallel evidence: a single High-confidence entry when one parallel was identified, or several entries when more than one remains possible. Omitted when there is nothing to suggest. */
+            parallelSuggestions?: components["schemas"]["ParallelSuggestion"][];
+            /** @description Possible alternative card matches, best match first. Each entry is a full card record with the same fields as `card`. Included only when `confidence` is Medium or Low; omitted for High-confidence identifications and when there are no alternatives. */
             suggestions?: components["schemas"]["CardSuggestion"][];
         };
         IdentificationData: {
@@ -6042,7 +6247,7 @@ export interface components {
             id: string;
             /** @description Primary name of the entity. Player/subject name for cards, set name for sets, release name for releases. */
             name: string;
-            /** @description Relevance score combining full-text search rank and fuzzy similarity. Higher values indicate stronger matches. Results are sorted by this score descending. */
+            /** @description Relevance score for ordering results. Higher values indicate stronger matches; results are sorted by this score descending. The value is opaque and order-only — its magnitude is not an absolute scale and may change between backend versions. */
             relevance: number;
             /** @description Release year associated with this result. */
             year?: string;
@@ -6056,6 +6261,15 @@ export interface components {
             parallelName?: string;
             /** @description Serial print-run limit of the matching parallel (e.g. 25 for a /25). Present on parallel results, and on card results matched via `/N` slash notation. */
             numberedTo?: number;
+            /** @description Segment name for this result (e.g. "Baseball"). */
+            segmentName?: string;
+            /** @description Printed card number. Present on card results when available. */
+            cardNumber?: string;
+            /**
+             * @description Present on every result of the page only when close-spelling (fuzzy) matching engaged for this request: "exact" results matched the query directly and always sort before "fuzzy" results. Omitted entirely when fuzzy matching did not engage.
+             * @enum {string}
+             */
+            matchKind?: "exact" | "fuzzy";
         };
         CatalogSearchResponse: {
             /** @description Array of search results ordered by relevance score (descending). Contains a mix of cards, sets, and releases unless filtered by type. */
@@ -6529,6 +6743,90 @@ export interface components {
             results: components["schemas"]["MarketplaceSearchRecord"][];
             /** @description Response metadata */
             meta: components["schemas"]["SearchMeta"];
+        };
+        CandleStats: {
+            /** @description Arithmetic mean listing price in USD for this bucket. For auction candles this aggregates final sale prices; for fixed candles it aggregates Buy It Now asking prices (not necessarily completed sales). */
+            mean: number;
+            /** @description Median listing price in USD for this bucket */
+            median: number;
+            /** @description Highest listing price in USD in this bucket */
+            high: number;
+            /** @description Lowest listing price in USD in this bucket */
+            low: number;
+            /** @description Number of listings in this bucket for this listing type (after outlier filtering) */
+            count: number;
+        };
+        CandlePeriod: {
+            /** @description Bucket start date (YYYY-MM-DD): the UTC calendar day, the Monday of the ISO week, or the 1st of the month, depending on interval. */
+            period_start: string;
+            /** @description Stats keyed by listing type; new listing types appear as additive keys. Currently "auction" (completed auction sales — the bid side) and "fixed" (Buy It Now asking prices — the ask side, not necessarily completed sales). A type with no listings in this bucket is absent from the map. */
+            types: {
+                [key: string]: components["schemas"]["CandleStats"];
+            };
+        };
+        TimeseriesTypeTotals: {
+            /** @description Listings included across all candles for this listing type (after outlier filtering); equals the sum of the per-candle counts. */
+            total_count: number;
+            /** @description Listings removed by the outlier filter for this listing type. Pre-filter total = total_count + filtered_count. */
+            filtered_count: number;
+        };
+        TimeseriesQueryEcho: {
+            /** @description Rollup bucket size applied */
+            interval: string;
+            /** @description Effective bucket count (the service applies per-interval defaults when omitted and clamps oversized values) */
+            periods: number;
+            /** @description Effective viewpoint date (UTC) the window ends on */
+            as_of_date: string;
+            /** @description Listing type filter applied */
+            listing_type: string;
+            /** @description Parallel UUID filter applied */
+            parallel_id?: string | null;
+            /** @description Grade UUID filter applied */
+            grade_id?: string | null;
+        };
+        RawTimeseriesSection: {
+            /** @description Chronological buckets computed from ungraded listings only, oldest first. A bucket with no listings in any requested type is omitted entirely; empty when the card has no ungraded listings in the window, or when the grade_id filter pins a specific grade (which excludes ungraded listings). */
+            candles: components["schemas"]["CandlePeriod"][];
+            /** @description Whole-window counts for ungraded listings, keyed by listing type. A type with no listings across the window is omitted; a type can appear with total_count 0 when all of its listings were removed by the outlier filter. */
+            totals: {
+                [key: string]: components["schemas"]["TimeseriesTypeTotals"];
+            };
+        };
+        TimeseriesGradeGroup: {
+            /** @description Grade value (e.g., "10", "9.5") */
+            grade_value: string;
+            /**
+             * Format: uuid
+             * @description Grade UUID
+             */
+            grade_id: string;
+            /** @description Chronological buckets computed from this grade's listings only, oldest first. A bucket with no listings in any requested type is omitted entirely. */
+            candles: components["schemas"]["CandlePeriod"][];
+            /** @description Whole-window counts for this grade, keyed by listing type. A type with no listings across the window is omitted; a type can appear with total_count 0 when all of its listings were removed by the outlier filter. */
+            totals: {
+                [key: string]: components["schemas"]["TimeseriesTypeTotals"];
+            };
+        };
+        TimeseriesCompanyGroup: {
+            /** @description Grading company name (e.g., "PSA") */
+            company_name: string;
+            /**
+             * Format: uuid
+             * @description Grading company UUID
+             */
+            company_id: string;
+            /** @description Per-grade candle series for this company */
+            grades: components["schemas"]["TimeseriesGradeGroup"][];
+        };
+        TimeseriesResponse: {
+            /** @description Card context information */
+            card: components["schemas"]["PricingCardContext"];
+            /** @description Echo of query parameters applied (effective values) */
+            query: components["schemas"]["TimeseriesQueryEcho"];
+            /** @description Candle series computed from ungraded listings only. Always present; empty candles/totals when the card has no ungraded listings in the window, or when the grade_id filter pins a specific grade (which excludes ungraded listings — pass grade_id "null" for ungraded only). */
+            raw: components["schemas"]["RawTimeseriesSection"];
+            /** @description Per-grade candle series grouped by grading company, so graded and ungraded prices never blend into one candle range. Grades with no listings in the window are omitted; empty when the card has no graded listings in the window. When the grade_id filter pins a specific grade, this contains at most that one grade. */
+            graded: components["schemas"]["TimeseriesCompanyGroup"][];
         };
         ReleaseCalendarEntry: {
             /**
@@ -7143,7 +7441,7 @@ export interface operations {
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
-                /** @description Free-text search query. Searches across card names, set names, release names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps" or "1952 mickey mantle". Append a standalone slash term like "/25" to filter to cards and parallels whose parallel is numbered to that value (e.g. "aaron judge /25"). Minimum 2 characters. */
+                /** @description Free-text search query. Searches across card names, set names, release names, manufacturer names, and years simultaneously. Supports multi-word queries like "aaron judge topps" or "1952 mickey mantle". Append a standalone slash term like "/25" to filter to cards and parallels whose parallel is numbered to that value (e.g. "aaron judge /25"). Minimum 2 characters (after trimming surrounding whitespace). */
                 q: string;
                 /** @description Filter results to a specific entity type. When omitted, returns mixed results across all types. */
                 type?: "card" | "set" | "release" | "parallel";
@@ -7212,7 +7510,25 @@ export interface operations {
                 };
             };
             /** @description Default Response */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12003,6 +12319,15 @@ export interface operations {
                 };
             };
             /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -12067,6 +12392,15 @@ export interface operations {
             };
             /** @description Default Response */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12147,6 +12481,15 @@ export interface operations {
                 };
             };
             /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -12211,6 +12554,15 @@ export interface operations {
             };
             /** @description Default Response */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12291,6 +12643,15 @@ export interface operations {
                 };
             };
             /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -12363,6 +12724,15 @@ export interface operations {
                 };
             };
             /** @description Default Response */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -12415,6 +12785,15 @@ export interface operations {
             };
             /** @description Default Response */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12858,6 +13237,87 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BulkPricingResponse"];
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCardPricingTimeseries: {
+        parameters: {
+            query: {
+                /** @description Rollup bucket size: daily = UTC calendar day, weekly = ISO week (Monday start), monthly = calendar month. */
+                interval: "daily" | "weekly" | "monthly";
+                /** @description How many buckets to look back. Defaults per interval when omitted: daily 90, weekly 52, monthly 24. Values above 365 are rejected; weekly values above 156 and monthly values above 120 are clamped to those per-interval caps, and the response echoes the effective value. */
+                periods?: number;
+                /** @description Viewpoint date (UTC, YYYY-MM-DD): the newest bucket is the one containing this date and the window extends back `periods` buckets. Defaults to today (UTC). */
+                as_of_date?: string;
+                /** @description Which listing-type series to compute. Stats are always split by type — this only restricts which types appear. auction=completed auction sales (bid side), fixed=Buy It Now asking prices (ask side, not necessarily completed sales), both=all */
+                listing_type?: "auction" | "fixed" | "both";
+                /** @description Filter by parallel variant. Pass a UUID for a specific parallel, "null" for base card only, or omit for all variants. */
+                parallel_id?: string;
+                /** @description Filter by grade. Pass a UUID for a specific grade, "null" for ungraded only, or omit for all grades. */
+                grade_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Card UUID */
+                card_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeseriesResponse"];
+                };
+            };
+            /** @description Default Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeseriesResponse"];
                 };
             };
             /** @description Default Response */
