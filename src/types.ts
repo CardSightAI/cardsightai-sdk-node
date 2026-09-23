@@ -241,6 +241,25 @@ export type IdentifiableSet = components['schemas']['IdentifiableSet'];
 export type IdentifiableSetsResponse = components['schemas']['IdentifiableSetsResponse'];
 export type SetIdentifiableResponse = components['schemas']['SetIdentifiableResponse'];
 
+// CardMagic types (v4.1.0)
+export type CardMagicProcessParams = NonNullable<
+  paths['/v1/cardmagic/process']['post']['parameters']['query']
+>;
+
+/** Metadata about a CardMagic response, read from its headers by `getCardMagicInfo()` */
+export interface CardMagicInfo {
+  /** Response content type: "image/jpeg", "image/png", or "application/zip" */
+  contentType: string;
+  /** True when the body is a zip archive (two or more cards, or corners requested) */
+  isZip: boolean;
+  /** Number of cards found in the photo (X-CardMagic-Count) */
+  count?: number;
+  /** Single image only: width in pixels, padding included (X-CardMagic-Width) */
+  width?: number;
+  /** Single image only: height in pixels, padding included (X-CardMagic-Height) */
+  height?: number;
+}
+
 export interface CardDetection {
   confidence: 'High' | 'Medium' | 'Low';
   card: DetectedCard;

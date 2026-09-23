@@ -144,6 +144,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/cardmagic/process": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create listing-ready card images from a photo
+         * @description Upload a phone photo of one or more trading cards and get each card back as a clean, listing-ready image. Best results come from raw cards; cards in toploaders or grading-company slabs may crop poorly. mode=process (default) returns each card straightened and squared up at standard trading-card proportions, as if it had been scanned; mode=crop returns each card as it appears in the photo, trimmed to the card. Padding, fill, auto-levels and the returned image size (longEdge) are adjustable. One card returns the image directly (image/jpeg or image/png per outputFormat) with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers. Two or more cards return application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order (top to bottom, then left to right). corners=true adds close-ups of each card's four corners and a sheet combining them, and the response is then always application/zip, even for one card: card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext>. If no card is found the response is 422 NO_CARD_FOUND. Accepts multipart/form-data or a direct binary body (image/jpeg, image/png, image/webp, image/heic). Maximum upload 20MB and 8192px per side. Send the original photo (including its orientation flag), not a downscaled or rotated copy.
+         */
+        post: operations["processCardImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalog/statistics": {
         parameters: {
             query?: never;
@@ -7387,6 +7407,121 @@ export interface operations {
             };
             /** @description Default Response */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    processCardImage: {
+        parameters: {
+            query?: {
+                /** @description process (default): each card straightened and squared up at standard trading-card proportions, as if scanned. crop: each card as it appears in the photo, trimmed to the card. */
+                mode?: "process" | "crop";
+                /** @description Margin around the card as a percent of the card size on each side, 0 to 50. Default 5. */
+                paddingPercent?: number;
+                /** @description What fills the margin: "background" (the real surroundings, default) or a solid #RRGGBB color. */
+                paddingFill?: string;
+                /** @description Restore contrast and remove color cast (default true). Set false when the photo's own color is what matters. */
+                autoLevels?: "true" | "false";
+                /** @description Encoding of the returned card image(s). Default jpeg. */
+                outputFormat?: "jpeg" | "png";
+                /** @description Size of every returned image as the length of its long side in pixels, padding included, 32 to 2100. Omit it for the photo's native size. */
+                longEdge?: number;
+                /** @description Add close-ups of each card's four corners for judging condition (default false). Each close-up is 600x600 and shows 14 mm of the card from the corner plus 2.5 mm beyond it, with a light 1 mm grid (heavier every 5 mm; the grid assumes a standard 2.5 x 3.5 in card), in the photo's original color. A 1210x1210 sheet shows all four as they sit on the card. The response is then always application/zip, even for one card. */
+                corners?: "true" | "false";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+                "image/jpeg": components["schemas"]["FileUploadInput"];
+                "image/png": components["schemas"]["FileUploadInput"];
+                "image/webp": components["schemas"]["FileUploadInput"];
+                "image/heic": components["schemas"]["FileUploadInput"];
+                "image/heif": components["schemas"]["FileUploadInput"];
+            };
+        };
+        responses: {
+            /** @description One card: the processed image as image/jpeg or image/png (per outputFormat), with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers. Two or more cards: application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order. With corners=true the response is always application/zip, even for one card, and each card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext> (all four on one sheet). */
+            200: {
+                headers: {
+                    /** @description Number of cards in the photo */
+                    "X-CardMagic-Count"?: number;
+                    /** @description Single image only. Image width in pixels, padding included */
+                    "X-CardMagic-Width"?: number;
+                    /** @description Single image only. Image height in pixels, padding included */
+                    "X-CardMagic-Height"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                    "application/zip": string;
+                };
+            };
+            /** @description Default Response */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

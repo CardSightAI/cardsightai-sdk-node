@@ -25,7 +25,8 @@ import {
   getParallelSuggestions,
   getBestParallelSuggestion,
   filterParallelSuggestionsByConfidence,
-  formatParallelSuggestion
+  formatParallelSuggestion,
+  getCardMagicInfo
 } from '../dist/esm/index.js';
 
 test('SDK initialization', async (t) => {
@@ -96,6 +97,7 @@ test('Client structure', async (t) => {
     assert(client.health, 'Should have health endpoints');
     assert(client.identify, 'Should have identify endpoints');
     assert(client.detect, 'Should have detect endpoints');
+    assert(client.cardMagic, 'Should have cardMagic endpoints');
     assert(client.catalog, 'Should have catalog endpoints');
     assert(client.collections, 'Should have collections endpoints');
     assert(client.autocomplete, 'Should have autocomplete endpoints');
@@ -125,6 +127,10 @@ test('Client structure', async (t) => {
     assert(typeof client.detect.card === 'function', 'Should have detect.card()');
   });
 
+  await t.test('cardMagic endpoints should exist', () => {
+    assert(typeof client.cardMagic.process === 'function', 'Should have cardMagic.process()');
+  });
+
   await t.test('catalog endpoints should exist', () => {
     assert(typeof client.catalog.cards.list === 'function', 'Should have catalog.cards.list()');
     assert(typeof client.catalog.cards.get === 'function', 'Should have catalog.cards.get()');
@@ -150,6 +156,92 @@ test('Client structure', async (t) => {
     assert(typeof client.pricing.timeseries === 'function', 'Should have pricing.timeseries()');
     assert(typeof client.marketplace.get === 'function', 'Should have marketplace.get()');
     assert(typeof client.marketplace.search === 'function', 'Should have marketplace.search()');
+  });
+});
+
+test('CardMagic (v4.1.0)', async (t) => {
+  const mockClient = (reply) => {
+    const calls = [];
+    const client = init({
+      apiKey: 'test_key',
+      fetch: async (request) => {
+        calls.push(request);
+        return reply();
+      }
+    });
+    return { client, calls };
+  };
+
+  await t.test('process() uploads multipart with query params and returns a Blob', async () => {
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
+    const { client, calls } = mockClient(
+      () =>
+        new Response(jpeg, {
+          headers: {
+            'Content-Type': 'image/jpeg',
+            'X-CardMagic-Count': '1',
+            'X-CardMagic-Width': '750',
+            'X-CardMagic-Height': '1050'
+          }
+        })
+    );
+
+    const result = await client.cardMagic.process(new Uint8Array([1, 2, 3]).buffer, {
+      mode: 'crop',
+      longEdge: 1200,
+      autoLevels: 'false'
+    });
+
+    assert.strictEqual(calls.length, 1);
+    const request = calls[0];
+    const url = new URL(request.url);
+    assert.strictEqual(request.method, 'POST');
+    assert.strictEqual(url.pathname, '/v1/cardmagic/process');
+    assert.strictEqual(url.searchParams.get('mode'), 'crop');
+    assert.strictEqual(url.searchParams.get('longEdge'), '1200');
+    assert.strictEqual(url.searchParams.get('autoLevels'), 'false');
+    assert.match(request.headers.get('Content-Type'), /^multipart\/form-data; boundary=/);
+    const form = await request.formData();
+    assert.strictEqual((await form.get('image').arrayBuffer()).byteLength, 3);
+
+    assert(result.data instanceof Blob, 'data should be a Blob');
+    assert.deepStrictEqual(new Uint8Array(await result.data.arrayBuffer()), jpeg);
+    assert.deepStrictEqual(getCardMagicInfo(result.response), {
+      contentType: 'image/jpeg',
+      isZip: false,
+      count: 1,
+      width: 750,
+      height: 1050
+    });
+  });
+
+  await t.test('getCardMagicInfo flags zip responses and omits single-image size', () => {
+    const zip = new Response(new Uint8Array([0x50, 0x4b]), {
+      headers: { 'Content-Type': 'application/zip', 'X-CardMagic-Count': '3' }
+    });
+    assert.deepStrictEqual(getCardMagicInfo(zip), {
+      contentType: 'application/zip',
+      isZip: true,
+      count: 3,
+      width: undefined,
+      height: undefined
+    });
+  });
+
+  await t.test('process() throws CardSightAIError 422 when no card is found', async () => {
+    const { client } = mockClient(() =>
+      Response.json({ error: 'No card found in image', code: 'NO_CARD_FOUND' }, { status: 422 })
+    );
+    await assert.rejects(
+      client.cardMagic.process(new Blob([new Uint8Array([1])], { type: 'image/jpeg' })),
+      (error) => {
+        assert(error instanceof CardSightAIError);
+        assert.strictEqual(error.status, 422);
+        assert.strictEqual(error.message, 'No card found in image');
+        assert.strictEqual(error.response.code, 'NO_CARD_FOUND');
+        return true;
+      }
+    );
   });
 });
 

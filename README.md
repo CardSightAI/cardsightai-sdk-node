@@ -7,8 +7,8 @@
 
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
-The most comprehensive baseball card identification and collection management platform.
-**14M+ Trading Cards** • **8,250+ Identifiable Sets** • **AI-Powered Recognition** • **Free Tier Available**
+The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece).
+**15M+ Trading Cards** • **8,250+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -18,6 +18,8 @@ The most comprehensive baseball card identification and collection management pl
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
+- **Sports Cards & TCGs** - Identification and catalog data for Baseball, Football, Basketball, Hockey, and MMA, plus Pokémon, Magic: The Gathering, and One Piece
+- **CardMagic** - Turn a phone photo into clean, listing-ready card images. No scanner or custom hardware required
 - **Parallel Identification (beta)** - Ranked parallel variant candidates with per-entry confidence tiers, launched for baseball
 - **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
 - **Universal Compatibility** - Works in Node.js, browsers, and edge runtimes
@@ -32,6 +34,7 @@ The most comprehensive baseball card identification and collection management pl
 |---------|-------------|-----------------|
 | **Card Identification** | Identify multiple cards from images using AI; free pre-flight set identifiability lookups | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Card Detection** | Check if trading cards are present in an image | `detect.card()` |
+| **CardMagic** | Turn a phone photo of one or more cards into listing-ready card images | `cardMagic.process()` |
 | **Catalog Search** | Fuzzy search across cards, sets, releases, parallels | `catalog.search()`, `catalog.cards.list()` |
 | **Random Catalog** | Pack opening simulations with parallel odds | `catalog.random.cards()`, `catalog.random.sets()` |
 | **Collections** | Manage owned card collections with analytics | `collections.create()`, `collections.cards.add()` |
@@ -103,7 +106,7 @@ That's it! The SDK handles all API communication, type safety, and error handlin
 
 ### Card Identification
 
-The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target a specific sport.
+The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, MMA) and trading card games (Pokémon, Magic: The Gathering, One Piece). Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
 
 ```typescript
 import { CardSightAI } from 'cardsightai';
@@ -430,7 +433,7 @@ if (hasSuggestions(detection)) {
 }
 ```
 
-See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon, One Piece, and Magic: The Gathering examples.
+See [Fields (Flexible Metadata System)](#fields-flexible-metadata-system) for end-to-end Pokémon and Magic: The Gathering examples.
 
 #### Parallel Variant Detection (beta)
 
@@ -642,6 +645,101 @@ if (card && hasCardParallels(card)) {
 
 **Note**: These utilities are for catalog cards (`card.parallels[]`). For identification results, use `hasParallelSuggestions()`, `getBestParallelSuggestion()`, etc. which work with the detected `card.parallelSuggestions` array (see [Parallel Variant Detection](#parallel-variant-detection-beta)). A `ParallelSuggestion` has the same `id` / `name` / `numberedTo` shape as a `CardParallel`, so `formatCardParallel()` accepts either.
 
+### CardMagic (Listing-Ready Card Images)
+
+CardMagic turns a phone photo into clean, listing-ready card images. No scanner or custom hardware is needed: snap a picture of one or more cards and CardMagic finds each card, straightens it, squares it up at standard trading-card proportions, and returns an image ready for a marketplace listing.
+
+```typescript
+import { CardSightAI, CardSightAIError, getCardMagicInfo } from 'cardsightai';
+import { readFileSync, writeFileSync } from 'fs';
+
+const client = new CardSightAI({ apiKey: 'your_api_key' });
+
+// Send the original photo from the phone, not a downscaled or rotated copy
+const photo = new Uint8Array(readFileSync('path/to/IMG_1234.HEIC')).buffer;
+
+try {
+  const result = await client.cardMagic.process(photo, {
+    mode: 'process',      // default: straightened and squared up, as if scanned
+    outputFormat: 'jpeg', // or 'png'
+    longEdge: 2000        // long side in pixels (32-2100); omit for the photo's native size
+  });
+
+  if (result.data) {
+    // The response is binary: result.data is a Blob, and metadata comes from the headers
+    const info = getCardMagicInfo(result.response);
+    const bytes = Buffer.from(await result.data.arrayBuffer());
+
+    if (info.isZip) {
+      // Two or more cards: a zip of card_0, card_1, ... in reading order
+      writeFileSync('cards.zip', bytes);
+      console.log(`${info.count} cards processed`);
+    } else {
+      // One card: the image itself
+      writeFileSync('card.jpg', bytes);
+      console.log(`Card image: ${info.width}x${info.height}px`);
+    }
+  }
+} catch (error) {
+  if (error instanceof CardSightAIError && error.status === 422) {
+    console.log('No card found in the photo'); // error.response.code === 'NO_CARD_FOUND'
+  } else {
+    throw error;
+  }
+}
+```
+
+In the browser, pass the `File` from a camera input directly:
+
+```typescript
+import { CardSightAI, getCardMagicInfo } from 'cardsightai';
+
+const client = new CardSightAI({ apiKey: 'your_api_key' });
+
+// <input type="file" accept="image/*" capture="environment">
+const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+const photoFile = input?.files?.[0];
+
+if (photoFile) {
+  const { data, response } = await client.cardMagic.process(photoFile, { outputFormat: 'png' });
+  const preview = document.querySelector<HTMLImageElement>('#preview');
+
+  if (data && preview && !getCardMagicInfo(response).isZip) {
+    preview.src = URL.createObjectURL(data);
+  }
+}
+```
+
+**Options** (all optional). Yes/no options take the strings `'true'` and `'false'`, matching the API.
+
+| Option | Values | Default | Effect |
+|--------|--------|---------|--------|
+| `mode` | `'process'` \| `'crop'` | `'process'` | `process` straightens each card and squares it up at standard trading-card proportions, as if scanned. `crop` returns each card as it appears in the photo, trimmed to the card |
+| `paddingPercent` | `0`-`50` | `5` | Margin around the card, as a percent of the card size on each side |
+| `paddingFill` | `'background'` or `'#RRGGBB'` | `'background'` | Fill the margin with the photo's real surroundings or a solid color |
+| `autoLevels` | `'true'` \| `'false'` | `'true'` | Restore contrast and remove color cast. Use `'false'` when the photo's own color matters |
+| `outputFormat` | `'jpeg'` \| `'png'` | `'jpeg'` | Encoding of the returned images |
+| `longEdge` | `32`-`2100` | Photo's native size | Length of the long side of every returned image in pixels, padding included |
+| `corners` | `'true'` \| `'false'` | `'false'` | Add close-ups of each card's four corners for judging condition (600x600 each, showing 14 mm of card plus 2.5 mm beyond it on a light 1 mm grid, in the photo's original color) and a 1210x1210 sheet combining them |
+
+**What comes back:**
+
+| Photo contains | `corners` | Response (`result.data` Blob) |
+|----------------|-----------|-------------------------------|
+| One card | off | The image (`image/jpeg` or `image/png`). `getCardMagicInfo()` reports its `width` and `height` |
+| Two or more cards | off | `application/zip` with `card_0.<ext>`, `card_1.<ext>`, ... in reading order (top to bottom, then left to right) |
+| One or more cards | `'true'` | Always `application/zip`. Each `card_N.<ext>` is followed by `card_N_top-left`, `card_N_top-right`, `card_N_bottom-right`, `card_N_bottom-left`, and `card_N_corners` (all four on one sheet) |
+| No card | any | Throws `CardSightAIError` with status `422` and code `NO_CARD_FOUND` |
+
+`getCardMagicInfo(response)` returns `{ contentType, isZip, count?, width?, height? }`, parsed from the `Content-Type`, `X-CardMagic-Count`, `X-CardMagic-Width`, and `X-CardMagic-Height` headers. `width` and `height` are only set for single-image responses.
+
+**Tips:**
+
+- Raw cards give the best results. Cards in toploaders or grading-company slabs may crop poorly.
+- Accepts JPEG, PNG, WebP, and HEIC/HEIF photos up to 20MB and 8192px per side.
+- Send the original photo, including its orientation flag. Don't downscale or rotate it first.
+- The SDK has no zip dependency. Unzip multi-card results with the library of your choice, or pass the zip straight through to your users.
+
 ### Catalog Search
 
 Search across cards, sets, releases, and parallels with a single query:
@@ -700,7 +798,7 @@ if (results.data) {
 
 ### Fields (Flexible Metadata System)
 
-Every trading card game has different metadata: Pokémon cards have HP and Rarity, Magic: The Gathering cards have Mana Cost and Artist, Yu-Gi-Oh! cards have Attribute and Level. Rather than hard-coding columns per game, CardSight exposes a flexible **Fields** system — any card, set, release, or segment can carry key/value metadata, and the catalog exposes it as a first-class browsable entity. One SDK surface works across every TCG, no per-game branching required.
+Every trading card game has different metadata: Pokémon cards have HP and Rarity, while Magic: The Gathering cards have Mana Cost and Artist. Rather than hard-coding columns per game, CardSight exposes a flexible **Fields** system — any card, set, release, or segment can carry key/value metadata, and the catalog exposes it as a first-class browsable entity. One SDK surface works across every TCG, no per-game branching required.
 
 **Browse available fields, sorted by how prevalent they are:**
 
@@ -728,7 +826,7 @@ Identification responses now include a `fields` array on every detected card, so
 import { CardSightAI, getFieldValue, isExactMatch } from 'cardsightai';
 
 const client = new CardSightAI({ apiKey: 'your_api_key_here' });
-const result = await client.identify.card(pokemonCardImage);
+const result = await client.identify.cardBySegment('pokemon', pokemonCardImage);
 const detection = result.data?.detections?.[0];
 
 if (detection && isExactMatch(detection)) {
@@ -1442,7 +1540,9 @@ import {
   MarketplaceSearchResponse,
   MarketplaceSearchRecord,
   FeedbackResponse,
-  FeedbackStatus
+  FeedbackStatus,
+  CardMagicProcessParams,
+  CardMagicInfo
 } from 'cardsightai';
 
 // All methods are fully typed
@@ -1562,6 +1662,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
 | **Identification** | 4 | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Detection** | 1 | `detect.card()` |
+| **CardMagic** | 1 | `cardMagic.process()` |
 | **Catalog** | 20 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.fields.*`, `catalog.random.*` |
 | **Release Calendar** | 1 | `releaseCalendar.list()` |
 | **Collections** | 23 | `collections.*`, `collections.cards.*`, `collections.binders.*` |

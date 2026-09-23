@@ -9,7 +9,8 @@ import type {
   CardParallel,
   FieldValue,
   CardSuggestion,
-  ParallelSuggestion
+  ParallelSuggestion,
+  CardMagicInfo
 } from './types.js';
 
 /**
@@ -539,4 +540,36 @@ export function isNumberedCard(detection: CardDetection): boolean {
  */
 export function getNumberedTo(detection: CardDetection): number | undefined {
   return detection.card.numberedTo;
+}
+
+// ============================================================================
+// CardMagic Utilities (v4.1.0 — listing-ready card images)
+// ============================================================================
+
+function readNumberHeader(headers: Headers, name: string): number | undefined {
+  const raw = headers.get(name);
+  if (raw === null || raw.trim() === '') {
+    return undefined;
+  }
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : undefined;
+}
+
+/**
+ * Read the metadata CardMagic returns in response headers
+ * @param response - The `response` from a `cardMagic.process()` result
+ * @returns Content type, whether the body is a zip, card count, and (single image only) pixel size
+ */
+export function getCardMagicInfo(response: Response): CardMagicInfo {
+  const contentType = (response.headers.get('Content-Type') || '')
+    .split(';')[0]
+    .trim()
+    .toLowerCase();
+  return {
+    contentType,
+    isZip: contentType === 'application/zip',
+    count: readNumberHeader(response.headers, 'X-CardMagic-Count'),
+    width: readNumberHeader(response.headers, 'X-CardMagic-Width'),
+    height: readNumberHeader(response.headers, 'X-CardMagic-Height')
+  };
 }

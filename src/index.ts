@@ -86,7 +86,10 @@ export type {
   // Identifiable set pre-flight types (v3.6.0)
   IdentifiableSet,
   IdentifiableSetsResponse,
-  SetIdentifiableResponse
+  SetIdentifiableResponse,
+  // CardMagic types (v4.1.0)
+  CardMagicProcessParams,
+  CardMagicInfo
 } from './types.js';
 
 // Export utility functions for working with identification results
@@ -131,7 +134,9 @@ export {
   hasSuggestions,
   getSuggestions,
   isNumberedCard,
-  getNumberedTo
+  getNumberedTo,
+  // CardMagic utilities (v4.1.0)
+  getCardMagicInfo
 } from './utils.js';
 
 // Default export

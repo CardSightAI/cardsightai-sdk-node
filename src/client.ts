@@ -10,6 +10,12 @@ type GetQueryParams<T extends keyof paths> = paths[T] extends {
   ? Q
   : never;
 
+type PostQueryParams<T extends keyof paths> = paths[T] extends {
+  post: { parameters: { query?: infer Q } };
+}
+  ? Q
+  : never;
+
 type PostBody<T extends keyof paths> = paths[T] extends {
   post: { requestBody?: { content: { 'application/json': infer B } } };
 }
@@ -317,6 +323,41 @@ export class CardSightAI {
         ...options,
         body: formData as any,
         bodySerializer: (body: any) => body // Don't serialize FormData
+      });
+    }
+  };
+
+  /**
+   * CardMagic endpoints - Turn a phone photo of cards into listing-ready images
+   */
+  public readonly cardMagic = {
+    /**
+     * Process a phone photo into clean, listing-ready card images.
+     * The response body is binary and is returned as a Blob in `data`:
+     * - One card: `image/jpeg` or `image/png` (per `outputFormat`)
+     * - Two or more cards, or `corners: 'true'`: `application/zip` of `card_N.<ext>` files
+     * Use `getCardMagicInfo(result.response)` to read the content type, card count, and image size.
+     * Throws `CardSightAIError` with status 422 (code `NO_CARD_FOUND`) when no card is found.
+     * @param image - The original photo (JPEG, PNG, WebP, or HEIC; max 20MB and 8192px per side)
+     * @param params - Optional query parameters (mode, paddingPercent, paddingFill, autoLevels, outputFormat, longEdge, corners)
+     */
+    process: (
+      image: Blob | File | ArrayBuffer,
+      params?: PostQueryParams<'/v1/cardmagic/process'>
+    ) => {
+      const formData = new FormData();
+
+      if (image instanceof Blob || image instanceof File) {
+        formData.append('image', image);
+      } else {
+        formData.append('image', new Blob([image]));
+      }
+
+      return this.client.POST('/v1/cardmagic/process', {
+        params: { query: params },
+        body: formData as any,
+        bodySerializer: (body: any) => body, // Don't serialize FormData
+        parseAs: 'blob' // Image or zip bytes, not JSON
       });
     }
   };

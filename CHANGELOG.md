@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-09-23
+
+### Added
+
+- **CardMagic** — New top-level `cardMagic` namespace. `cardMagic.process(image, params?)` calls `POST /v1/cardmagic/process` (operation `processCardImage`), which turns a phone photo of one or more cards into clean, listing-ready card images without a scanner or custom hardware. The photo is uploaded as multipart form data, the same way as `identify.card()`, and accepts a `Blob`, `File`, or `ArrayBuffer` (JPEG, PNG, WebP, or HEIC/HEIF; max 20MB and 8192px per side).
+  - Query options: `mode` (`"process"`, the default, straightens and squares each card as if scanned; `"crop"` trims to the card as photographed), `paddingPercent` (0–50, default 5), `paddingFill` (`"background"` or `#RRGGBB`), `autoLevels` (`"true" | "false"`, default `"true"`), `outputFormat` (`"jpeg" | "png"`), `longEdge` (32–2100 px), and `corners` (`"true" | "false"`; adds four 600x600 corner close-ups per card plus a combined 1210x1210 sheet).
+  - The response is binary and `data` is typed as a `Blob`: a single `image/jpeg` or `image/png` for one card, or an `application/zip` of `card_N.<ext>` files in reading order for two or more cards. With `corners: "true"` the response is always a zip. No card in the photo throws `CardSightAIError` with status `422` and `response.code === "NO_CARD_FOUND"`.
+  - New helper `getCardMagicInfo(response)` reads the response headers into `{ contentType, isZip, count?, width?, height? }` (from `Content-Type`, `X-CardMagic-Count`, `X-CardMagic-Width`, and `X-CardMagic-Height`).
+  - New exported types: `CardMagicProcessParams` and `CardMagicInfo`.
+
 ## [4.0.0] - 2026-09-10
 
 ### Breaking
