@@ -7,7 +7,7 @@
 
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
-The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece).
+The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece).
 **15M+ Trading Cards** • **8,250+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
@@ -18,7 +18,7 @@ The most comprehensive trading card identification and collection management pla
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
-- **Sports Cards & TCGs** - Identification and catalog data for Baseball, Football, Basketball, Hockey, and MMA, plus Pokémon, Magic: The Gathering, and One Piece
+- **Sports Cards & TCGs** - Identification and catalog data for Baseball, Football, Basketball, Hockey, Soccer, and MMA, plus Pokémon, Magic: The Gathering, and One Piece
 - **CardMagic** - Turn a phone photo into clean, listing-ready card images. No scanner or custom hardware required
 - **Parallel Identification (beta)** - Ranked parallel variant candidates with per-entry confidence tiers, launched for baseball
 - **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
@@ -106,7 +106,7 @@ That's it! The SDK handles all API communication, type safety, and error handlin
 
 ### Card Identification
 
-The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, MMA) and trading card games (Pokémon, Magic: The Gathering, One Piece). Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
+The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, Soccer, MMA) and trading card games (Pokémon, Magic: The Gathering, One Piece). Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
 
 ```typescript
 import { CardSightAI } from 'cardsightai';
@@ -175,9 +175,10 @@ if (result.data?.success && result.data.detections) {
   }
 }
 
-// Segment-specific identification (football, basketball, etc.)
+// Segment-specific identification (football, basketball, soccer, etc.)
 const footballResult = await client.identify.cardBySegment('football', imageBuffer);
 const basketballResult = await client.identify.cardBySegment('basketball', blob);
+const soccerResult = await client.identify.cardBySegment('soccer', imageBuffer);
 ```
 
 #### Response Structure
@@ -188,7 +189,21 @@ Each detection has a `confidence` level and a `card` object. The `card` is alway
 - **Set-level match**: `card.setId` present but no `card.id` — release/set info available but no specific card
 - **No match**: `card` is an empty object `{}` — a card was detected in the image but couldn't be identified
 
-Detections may also include a `grading` object when the card is inside a graded slab (see [Grading/Slab Detection](#gradingslab-detection) below).
+Detections may also include a `grading` object when the card is inside a graded slab (see [Grading/Slab Detection](#gradingslab-detection) below). A slabbed card that couldn't be identified is still returned, with an empty `card` and its `grading`.
+
+The response also reports two counts (v4.2.0+):
+
+- `detectedCount?: number` — cards found in the image, whether or not they were identified. Present on unsuccessful identifications too, so you can tell "no card in the image" (`0`) from "a card was found but not identified". Omitted when the count is unavailable.
+- `identifiedCount?: number` — detections whose `card` was matched to the catalog (exact or set-level match). Never more than `detectedCount`.
+
+```typescript
+const { detectedCount, identifiedCount } = result.data ?? {};
+if (detectedCount === 0) {
+  console.log('No card in the image');
+} else if (detectedCount !== undefined && identifiedCount !== undefined) {
+  console.log(`${detectedCount - identifiedCount} card(s) found but not identified`);
+}
+```
 
 ```typescript
 // Exact card match with parallel variant
@@ -220,6 +235,8 @@ Detections may also include a `grading` object when the card is inside a graded 
       }
     }
   ],
+  detectedCount: 1,
+  identifiedCount: 1,
   processingTime: 1250
 }
 
@@ -260,6 +277,8 @@ Detections may also include a `grading` object when the card is inside a graded 
       card: {}
     }
   ],
+  detectedCount: 3,
+  identifiedCount: 2,  // the empty-card detection is not counted
   processingTime: 1500
 }
 
@@ -268,6 +287,8 @@ Detections may also include a `grading` object when the card is inside a graded 
   success: true,
   requestId: "req_def456",
   detections: [],
+  detectedCount: 0,
+  identifiedCount: 0,
   processingTime: 800
 }
 ```
@@ -528,7 +549,7 @@ for (const detection of result.data?.detections || []) {
 
 #### Grading/Slab Detection
 
-When identifying a card that is inside a graded slab, the detection includes grading information:
+When identifying a card that is inside a graded slab, the detection includes grading information. A slabbed card that couldn't be identified is still returned, with an empty `card` alongside its `grading`:
 
 ```typescript
 import {
@@ -564,6 +585,11 @@ for (const detection of result.data?.detections || []) {
     if (grading.autoGrade) {
       console.log(`  Auto Grade: ${grading.autoGrade.value}`); // e.g., "10"
     }
+
+    // Certification number read from the slab label (v4.2.0+)
+    if (grading.certNumber) {
+      console.log(`  Cert #: ${grading.certNumber}`);          // e.g., "12345678"
+    }
   }
 }
 ```
@@ -597,7 +623,8 @@ for (const detection of result.data?.detections || []) {
       id: "auto_grade_uuid",  // Optional catalog UUID
       value: "10",            // Autograph grade value
       condition: "MINT"       // Autograph grade condition
-    }
+    },
+    certNumber: "12345678"     // Optional - cert number read from the slab label (v4.2.0+)
   }
 }
 ```
@@ -1173,6 +1200,15 @@ if (cardDetail?.parallels && cardDetail.parallels.length > 0) {
     const display = p.numberedTo ? `${p.name} /${p.numberedTo}` : p.name;
     console.log(`- ${display}`);
   });
+}
+
+// Variation links: a variation card carries its base card's UUID in `variationOf`,
+// and a base card lists its variations' UUIDs in `variations` (v4.2.0+)
+if (cardDetail?.variationOf) {
+  console.log(`Variation of: ${cardDetail.variationOf}`);
+}
+if (cardDetail?.variations?.length) {
+  console.log(`Variations: ${cardDetail.variations.join(', ')}`);
 }
 
 // Get catalog statistics

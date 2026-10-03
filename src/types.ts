@@ -283,6 +283,8 @@ export interface CardDetection {
       value?: string;
       condition?: string;
     };
+    /** Certification number read from the slab label. Absent when it could not be read. */
+    certNumber?: string;
   };
 }
 
@@ -329,6 +331,16 @@ export interface IdentifyResult {
   success: boolean;
   requestId: string;
   detections?: CardDetection[];
+  /**
+   * Number of cards found in the image, whether or not they were identified. Never less than
+   * `identifiedCount`. Present on unsuccessful identifications too. Omitted when unavailable.
+   */
+  detectedCount?: number;
+  /**
+   * Number of detections whose `card` was matched to the catalog (exact or set-level).
+   * Detections with an empty `card`, such as an unidentified slabbed card, are not counted.
+   */
+  identifiedCount?: number;
   processingTime?: number;
   messages?: ServerMessageInfo[];
 }

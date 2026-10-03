@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-10-03
+
+### Added
+
+- **Identification counts** — `IdentifyCardResponse` (and the SDK's `IdentifyResult`) gained optional `detectedCount` and `identifiedCount`. `detectedCount` is the number of cards found in the image whether or not they were identified, and is present on unsuccessful identifications too, so a caller can tell "no card in the image" (`0`) from "a card was found but not identified". `identifiedCount` is the number of detections whose `card` matched the catalog (exact or set-level); detections with an empty `card` are not counted, so `detectedCount - identifiedCount` is how many cards were found but not identified. `detectedCount` is omitted when the count is unavailable.
+- **Slab certification number** — Graded-slab detections (`SlabGradingDetail`, and `CardDetection.grading`) gained an optional `certNumber` holding the certification number read from the slab label. It is absent when the label could not be read.
+- **Card variations** — Catalog card records gained an optional `variations: string[]` listing the UUIDs of the cards that are variations of this card (each of which carries this card's UUID in `variationOf`). It is omitted when the card has no variations. Applies to `catalog.cards.list()`, `catalog.cards.get()`, `catalog.sets.cards()`, `catalog.releases.cards()`, and `catalog.random.cards()` results.
+
+### Changed
+
+- **Unidentified slabbed cards** — A card inside a graded slab that could not be identified is now returned as a detection with an empty `card` and its `grading`. Code that assumes every detection with `grading` has a matched card should check `isExactMatch()` / `isSetLevelMatch()` first.
+- Regenerated types from the latest OpenAPI spec. No endpoints, methods, or parameters were added, removed, or renamed.
+
 ## [4.1.0] - 2026-09-23
 
 ### Added

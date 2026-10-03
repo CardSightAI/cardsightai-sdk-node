@@ -3174,8 +3174,12 @@ export interface components {
             success: boolean;
             /** @description Unique identifier for tracking this identification request */
             requestId: string;
-            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab. Empty if no cards found. */
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab; a slabbed card that could not be identified is still returned, with an empty `card` and its `grading`. Empty if no cards found. */
             detections?: components["schemas"]["IdentificationDataInput"][];
+            /** @description Number of cards found in the image, whether or not they were identified. Never less than `identifiedCount`; `detectedCount - identifiedCount` is how many cards were found but not identified. Present on unsuccessful identifications too, so a caller can tell "no card in the image" (0) from "a card was found but not identified". Omitted when the count is unavailable. */
+            detectedCount?: number;
+            /** @description Number of entries in `detections` whose `card` was matched to the catalog (an exact card or a set-level match). Detections with an empty `card`, such as an unidentified card inside a graded slab, are not counted. 0 when no card was identified. */
+            identifiedCount?: number;
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
             /** @description Server advisory messages (e.g., image quality warnings) */
@@ -3275,6 +3279,8 @@ export interface components {
             qualifier?: components["schemas"]["SlabQualifierInput"];
             /** @description Autograph grade detected on the slab label */
             autoGrade?: components["schemas"]["SlabAutoGradeInput"];
+            /** @description Certification number read from the slab label. Absent when it could not be read. */
+            certNumber?: string;
         };
         AIQueryRequestInput: {
             /** @description Natural language query */
@@ -3527,6 +3533,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
             parallels?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -3570,6 +3578,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
             fields?: components["schemas"]["FieldValuesInput"];
         };
@@ -3768,6 +3778,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
             fields?: components["schemas"]["FieldValuesInput"];
         };
@@ -3966,6 +3978,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
             parallels?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -5408,8 +5422,12 @@ export interface components {
             success: boolean;
             /** @description Unique identifier for tracking this identification request */
             requestId: string;
-            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab. Empty if no cards found. */
+            /** @description Array of card detections from the image. Multiple cards may be detected in a single image. Each detection may include grading data if the card is inside a graded slab; a slabbed card that could not be identified is still returned, with an empty `card` and its `grading`. Empty if no cards found. */
             detections?: components["schemas"]["IdentificationData"][];
+            /** @description Number of cards found in the image, whether or not they were identified. Never less than `identifiedCount`; `detectedCount - identifiedCount` is how many cards were found but not identified. Present on unsuccessful identifications too, so a caller can tell "no card in the image" (0) from "a card was found but not identified". Omitted when the count is unavailable. */
+            detectedCount?: number;
+            /** @description Number of entries in `detections` whose `card` was matched to the catalog (an exact card or a set-level match). Detections with an empty `card`, such as an unidentified card inside a graded slab, are not counted. 0 when no card was identified. */
+            identifiedCount?: number;
             /** @description Total processing time in milliseconds for AI analysis and catalog matching */
             processingTime?: number;
             /** @description Server advisory messages (e.g., image quality warnings) */
@@ -5509,6 +5527,8 @@ export interface components {
             qualifier?: components["schemas"]["SlabQualifier"];
             /** @description Autograph grade detected on the slab label */
             autoGrade?: components["schemas"]["SlabAutoGrade"];
+            /** @description Certification number read from the slab label. Absent when it could not be read. */
+            certNumber?: string;
         };
         AIQueryRequest: {
             /** @description Natural language query */
@@ -5761,6 +5781,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
             parallels?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
@@ -5804,6 +5826,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
             fields?: components["schemas"]["FieldValues"];
         };
@@ -6002,6 +6026,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Key-value field properties inherited from segment, release, set, and card levels (e.g., HP, Rarity, Artist). Additive — duplicate keys across levels are preserved. Omitted when no fields apply anywhere in the lineage. */
             fields?: components["schemas"]["FieldValues"];
         };
@@ -6200,6 +6226,8 @@ export interface components {
             attributes?: string[];
             /** @description UUID of the base card if this is a variation. Only present for variation cards, omitted for base cards. */
             variationOf?: string;
+            /** @description UUIDs of the cards that are variations of this card (each carries this card's UUID in `variationOf`). Omitted when the card has no variations. */
+            variations?: string[];
             /** @description Simplified list of parallel variants for this card. Includes id, name, and numberedTo. */
             parallels?: {
                 /** @description Unique identifier for the parallel type. Format: UUID v4. This ID represents the parallel variant, not individual cards. */
