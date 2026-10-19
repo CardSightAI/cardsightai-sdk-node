@@ -32,7 +32,7 @@ The most comprehensive trading card identification and collection management pla
 
 | Feature | Description | Primary Methods |
 |---------|-------------|-----------------|
-| **Card Identification** | Identify multiple cards from images using AI; free pre-flight set identifiability lookups | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
+| **Card Identification** | Identify multiple cards from images using AI; read graded slab labels; free pre-flight set identifiability lookups | `identify.card()`, `identify.cardBySegment()`, `identify.slabs()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Card Detection** | Check if trading cards are present in an image | `detect.card()` |
 | **CardMagic** | Turn a phone photo of one or more cards into listing-ready card images | `cardMagic.process()` |
 | **Catalog Search** | Fuzzy search across cards, sets, releases, parallels | `catalog.search()`, `catalog.cards.list()` |
@@ -590,6 +590,17 @@ for (const detection of result.data?.detections || []) {
     if (grading.certNumber) {
       console.log(`  Cert #: ${grading.certNumber}`);          // e.g., "12345678"
     }
+
+    // Subgrades on BGS/BVG and HGA-style labels (v4.3.0+)
+    if (grading.subgrades) {
+      const { centering, corners, edges, surface } = grading.subgrades;
+      console.log(`  Subgrades: C ${centering} / Co ${corners} / E ${edges} / S ${surface}`);
+    }
+
+    // Second score printed beside the 10-point grade: SGC 100-point, TAG 1000-point (v4.3.0+)
+    if (grading.gradeScore) {
+      console.log(`  Score: ${grading.gradeScore.value} (${grading.gradeScore.scale})`); // e.g., "933 (tag1000)"
+    }
   }
 }
 ```
@@ -624,10 +635,50 @@ for (const detection of result.data?.detections || []) {
       value: "10",            // Autograph grade value
       condition: "MINT"       // Autograph grade condition
     },
-    certNumber: "12345678"     // Optional - cert number read from the slab label (v4.2.0+)
+    certNumber: "12345678",    // Optional - cert number read from the slab label (v4.2.0+)
+    subgrades: {               // Optional - BGS/BVG and HGA-style labels, only when all four were read (v4.3.0+)
+      centering: "9.5",
+      corners: "9.5",
+      edges: "10",
+      surface: "9"
+    },
+    gradeScore: {              // Optional - second score beside the 10-point grade (v4.3.0+)
+      value: "88",
+      scale: "sgc100"         // "sgc100" | "tag1000"; new scales may be added
+    },
+    labelTier: "black",        // Optional - Beckett Black or Gold Label (v4.3.0+)
+    subBrand: "BGS",           // Optional - Beckett sub-brand: "BGS" | "BVG" | "BCCG" (v4.3.0+)
+    errorCard: true,           // Optional - CGC error/variation designation; absence does not mean false (v4.3.0+)
+    labelText: [              // Optional - raw OCR of the label's card lines; untrusted, escape before rendering (v4.3.0+)
+      "2018 Panini Prizm",
+      "Luka Doncic #280"
+    ]
   }
 }
 ```
+
+The `labelTier`, `subBrand`, and `gradeScore.scale` values may grow over time, so handle unknown values gracefully.
+
+#### Reading Slab Labels Only
+
+When you only need what is printed on the slab label (grading company, grade, cert number and, where printed, subgrades, second score, label tier, and sub-brand), `identify.slabs()` skips card identification and is faster (v4.3.0+):
+
+```typescript
+import { getGradingInfo } from 'cardsightai';
+
+const slabs = await client.identify.slabs(imageFile);
+
+console.log(`Slabs found: ${slabs.data?.detectedCount}`);
+for (const detection of slabs.data?.detections || []) {
+  // Each slab comes back with an empty `card` and its `grading`
+  const grading = getGradingInfo(detection);
+  if (grading) {
+    console.log(`${grading.company.name} ${grading.grade?.value} - cert ${grading.certNumber}`);
+  }
+}
+```
+
+`identifiedCount` is always `0` in this mode. `detectedCount` is the number of slabs found, which can exceed the detections returned when a slab is dropped for low confidence or an unreadable label. Cards that are not in a slab are not returned. To read slabs with a specific segment, pass the flag to `cardBySegment()`: `client.identify.cardBySegment('football', image, { params: { query: { slabOnly: 'true' } } })`.
 
 #### Card Parallel Utilities (Catalog)
 
@@ -674,7 +725,7 @@ if (card && hasCardParallels(card)) {
 
 ### CardMagic (Listing-Ready Card Images)
 
-CardMagic turns a phone photo into clean, listing-ready card images. No scanner or custom hardware is needed: snap a picture of one or more cards and CardMagic finds each card, straightens it, squares it up at standard trading-card proportions, and returns an image ready for a marketplace listing.
+CardMagic turns a phone photo into clean, listing-ready card images. No scanner or custom hardware is needed: snap a picture of one or more cards and CardMagic finds each card, straightens it, squares it up at its own proportions (standard, or the smaller mini size), and returns an image ready for a marketplace listing.
 
 ```typescript
 import { CardSightAI, CardSightAIError, getCardMagicInfo } from 'cardsightai';
@@ -741,13 +792,14 @@ if (photoFile) {
 
 | Option | Values | Default | Effect |
 |--------|--------|---------|--------|
-| `mode` | `'process'` \| `'crop'` | `'process'` | `process` straightens each card and squares it up at standard trading-card proportions, as if scanned. `crop` returns each card as it appears in the photo, trimmed to the card |
-| `paddingPercent` | `0`-`50` | `5` | Margin around the card, as a percent of the card size on each side |
+| `mode` | `'process'` \| `'crop'` | `'process'` | `process` straightens each card and squares it up at its own proportions (standard 2.5 x 3.5 in, or the smaller mini size such as T206 or Allen & Ginter minis), as if scanned. `crop` returns each card as it appears in the photo, trimmed to the card |
+| `paddingPercent` | `0`-`50` | `5` | Margin around the card (or the slab, with `graded: 'slab'`), as a percent of its size on each side |
 | `paddingFill` | `'background'` or `'#RRGGBB'` | `'background'` | Fill the margin with the photo's real surroundings or a solid color |
 | `autoLevels` | `'true'` \| `'false'` | `'true'` | Restore contrast and remove color cast. Use `'false'` when the photo's own color matters |
 | `outputFormat` | `'jpeg'` \| `'png'` | `'jpeg'` | Encoding of the returned images |
 | `longEdge` | `32`-`2100` | Photo's native size | Length of the long side of every returned image in pixels, padding included |
-| `corners` | `'true'` \| `'false'` | `'false'` | Add close-ups of each card's four corners for judging condition (600x600 each, showing 14 mm of card plus 2.5 mm beyond it on a light 1 mm grid, in the photo's original color) and a 1210x1210 sheet combining them |
+| `corners` | `'true'` \| `'false'` | `'false'` | Add close-ups of each card's four corners for judging condition (600x600 each, showing 14 mm of card plus 2.5 mm beyond it on a light 1 mm grid, in the photo's original color) and a 1210x1210 sheet combining them. Close-ups always show the card's corners, even with `graded: 'slab'` |
+| `graded` | `'card'` \| `'slab'` | `'card'` | For a card sealed in a grading-company slab: return the card inside, or the whole slab (label included), squared up. Cards not in a slab are always returned as the card (v4.3.0+) |
 
 **What comes back:**
 
@@ -758,11 +810,18 @@ if (photoFile) {
 | One or more cards | `'true'` | Always `application/zip`. Each `card_N.<ext>` is followed by `card_N_top-left`, `card_N_top-right`, `card_N_bottom-right`, `card_N_bottom-left`, and `card_N_corners` (all four on one sheet) |
 | No card | any | Throws `CardSightAIError` with status `422` and code `NO_CARD_FOUND` |
 
-`getCardMagicInfo(response)` returns `{ contentType, isZip, count?, width?, height? }`, parsed from the `Content-Type`, `X-CardMagic-Count`, `X-CardMagic-Width`, and `X-CardMagic-Height` headers. `width` and `height` are only set for single-image responses.
+`getCardMagicInfo(response)` returns `{ contentType, isZip, count?, width?, height?, subject?, grader?, fallback? }`, parsed from the `Content-Type` and `X-CardMagic-*` headers. The single-image-only fields:
+
+- `width` / `height` — pixel size, padding included
+- `subject` — what the image shows: `'card'` or `'slab'` (v4.3.0+)
+- `grader` — for a card in a grading-company slab: `'psa'`, `'tag'`, `'cgc'`, `'sgc'`, `'beckett'`, or `'other'` (v4.3.0+)
+- `fallback` — why `graded: 'slab'` returned the card instead of its slab: `'cut_off'` (the slab runs off the edge of the photo; retake with the whole slab in frame) or `'unsupported_slab'` (a company other than PSA, TAG, CGC, SGC, or Beckett) (v4.3.0+)
+
+With two or more cards, file names stay `card_N.<ext>` whichever `graded` value you choose.
 
 **Tips:**
 
-- Raw cards give the best results. Cards in toploaders or grading-company slabs may crop poorly.
+- Raw cards give the best results. Cards in grading-company slabs are recognized (see `graded`), but cards in toploaders or sleeves may come back as the holder rather than the card.
 - Accepts JPEG, PNG, WebP, and HEIC/HEIF photos up to 20MB and 8192px per side.
 - Send the original photo, including its orientation flag. Don't downscale or rotate it first.
 - The SDK has no zip dependency. Unzip multi-card results with the library of your choice, or pass the zip straight through to your users.
@@ -979,10 +1038,15 @@ const bulk = await client.pricing.bulk({
   card_ids: ['card_uuid_1', 'card_uuid_2', 'card_uuid_3'],
   period: '90d',
   listing_type: 'both',
-  limit: 25                       // Optional: most-recent listings per card (default 25, max 100)
+  limit: 25                       // Optional: most-recent listings per card (default 25, max 50)
 });
 
 if (bulk.data) {
+  // Request-level advisories, e.g. a limit above 50 was reduced to 50 (v4.3.0+)
+  for (const msg of bulk.data.messages ?? []) {
+    console.log(`[${msg.type}] ${msg.message}`);
+  }
+
   console.log(`Requested: ${bulk.data.meta.requested}`);
   console.log(`Successful: ${bulk.data.meta.successful}`);
   console.log(`Failed: ${bulk.data.meta.failed}`);
@@ -1696,7 +1760,7 @@ The SDK provides 100% coverage of all CardSight AI REST API endpoints:
 | Category | Endpoints | SDK Methods |
 |----------|-----------|------------|
 | **Health** | 2 | `health.check()`, `health.checkAuth()` |
-| **Identification** | 4 | `identify.card()`, `identify.cardBySegment()`, `identify.sets.list()`, `identify.sets.check()` |
+| **Identification** | 4 | `identify.card()`, `identify.cardBySegment()`, `identify.slabs()`, `identify.sets.list()`, `identify.sets.check()` |
 | **Detection** | 1 | `detect.card()` |
 | **CardMagic** | 1 | `cardMagic.process()` |
 | **Catalog** | 20 | `catalog.search()`, `catalog.cards.*`, `catalog.sets.*`, `catalog.releases.*`, `catalog.fields.*`, `catalog.random.*` |

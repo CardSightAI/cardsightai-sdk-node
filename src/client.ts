@@ -271,7 +271,36 @@ export class CardSightAI {
 
       return this.client.POST('/v1/identify/card/{segment}', {
         ...options,
-        params: { path: { segment } },
+        params: { ...options?.params, path: { segment } },
+        body: formData as any,
+        bodySerializer: (body: any) => body // Don't serialize FormData
+      });
+    },
+
+    /**
+     * Read graded slab labels only, skipping card identification (`slabOnly=true`).
+     * Each slab is returned as a detection with an empty `card` and its `grading`
+     * (company, grade, cert number and, where printed, subgrades, second score, label
+     * tier and sub-brand). `identifiedCount` is 0; `detectedCount` is the number of slabs
+     * found, which can exceed the detections returned. Cards not in a slab are not returned.
+     * @param image - Image data containing one or more graded slabs
+     * @param options - Additional request options
+     */
+    slabs: (image: Blob | File | ArrayBuffer, options?: any) => {
+      const formData = new FormData();
+
+      if (image instanceof Blob || image instanceof File) {
+        formData.append('image', image);
+      } else {
+        formData.append('image', new Blob([image]));
+      }
+
+      return this.client.POST('/v1/identify/card', {
+        ...options,
+        params: {
+          ...options?.params,
+          query: { ...options?.params?.query, slabOnly: 'true' }
+        },
         body: formData as any,
         bodySerializer: (body: any) => body // Don't serialize FormData
       });
@@ -336,10 +365,11 @@ export class CardSightAI {
      * The response body is binary and is returned as a Blob in `data`:
      * - One card: `image/jpeg` or `image/png` (per `outputFormat`)
      * - Two or more cards, or `corners: 'true'`: `application/zip` of `card_N.<ext>` files
-     * Use `getCardMagicInfo(result.response)` to read the content type, card count, and image size.
+     * Use `getCardMagicInfo(result.response)` to read the content type, card count, image size,
+     * and, for slabbed cards, the subject, grader, and fallback reason.
      * Throws `CardSightAIError` with status 422 (code `NO_CARD_FOUND`) when no card is found.
      * @param image - The original photo (JPEG, PNG, WebP, or HEIC; max 20MB and 8192px per side)
-     * @param params - Optional query parameters (mode, paddingPercent, paddingFill, autoLevels, outputFormat, longEdge, corners)
+     * @param params - Optional query parameters (mode, paddingPercent, paddingFill, autoLevels, outputFormat, longEdge, corners, graded)
      */
     process: (
       image: Blob | File | ArrayBuffer,
@@ -401,6 +431,10 @@ export class CardSightAI {
       get: (id: string) =>
         this.client.GET('/v1/catalog/releases/{id}', { params: { path: { id } } }),
 
+      /**
+       * @deprecated The API will remove this endpoint in a future release, and it now returns
+       * at most 10 cards per page. Use `catalog.sets.cards()` or `catalog.cards.list({ releaseId })`.
+       */
       cards: (id: string, params?: GetQueryParams<'/v1/catalog/releases/{id}/cards'>) =>
         this.client.GET('/v1/catalog/releases/{id}/cards', {
           params: { path: { id }, query: params }
@@ -1038,7 +1072,7 @@ export class CardSightAI {
       }),
 
     /**
-     * Get pricing for multiple cards in bulk (up to 100)
+     * Get pricing for multiple cards in bulk (up to 100 cards; `limit` max 50 listings per card)
      * @param data - Request body with card_ids and optional filters
      */
     bulk: (data: PostBody<'/v1/pricing/'>) => this.client.POST('/v1/pricing/', { body: data }),

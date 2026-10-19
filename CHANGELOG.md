@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-10-19
+
+### Added
+
+- **Slab-only identification** — New `identify.slabs(image, options?)` reads graded slab labels without identifying the card, by calling `POST /v1/identify/card` with the new `slabOnly=true` query parameter. Each slab comes back as a detection with an empty `card` and its `grading`. `identifiedCount` is `0`, and `detectedCount` is the number of slabs found, which can exceed the detections returned when a slab is dropped for low confidence or an unreadable label. Cards not in a slab are not returned. The flag is also accepted by `identify.card()` and `identify.cardBySegment()` via `{ params: { query: { slabOnly: 'true' } } }`.
+- **More slab label fields** — `SlabGradingDetail` (and `CardDetection.grading`) gained optional `subgrades` (`{ centering, corners, edges, surface }`, BGS/BVG and HGA-style labels, present only when all four were read), `gradeScore` (`{ value, scale }`, the SGC 100-point or TAG 1000-point score with `scale` `"sgc100" | "tag1000"`), `labelTier` (`"black" | "gold"`, Beckett), `subBrand` (`"BGS" | "BVG" | "BCCG"`), `errorCard` (CGC error/variation designation; absence does not mean `false`), and `labelText` (raw, unverified OCR of the label's card lines; treat as untrusted text). `labelTier`, `subBrand`, and `scale` may gain new values. New exported types: `SlabSubgrades` and `SlabGradeScore`.
+- **CardMagic slabs** — `cardMagic.process()` accepts a new `graded` option (`"card"`, the default, returns the card inside a slab; `"slab"` returns the whole slab, label included). `getCardMagicInfo()` now also returns `subject` (`"card"` or `"slab"`), `grader` (`"psa"`, `"tag"`, `"cgc"`, `"sgc"`, `"beckett"`, or `"other"`), and `fallback` (`"cut_off"` or `"unsupported_slab"`, when `graded: "slab"` returned the card instead), read from the new `X-CardMagic-Subject`, `X-CardMagic-Grader`, and `X-CardMagic-Fallback` headers on single-image responses. `CardMagicInfo` gained the matching optional fields. `mode: "process"` now squares mini cards (such as T206 or Allen & Ginter minis) at their own proportions.
+- **Bulk pricing request messages** — `BulkPricingResponse` gained an optional request-level `messages` array (`ServerMessage[]`), e.g. when `limit` was reduced. Per-card messages remain on each result.
+
+### Changed
+
+- **Bulk pricing `limit` capped at 50** — `pricing.bulk()` now returns at most 50 most-recent listings per card (was 100). Larger values (up to 100) are still accepted but reduced to 50, with a warning in the response's `messages`.
+- **`catalog.releases.cards()` deprecated** — The API marks `GET /v1/catalog/releases/{id}/cards` as deprecated and will remove it in a future release. It now returns at most 10 cards per page (larger `take` values are reduced; the response's `take` reports the page size used). The SDK method is marked `@deprecated`; use `catalog.sets.cards()` or `catalog.cards.list({ releaseId })` instead.
+- Regenerated types from the latest OpenAPI spec, which adds Terms of Service notices to the catalog card and card image endpoint descriptions.
+
+### Fixed
+
+- **`identify.cardBySegment()` dropped caller query params** — Any `options.params` passed to `cardBySegment()` were overwritten by the segment path param, so query params never reached the API. They are now merged with the segment.
+
 ## [4.2.0] - 2026-10-03
 
 ### Added

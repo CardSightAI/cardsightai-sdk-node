@@ -28,6 +28,8 @@ export type {
   SlabGrade,
   SlabQualifier,
   SlabAutoGrade,
+  SlabSubgrades,
+  SlabGradeScore,
   ServerMessage,
   PricingResponse,
   PricingRecord,

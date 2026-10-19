@@ -161,6 +161,8 @@ export type SlabCompany = components['schemas']['SlabCompany'];
 export type SlabGrade = components['schemas']['SlabGrade'];
 export type SlabQualifier = components['schemas']['SlabQualifier'];
 export type SlabAutoGrade = components['schemas']['SlabAutoGrade'];
+export type SlabSubgrades = components['schemas']['SlabSubgrades'];
+export type SlabGradeScore = components['schemas']['SlabGradeScore'];
 
 // Server advisory message type (from identify/detect responses)
 export type ServerMessage = components['schemas']['ServerMessage'];
@@ -258,6 +260,18 @@ export interface CardMagicInfo {
   width?: number;
   /** Single image only: height in pixels, padding included (X-CardMagic-Height) */
   height?: number;
+  /** Single image only: what the image shows, "card" or "slab" (X-CardMagic-Subject) */
+  subject?: string;
+  /**
+   * Single image of a slabbed card only: the grading company, "psa", "tag", "cgc", "sgc",
+   * "beckett", or "other" (X-CardMagic-Grader)
+   */
+  grader?: string;
+  /**
+   * Single image only, when `graded: 'slab'` returned the card instead of its slab:
+   * "cut_off" (slab runs off the photo) or "unsupported_slab" (X-CardMagic-Fallback)
+   */
+  fallback?: string;
 }
 
 export interface CardDetection {
@@ -285,6 +299,18 @@ export interface CardDetection {
     };
     /** Certification number read from the slab label. Absent when it could not be read. */
     certNumber?: string;
+    /** Subgrades printed on BGS/BVG and HGA-style labels. Present only when all four were read. */
+    subgrades?: SlabSubgrades;
+    /** Second numeric grade printed beside the 10-point grade (SGC 100-point, TAG 1000-point) */
+    gradeScore?: SlabGradeScore;
+    /** Beckett label tier. New values may be added. */
+    labelTier?: 'black' | 'gold';
+    /** Beckett sub-brand printed on the label. New values may be added. */
+    subBrand?: 'BGS' | 'BVG' | 'BCCG';
+    /** True when the label carries CGC's error/variation designation. Absence does not mean false. */
+    errorCard?: boolean;
+    /** Card-information lines printed on the label. Raw, unverified OCR: treat as untrusted text. */
+    labelText?: string[];
   };
 }
 

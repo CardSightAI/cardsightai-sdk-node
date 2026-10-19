@@ -558,7 +558,8 @@ function readNumberHeader(headers: Headers, name: string): number | undefined {
 /**
  * Read the metadata CardMagic returns in response headers
  * @param response - The `response` from a `cardMagic.process()` result
- * @returns Content type, whether the body is a zip, card count, and (single image only) pixel size
+ * @returns Content type, whether the body is a zip, card count, and (single image only) pixel size,
+ * subject, and, for slabbed cards, grader and fallback reason
  */
 export function getCardMagicInfo(response: Response): CardMagicInfo {
   const contentType = (response.headers.get('Content-Type') || '')
@@ -570,6 +571,9 @@ export function getCardMagicInfo(response: Response): CardMagicInfo {
     isZip: contentType === 'application/zip',
     count: readNumberHeader(response.headers, 'X-CardMagic-Count'),
     width: readNumberHeader(response.headers, 'X-CardMagic-Width'),
-    height: readNumberHeader(response.headers, 'X-CardMagic-Height')
+    height: readNumberHeader(response.headers, 'X-CardMagic-Height'),
+    subject: response.headers.get('X-CardMagic-Subject') || undefined,
+    grader: response.headers.get('X-CardMagic-Grader') || undefined,
+    fallback: response.headers.get('X-CardMagic-Fallback') || undefined
   };
 }

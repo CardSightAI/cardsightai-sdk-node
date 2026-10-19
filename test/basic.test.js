@@ -121,6 +121,7 @@ test('Client structure', async (t) => {
     );
     assert(typeof client.identify.sets.list === 'function', 'Should have identify.sets.list()');
     assert(typeof client.identify.sets.check === 'function', 'Should have identify.sets.check()');
+    assert(typeof client.identify.slabs === 'function', 'Should have identify.slabs()');
   });
 
   await t.test('detect endpoints should exist', () => {
@@ -211,7 +212,10 @@ test('CardMagic (v4.1.0)', async (t) => {
       isZip: false,
       count: 1,
       width: 750,
-      height: 1050
+      height: 1050,
+      subject: undefined,
+      grader: undefined,
+      fallback: undefined
     });
   });
 
@@ -224,8 +228,36 @@ test('CardMagic (v4.1.0)', async (t) => {
       isZip: true,
       count: 3,
       width: undefined,
-      height: undefined
+      height: undefined,
+      subject: undefined,
+      grader: undefined,
+      fallback: undefined
     });
+  });
+
+  await t.test('process() sends graded and getCardMagicInfo reads the slab headers', async () => {
+    const { client, calls } = mockClient(
+      () =>
+        new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), {
+          headers: {
+            'Content-Type': 'image/jpeg',
+            'X-CardMagic-Count': '1',
+            'X-CardMagic-Width': '750',
+            'X-CardMagic-Height': '1050',
+            'X-CardMagic-Subject': 'card',
+            'X-CardMagic-Grader': 'psa',
+            'X-CardMagic-Fallback': 'cut_off'
+          }
+        })
+    );
+
+    const result = await client.cardMagic.process(new Uint8Array([1]).buffer, { graded: 'slab' });
+
+    assert.strictEqual(new URL(calls[0].url).searchParams.get('graded'), 'slab');
+    const info = getCardMagicInfo(result.response);
+    assert.strictEqual(info.subject, 'card');
+    assert.strictEqual(info.grader, 'psa');
+    assert.strictEqual(info.fallback, 'cut_off');
   });
 
   await t.test('process() throws CardSightAIError 422 when no card is found', async () => {
@@ -242,6 +274,64 @@ test('CardMagic (v4.1.0)', async (t) => {
         return true;
       }
     );
+  });
+});
+
+test('Slab-only identification (v4.3.0)', async (t) => {
+  const mockClient = () => {
+    const calls = [];
+    const client = init({
+      apiKey: 'test_key',
+      fetch: async (request) => {
+        calls.push(request);
+        return Response.json({
+          success: true,
+          requestId: 'req_1',
+          detections: [],
+          detectedCount: 0,
+          identifiedCount: 0
+        });
+      }
+    });
+    return { client, calls };
+  };
+
+  await t.test('slabs() uploads multipart to identify with slabOnly=true', async () => {
+    const { client, calls } = mockClient();
+
+    const result = await client.identify.slabs(new Uint8Array([1, 2, 3]).buffer);
+
+    assert.strictEqual(calls.length, 1);
+    const url = new URL(calls[0].url);
+    assert.strictEqual(calls[0].method, 'POST');
+    assert.strictEqual(url.pathname, '/v1/identify/card');
+    assert.strictEqual(url.searchParams.get('slabOnly'), 'true');
+    assert.match(calls[0].headers.get('Content-Type'), /^multipart\/form-data; boundary=/);
+    const form = await calls[0].formData();
+    assert.strictEqual((await form.get('image').arrayBuffer()).byteLength, 3);
+    assert.strictEqual(result.data.identifiedCount, 0);
+  });
+
+  await t.test('slabs() keeps slabOnly=true over a caller-supplied value', async () => {
+    const { client, calls } = mockClient();
+
+    await client.identify.slabs(new Blob([new Uint8Array([1])]), {
+      params: { query: { slabOnly: 'false' } }
+    });
+
+    assert.strictEqual(new URL(calls[0].url).searchParams.get('slabOnly'), 'true');
+  });
+
+  await t.test('cardBySegment() keeps caller query params alongside the segment', async () => {
+    const { client, calls } = mockClient();
+
+    await client.identify.cardBySegment('football', new Blob([new Uint8Array([1])]), {
+      params: { query: { slabOnly: 'true' } }
+    });
+
+    const url = new URL(calls[0].url);
+    assert.strictEqual(url.pathname, '/v1/identify/card/football');
+    assert.strictEqual(url.searchParams.get('slabOnly'), 'true');
   });
 });
 

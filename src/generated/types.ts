@@ -75,7 +75,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies card(s) from the submitted image (automatic segment detection)
-         * @description Identify one or more cards from an image. The segment (sport/category) of each card is detected automatically, so a single image may contain cards from different segments (e.g., baseball and basketball). To force a specific segment, use POST /card/:segment instead. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available.
+         * @description Identify one or more cards from an image. The segment (sport/category) of each card is detected automatically, so a single image may contain cards from different segments (e.g., baseball and basketball). To force a specific segment, use POST /card/:segment instead. Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available. To read graded slabs only (grade, cert number, subgrades and other label fields) without identifying the card, add `?slabOnly=true`.
          */
         post: operations["identifyCard"];
         delete?: never;
@@ -95,7 +95,7 @@ export interface paths {
         put?: never;
         /**
          * Identifies a card from the submitted image for a specific segment (sport)
-         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID, name, or shortname (case-insensitive, e.g., "football", "basketball", "magic"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available.
+         * @description Identify a card from an image for a specific segment (sport). The segment can be specified by UUID, name, or shortname (case-insensitive, e.g., "football", "basketball", "magic"). Supports both multipart/form-data and direct binary upload (image/jpeg, image/png, image/webp). Maximum file size: 20MB. Supported formats: JPEG, PNG, WebP, HEIF, HEIC. Where a parallel variant is recognised it is returned in `card.parallelSuggestions` (beta): best match first, with a confidence tier on each entry where available. To read graded slabs only (grade, cert number, subgrades and other label fields) without identifying the card, add `?slabOnly=true`.
          */
         post: operations["identifyCardBySegment"];
         delete?: never;
@@ -155,7 +155,7 @@ export interface paths {
         put?: never;
         /**
          * Create listing-ready card images from a photo
-         * @description Upload a phone photo of one or more trading cards and get each card back as a clean, listing-ready image. Best results come from raw cards; cards in toploaders or grading-company slabs may crop poorly. mode=process (default) returns each card straightened and squared up at standard trading-card proportions, as if it had been scanned; mode=crop returns each card as it appears in the photo, trimmed to the card. Padding, fill, auto-levels and the returned image size (longEdge) are adjustable. One card returns the image directly (image/jpeg or image/png per outputFormat) with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers. Two or more cards return application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order (top to bottom, then left to right). corners=true adds close-ups of each card's four corners and a sheet combining them, and the response is then always application/zip, even for one card: card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext>. If no card is found the response is 422 NO_CARD_FOUND. Accepts multipart/form-data or a direct binary body (image/jpeg, image/png, image/webp, image/heic). Maximum upload 20MB and 8192px per side. Send the original photo (including its orientation flag), not a downscaled or rotated copy.
+         * @description Upload a phone photo of one or more trading cards and get each card back as a clean, listing-ready image. Best results come from raw cards. Cards in grading-company slabs are recognized: you get the card inside by default, or the whole slab, label included, with graded=slab. Cards in toploaders or sleeves may come back as the holder rather than the card. mode=process (default) returns each card straightened and squared up at its own proportions (standard, or the smaller mini size), as if it had been scanned; mode=crop returns each card as it appears in the photo, trimmed to the card. Padding, fill, auto-levels and the returned image size (longEdge) are adjustable. One card returns the image directly (image/jpeg or image/png per outputFormat) with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers and what it shows (card or slab) in X-CardMagic-Subject. A card in a slab also gets the grading company in X-CardMagic-Grader, and X-CardMagic-Fallback says why graded=slab returned the card instead of its slab. Two or more cards return application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order (top to bottom, then left to right). corners=true adds close-ups of each card's four corners and a sheet combining them, and the response is then always application/zip, even for one card: card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext>. If no card is found the response is 422 NO_CARD_FOUND. Accepts multipart/form-data or a direct binary body (image/jpeg, image/png, image/webp, image/heic). Maximum upload 20MB and 8192px per side. Send the original photo (including its orientation flag), not a downscaled or rotated copy.
          */
         post: operations["processCardImage"];
         delete?: never;
@@ -340,7 +340,10 @@ export interface paths {
         };
         /**
          * List all cards in a release
-         * @description Retrieve a paginated list of all base cards (not parallels) within a specific release across all its sets. Use the optional setId parameter to filter to a specific set within the release. Cards can be searched by player name and sorted by card number or name. This endpoint is ideal for building complete checklists, player searches within a release, or browsing all cards in a product.
+         * @deprecated
+         * @description Deprecated: this endpoint will be removed in a future release. Retrieve a paginated list of base cards (not parallels) within a specific release across all its sets, at most 10 cards per page. Use the optional setId parameter to filter to a specific set within the release. Cards can be searched by player name and sorted by card number or name.
+         *
+         *     **Terms of Service notice:** Card data is licensed solely for use within your application under the [CardSight AI Terms of Service](https://cardsight.ai/terms). Results may be cached only on a limited, short-term basis to improve your application's performance (Section 3(c)). Downloading, storing, or copying card data to create or populate your own database, catalog, or dataset — including paging through sets or releases to copy their contents — is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getReleaseCards"];
         put?: never;
@@ -421,6 +424,8 @@ export interface paths {
         /**
          * List cards within a set
          * @description Retrieve a paginated list of all base cards within a specific set. Cards can be filtered by player name or card number, and sorted by number or name. This endpoint returns only the base versions of cards, not their parallel variants. Use this for building set checklists, finding specific cards within a set, or displaying complete set contents. Each card includes its number, name, and basic information.
+         *
+         *     **Terms of Service notice:** Card data is licensed solely for use within your application under the [CardSight AI Terms of Service](https://cardsight.ai/terms). Results may be cached only on a limited, short-term basis to improve your application's performance (Section 3(c)). Downloading, storing, or copying card data to create or populate your own database, catalog, or dataset — including paging through sets or releases to copy their contents — is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getSetCards"];
         put?: never;
@@ -461,6 +466,8 @@ export interface paths {
         /**
          * Search cards across entire catalog
          * @description Global search endpoint for finding base cards across all releases, sets, and manufacturers. Supports complex filtering by player name, card number, release, set, year range, manufacturer, and attributes. Results include card details with release and set information. This is the primary endpoint for card discovery, player collections, and cross-product searches. Use specific release or set endpoints for more focused searches.
+         *
+         *     **Terms of Service notice:** Card data is licensed solely for use within your application under the [CardSight AI Terms of Service](https://cardsight.ai/terms). Results may be cached only on a limited, short-term basis to improve your application's performance (Section 3(c)). Downloading, storing, or copying card data to create or populate your own database, catalog, or dataset — including paging through sets or releases to copy their contents — is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getCards"];
         put?: never;
@@ -481,6 +488,8 @@ export interface paths {
         /**
          * Get complete card details
          * @description Retrieve comprehensive information about a specific card including its release, set, attributes, and available parallel variants. Returns full card details with contextual information about where it belongs in the catalog hierarchy. Includes a count of parallel versions available and all attributes (Rookie, Autograph, etc.) associated with the card. Use this endpoint for detailed card views, collection management, or when you need complete card information.
+         *
+         *     **Terms of Service notice:** Card data is licensed solely for use within your application under the [CardSight AI Terms of Service](https://cardsight.ai/terms). Results may be cached only on a limited, short-term basis to improve your application's performance (Section 3(c)). Downloading, storing, or copying card data to create or populate your own database, catalog, or dataset — including paging through sets or releases to copy their contents — is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getCard"];
         put?: never;
@@ -501,6 +510,8 @@ export interface paths {
         /**
          * Get random cards with optional parallel conversion
          * @description Simulates pack opening experience by returning random cards from the catalog. When includeParallels=true, each card has a weighted probability of converting to a parallel based on the parallel's numberedTo value. Parallels are checked from rarest to most common using a cascading algorithm where lower numbered parallels (e.g., 1/1) are significantly rarer than higher numbered ones (e.g., /999), and unlimited parallels are the most common. Supports comprehensive filtering by set, release, player name, year, manufacturer, and card attributes. Note: setId and releaseId filters are mutually exclusive.
+         *
+         *     **Terms of Service notice:** Card data is licensed solely for use within your application under the [CardSight AI Terms of Service](https://cardsight.ai/terms). Results may be cached only on a limited, short-term basis to improve your application's performance (Section 3(c)). Downloading, storing, or copying card data to create or populate your own database, catalog, or dataset — including paging through sets or releases to copy their contents — is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getRandomCards"];
         put?: never;
@@ -1804,6 +1815,8 @@ export interface paths {
         /**
          * Get card image
          * @description Retrieve a card image by ID. Returns either raw JPEG (format=raw) or JSON with base64 data (format=json).
+         *
+         *     **Terms of Service notice:** CardSight AI card images are cryptographically thumbprinted. Long-term storage or use of these images without an active CardSight AI subscription violates the [CardSight AI Terms of Service](https://cardsight.ai/terms). Images may be cached only on a limited, short-term basis to improve your application's performance, and must be deleted when your subscription ends (Section 3(c)). Downloading or storing images to build your own image library, database, or dataset is prohibited (Section 3(b)). Usage is monitored for compliance. Accounts found programmatically extracting data from CardSight AI will have their access restricted and may be permanently banned (Sections 4(d) and 10(b)).
          */
         get: operations["getCardImage"];
         put?: never;
@@ -2315,7 +2328,7 @@ export interface paths {
         put?: never;
         /**
          * Get price history (bid/ask) for multiple cards
-         * @description Returns price history as a bid/ask spread for up to 100 cards in a single request — completed auction sales (bid) and Buy It Now asking prices (ask, not necessarily a completed sale). Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint. This endpoint is a recent market snapshot: it returns the most-recent listings per card up to `limit` (default 25, max 100). A single request covers up to 100 cards, so the default returns up to 2,500 datapoints and the maximum up to 10,000. When a card hits that cap a warning is returned in its `messages`; for a card's full history use GET /pricing/{card_id} with `as_of_date` to page backward.
+         * @description Returns price history as a bid/ask spread for up to 100 cards in a single request — completed auction sales (bid) and Buy It Now asking prices (ask, not necessarily a completed sale). Each card is processed independently — individual cards may succeed or fail without affecting others. Results include the same raw/graded grouping as the single-card endpoint. This endpoint is a recent market snapshot: it returns the most-recent listings per card up to `limit` (default 25, max 50; larger values up to 100 are accepted but reduced to 50, with a warning in the response's `messages`). A single request covers up to 100 cards, so the default returns up to 2,500 datapoints and the maximum up to 5,000. When a card hits that cap a warning is returned in its `messages`; for a card's full history use GET /pricing/{card_id} with `as_of_date` to page backward.
          */
         post: operations["getBulkPricing"];
         delete?: never;
@@ -3265,6 +3278,51 @@ export interface components {
             /** @description Autograph grade condition */
             condition?: string;
         };
+        SlabSubgradesInput: {
+            /** @description Centering subgrade as printed (e.g., "9.5") */
+            centering?: string;
+            /** @description Corners subgrade as printed (e.g., "9.5") */
+            corners?: string;
+            /** @description Edges subgrade as printed (e.g., "9.5") */
+            edges?: string;
+            /** @description Surface subgrade as printed (e.g., "9.5") */
+            surface?: string;
+        };
+        SlabGradeScoreInput: {
+            /** @description The score as printed on the label (e.g., "88", "933") */
+            value: string;
+            /**
+             * @description Scale of the score: sgc100 = SGC's legacy 100-point score; tag1000 = TAG's 1000-point score. New scales may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            scale: "sgc100" | "tag1000";
+        };
+        /**
+         * @example {
+         *       "confidence": "High",
+         *       "company": {
+         *         "id": "6f1c2b7e-3d4a-4e8b-9c1d-2a5f8e7b6c3d",
+         *         "name": "BGS"
+         *       },
+         *       "grade": {
+         *         "id": "0b9e4d2c-7a1f-4c6e-8d3b-5e2a9f1c7d4b",
+         *         "value": "9.5",
+         *         "condition": "Gem Mint"
+         *       },
+         *       "certNumber": "0012345678",
+         *       "subgrades": {
+         *         "centering": "9.5",
+         *         "corners": "9.5",
+         *         "edges": "10",
+         *         "surface": "9"
+         *       },
+         *       "subBrand": "BGS",
+         *       "labelText": [
+         *         "2018 Panini Prizm",
+         *         "Luka Doncic #280"
+         *       ]
+         *     }
+         */
         SlabGradingDetailInput: {
             /**
              * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
@@ -3281,6 +3339,24 @@ export interface components {
             autoGrade?: components["schemas"]["SlabAutoGradeInput"];
             /** @description Certification number read from the slab label. Absent when it could not be read. */
             certNumber?: string;
+            /** @description Subgrades printed on the label (BGS/BVG and HGA-style labels). Present only when all four were read confidently and agree with the overall grade. */
+            subgrades?: components["schemas"]["SlabSubgradesInput"];
+            /** @description Second numeric grade printed beside the 10-point grade (SGC, TAG). Present only when it pairs with the 10-point grade. */
+            gradeScore?: components["schemas"]["SlabGradeScoreInput"];
+            /**
+             * @description Beckett label tier (Black Label or Gold Label). Absent for other labels or when not confirmed. New values may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            labelTier?: "black" | "gold";
+            /**
+             * @description Beckett sub-brand printed on the label. Absent for other companies or when not read. New values may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            subBrand?: "BGS" | "BVG" | "BCCG";
+            /** @description Present and true when the label carries CGC's printed error/variation designation. Absent otherwise — absence does NOT mean the card is not an error card. Only CGC prints this designation. Distinct from `qualifier`. */
+            errorCard?: boolean;
+            /** @description Card-information lines printed on the label (year, set, player, card number), as read and unparsed. Raw, unverified OCR: may contain misreads, and the format may change. Treat as untrusted text — escape before rendering. At most 20 lines of 200 characters. */
+            labelText?: string[];
         };
         AIQueryRequestInput: {
             /** @description Natural language query */
@@ -4183,7 +4259,7 @@ export interface components {
              * @enum {string}
              */
             listing_type: "auction" | "fixed" | "both";
-            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Max 100 (up to 10,000 datapoints per request). For a card's full history use GET /pricing/{card_id} with as_of_date. */
+            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Maximum 50 (up to 5,000 datapoints per request); larger values (up to 100) are accepted but reduced to 50, with a warning in the response's messages. For a card's full history use GET /pricing/{card_id} with as_of_date. */
             limit?: number;
         };
         PricingRecordInput: {
@@ -4418,6 +4494,8 @@ export interface components {
                 /** @description Number of cards that failed */
                 failed: number;
             };
+            /** @description Server advisory messages for the whole request (e.g. the requested limit exceeded the maximum and was reduced). Omitted when there are none. Per-card messages are in each result's data.messages. */
+            messages?: components["schemas"]["ServerMessageInput"][];
         };
         SearchMatchedCardInput: {
             /**
@@ -5513,6 +5591,51 @@ export interface components {
             /** @description Autograph grade condition */
             condition?: string;
         };
+        SlabSubgrades: {
+            /** @description Centering subgrade as printed (e.g., "9.5") */
+            centering?: string;
+            /** @description Corners subgrade as printed (e.g., "9.5") */
+            corners?: string;
+            /** @description Edges subgrade as printed (e.g., "9.5") */
+            edges?: string;
+            /** @description Surface subgrade as printed (e.g., "9.5") */
+            surface?: string;
+        };
+        SlabGradeScore: {
+            /** @description The score as printed on the label (e.g., "88", "933") */
+            value: string;
+            /**
+             * @description Scale of the score: sgc100 = SGC's legacy 100-point score; tag1000 = TAG's 1000-point score. New scales may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            scale: "sgc100" | "tag1000";
+        };
+        /**
+         * @example {
+         *       "confidence": "High",
+         *       "company": {
+         *         "id": "6f1c2b7e-3d4a-4e8b-9c1d-2a5f8e7b6c3d",
+         *         "name": "BGS"
+         *       },
+         *       "grade": {
+         *         "id": "0b9e4d2c-7a1f-4c6e-8d3b-5e2a9f1c7d4b",
+         *         "value": "9.5",
+         *         "condition": "Gem Mint"
+         *       },
+         *       "certNumber": "0012345678",
+         *       "subgrades": {
+         *         "centering": "9.5",
+         *         "corners": "9.5",
+         *         "edges": "10",
+         *         "surface": "9"
+         *       },
+         *       "subBrand": "BGS",
+         *       "labelText": [
+         *         "2018 Panini Prizm",
+         *         "Luka Doncic #280"
+         *       ]
+         *     }
+         */
         SlabGradingDetail: {
             /**
              * @description Detection confidence level for this slab (High: 90-100%, Medium: 75-89%, Low: 50-74%)
@@ -5529,6 +5652,24 @@ export interface components {
             autoGrade?: components["schemas"]["SlabAutoGrade"];
             /** @description Certification number read from the slab label. Absent when it could not be read. */
             certNumber?: string;
+            /** @description Subgrades printed on the label (BGS/BVG and HGA-style labels). Present only when all four were read confidently and agree with the overall grade. */
+            subgrades?: components["schemas"]["SlabSubgrades"];
+            /** @description Second numeric grade printed beside the 10-point grade (SGC, TAG). Present only when it pairs with the 10-point grade. */
+            gradeScore?: components["schemas"]["SlabGradeScore"];
+            /**
+             * @description Beckett label tier (Black Label or Gold Label). Absent for other labels or when not confirmed. New values may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            labelTier?: "black" | "gold";
+            /**
+             * @description Beckett sub-brand printed on the label. Absent for other companies or when not read. New values may be added; treat unknown values gracefully.
+             * @enum {string}
+             */
+            subBrand?: "BGS" | "BVG" | "BCCG";
+            /** @description Present and true when the label carries CGC's printed error/variation designation. Absent otherwise — absence does NOT mean the card is not an error card. Only CGC prints this designation. Distinct from `qualifier`. */
+            errorCard?: boolean;
+            /** @description Card-information lines printed on the label (year, set, player, card number), as read and unparsed. Raw, unverified OCR: may contain misreads, and the format may change. Treat as untrusted text — escape before rendering. At most 20 lines of 200 characters. */
+            labelText?: string[];
         };
         AIQueryRequest: {
             /** @description Natural language query */
@@ -6431,7 +6572,7 @@ export interface components {
              * @enum {string}
              */
             listing_type: "auction" | "fixed" | "both";
-            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Max 100 (up to 10,000 datapoints per request). For a card's full history use GET /pricing/{card_id} with as_of_date. */
+            /** @description Most-recent listings to return per card. Defaults to 25 (server-applied when omitted) — across a full 100-card request that is up to 2,500 datapoints. Maximum 50 (up to 5,000 datapoints per request); larger values (up to 100) are accepted but reduced to 50, with a warning in the response's messages. For a card's full history use GET /pricing/{card_id} with as_of_date. */
             limit?: number;
         };
         PricingRecord: {
@@ -6666,6 +6807,8 @@ export interface components {
                 /** @description Number of cards that failed */
                 failed: number;
             };
+            /** @description Server advisory messages for the whole request (e.g. the requested limit exceeded the maximum and was reduced). Omitted when there are none. Per-card messages are in each result's data.messages. */
+            messages?: components["schemas"]["ServerMessage"][];
         };
         SearchMatchedCard: {
             /**
@@ -7143,7 +7286,10 @@ export interface operations {
     };
     identifyCard: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Read graded slabs only, skipping card identification (default false). Faster when you only need what is printed on the slab label: grading company, grade, cert number and, where printed, subgrades, second score, label tier and sub-brand. Each slab in the image is returned as a detection with an empty `card` and its `grading`; `identifiedCount` is 0 and `detectedCount` is the number of slabs found in the image, which can exceed the detections returned when a slab is dropped for low confidence or an unreadable label. Cards not in a slab are not returned. */
+                slabOnly?: "true" | "false";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -7224,7 +7370,10 @@ export interface operations {
     };
     identifyCardBySegment: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Read graded slabs only, skipping card identification (default false). Faster when you only need what is printed on the slab label: grading company, grade, cert number and, where printed, subgrades, second score, label tier and sub-brand. Each slab in the image is returned as a detection with an empty `card` and its `grading`; `identifiedCount` is 0 and `detectedCount` is the number of slabs found in the image, which can exceed the detections returned when a slab is dropped for low confidence or an unreadable label. Cards not in a slab are not returned. */
+                slabOnly?: "true" | "false";
+            };
             header?: never;
             path: {
                 /** @description Segment identifier — a UUID, segment name, or shortname (case-insensitive, e.g., "football", "baseball", "magic") */
@@ -7447,9 +7596,9 @@ export interface operations {
     processCardImage: {
         parameters: {
             query?: {
-                /** @description process (default): each card straightened and squared up at standard trading-card proportions, as if scanned. crop: each card as it appears in the photo, trimmed to the card. */
+                /** @description process (default): each card straightened and squared up at its own proportions, as if scanned: standard 2.5 x 3.5 in, or the smaller mini size (such as T206 or Allen & Ginter minis). crop: each card as it appears in the photo, trimmed to the card. */
                 mode?: "process" | "crop";
-                /** @description Margin around the card as a percent of the card size on each side, 0 to 50. Default 5. */
+                /** @description Margin around the card (or the slab, when graded=slab returns one) as a percent of its size on each side, 0 to 50. Default 5. */
                 paddingPercent?: number;
                 /** @description What fills the margin: "background" (the real surroundings, default) or a solid #RRGGBB color. */
                 paddingFill?: string;
@@ -7459,8 +7608,10 @@ export interface operations {
                 outputFormat?: "jpeg" | "png";
                 /** @description Size of every returned image as the length of its long side in pixels, padding included, 32 to 2100. Omit it for the photo's native size. */
                 longEdge?: number;
-                /** @description Add close-ups of each card's four corners for judging condition (default false). Each close-up is 600x600 and shows 14 mm of the card from the corner plus 2.5 mm beyond it, with a light 1 mm grid (heavier every 5 mm; the grid assumes a standard 2.5 x 3.5 in card), in the photo's original color. A 1210x1210 sheet shows all four as they sit on the card. The response is then always application/zip, even for one card. */
+                /** @description Add close-ups of each card's four corners for judging condition (default false). Each close-up is 600x600 and shows 14 mm of the card from the corner plus 2.5 mm beyond it, with a light 1 mm grid (heavier every 5 mm; the grid assumes a standard 2.5 x 3.5 in card), in the photo's original color. A 1210x1210 sheet shows all four as they sit on the card. The response is then always application/zip, even for one card. Close-ups always show the card's corners, also when graded=slab returns the slab. */
                 corners?: "true" | "false";
+                /** @description What a card sealed in a grading-company slab is returned as. card (default): the card inside the slab. slab: the whole slab, label included, squared up. Cards not in a slab are always returned as the card. With slab, a card whose slab runs off the edge of the photo, or is not from PSA, TAG, CGC, SGC or Beckett, is returned as the card instead. File names stay card_N.<ext> either way; a single image says what it shows in the X-CardMagic-Subject header. */
+                graded?: "card" | "slab";
             };
             header?: never;
             path?: never;
@@ -7477,7 +7628,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description One card: the processed image as image/jpeg or image/png (per outputFormat), with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers. Two or more cards: application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order. With corners=true the response is always application/zip, even for one card, and each card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext> (all four on one sheet). */
+            /** @description One card: the processed image as image/jpeg or image/png (per outputFormat), with its pixel size in the X-CardMagic-Width and X-CardMagic-Height headers and what it shows in X-CardMagic-Subject (plus X-CardMagic-Grader and X-CardMagic-Fallback for a card in a grading-company slab). Two or more cards: application/zip containing card_0.<ext>, card_1.<ext>, ... in reading order. With corners=true the response is always application/zip, even for one card, and each card_N.<ext> is followed by card_N_top-left.<ext>, card_N_top-right.<ext>, card_N_bottom-right.<ext>, card_N_bottom-left.<ext> and card_N_corners.<ext> (all four on one sheet). */
             200: {
                 headers: {
                     /** @description Number of cards in the photo */
@@ -7486,6 +7637,12 @@ export interface operations {
                     "X-CardMagic-Width"?: number;
                     /** @description Single image only. Image height in pixels, padding included */
                     "X-CardMagic-Height"?: number;
+                    /** @description Single image only. What the image shows: card, or slab (the whole slab, returned with graded=slab) */
+                    "X-CardMagic-Subject"?: string;
+                    /** @description Single image only, for a card in a grading-company slab. The grading company: psa, tag, cgc, sgc, beckett, or other (a slab from another company) */
+                    "X-CardMagic-Grader"?: string;
+                    /** @description Single image only, when graded=slab returned the card instead of its slab: cut_off (the slab runs off the edge of the photo; retake with the whole slab in frame) or unsupported_slab (a slab from a company other than PSA, TAG, CGC, SGC or Beckett) */
+                    "X-CardMagic-Fallback"?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -8014,7 +8171,7 @@ export interface operations {
     getReleaseCards: {
         parameters: {
             query?: {
-                /** @description Number of items to return per page. Minimum: 1, Maximum: 100, Default: 20. Use larger values for bulk data retrieval, smaller for responsive UIs. */
+                /** @description Number of cards to return per page. Default and maximum: 10. Larger values (up to 100) are accepted but reduced to 10; the response's take field reports the page size actually used. */
                 take?: number;
                 /** @description Number of items to skip (offset). Default: 0. Use for pagination: page 2 with take=20 would use skip=20, page 3 would use skip=40, etc. */
                 skip?: number;
