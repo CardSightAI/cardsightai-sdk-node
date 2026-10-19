@@ -8,7 +8,7 @@
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
 The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece).
-**15M+ Trading Cards** • **8,250+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
+**16M+ Trading Cards** • **10,000+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
