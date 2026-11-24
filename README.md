@@ -7,8 +7,8 @@
 
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
-The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece), plus **Marvel** and **Disney** cards.
-**16M+ Trading Cards** • **11,000+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
+The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA, Wrestling) and **trading card games** (Pokémon, Magic: The Gathering, One Piece), plus **Marvel** and **Disney** cards.
+**17M+ Trading Cards** • **12,000+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -18,7 +18,7 @@ The most comprehensive trading card identification and collection management pla
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
-- **Sports Cards, TCGs, Marvel & Disney** - Identification and catalog data for Baseball, Football, Basketball, Hockey, Soccer, and MMA, plus Pokémon, Magic: The Gathering, One Piece, Marvel, and Disney
+- **Sports Cards, TCGs, Marvel & Disney** - Identification and catalog data for Baseball, Football, Basketball, Hockey, Soccer, MMA, and Wrestling, plus Pokémon, Magic: The Gathering, One Piece, Marvel, and Disney
 - **CardMagic** - Turn a phone photo into clean, listing-ready card images. No scanner or custom hardware required
 - **Parallel Identification (beta)** - Ranked parallel variant candidates with per-entry confidence tiers, launched for baseball
 - **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
@@ -106,7 +106,7 @@ That's it! The SDK handles all API communication, type safety, and error handlin
 
 ### Card Identification
 
-The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, Soccer, MMA), trading card games (Pokémon, Magic: The Gathering, One Piece), and Marvel and Disney cards. Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
+The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, Soccer, MMA, Wrestling), trading card games (Pokémon, Magic: The Gathering, One Piece), and Marvel and Disney cards. Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
 
 ```typescript
 import { CardSightAI } from 'cardsightai';
