@@ -7,8 +7,8 @@
 
 **Official TypeScript/JavaScript SDK for [CardSight AI](https://cardsight.ai) REST API**
 
-The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece).
-**16M+ Trading Cards** • **10,000+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
+The most comprehensive trading card identification and collection management platform, covering **sports cards** (Baseball, Football, Basketball, Hockey, Soccer, MMA) and **trading card games** (Pokémon, Magic: The Gathering, One Piece), plus **Marvel** and **Disney** cards.
+**16M+ Trading Cards** • **11,000+ Identifiable Sets** • **AI-Powered Recognition** • **CardMagic Listing Images** • **Free Tier Available**
 
 **Quick Links:** [Getting Started](#getting-started) • [Installation](#installation) • [Examples](#usage-examples) • [API Documentation](https://api.cardsight.ai/documentation) • [Support](#support)
 
@@ -18,7 +18,7 @@ The most comprehensive trading card identification and collection management pla
 
 - **Full TypeScript Support** - Complete type safety with auto-generated types from OpenAPI
 - **Multi-Card Detection** - Identify multiple cards in a single image with confidence scores
-- **Sports Cards & TCGs** - Identification and catalog data for Baseball, Football, Basketball, Hockey, Soccer, and MMA, plus Pokémon, Magic: The Gathering, and One Piece
+- **Sports Cards, TCGs, Marvel & Disney** - Identification and catalog data for Baseball, Football, Basketball, Hockey, Soccer, and MMA, plus Pokémon, Magic: The Gathering, One Piece, Marvel, and Disney
 - **CardMagic** - Turn a phone photo into clean, listing-ready card images. No scanner or custom hardware required
 - **Parallel Identification (beta)** - Ranked parallel variant candidates with per-entry confidence tiers, launched for baseball
 - **Flexible Metadata via Fields** - Search and surface arbitrary card properties (HP, Rarity, Artist, Mana Cost, etc.) across any trading card game
@@ -106,7 +106,7 @@ That's it! The SDK handles all API communication, type safety, and error handlin
 
 ### Card Identification
 
-The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, Soccer, MMA) and trading card games (Pokémon, Magic: The Gathering, One Piece). Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
+The identification endpoint uses AI to detect cards in images. It can identify multiple cards in a single image and returns confidence levels for each detection. Identification covers sports cards (Baseball, Football, Basketball, Hockey, Soccer, MMA), trading card games (Pokémon, Magic: The Gathering, One Piece), and Marvel and Disney cards. Use `identify.card()` for baseball (the default segment) or `identify.cardBySegment()` to target any other segment by UUID, name, or shortname (e.g. `'football'`, `'magic'`).
 
 ```typescript
 import { CardSightAI } from 'cardsightai';
@@ -191,6 +191,24 @@ Each detection has a `confidence` level and a `card` object. The `card` is alway
 
 Detections may also include a `grading` object when the card is inside a graded slab (see [Grading/Slab Detection](#gradingslab-detection) below). A slabbed card that couldn't be identified is still returned, with an empty `card` and its `grading`.
 
+When an image holds more than one card, each detection can include a `zIndex` (v4.4.0+): its front-to-back position among all cards found, like CSS `z-index`. `0` is the card closest to the camera, `-1` the next one back, and so on. Use it to pick the card someone is holding up to the camera rather than cards in the background. The ranking covers every card found, not only the detections returned, so if the closest card was dropped (for example, because its confidence was too low), the highest `zIndex` you get back is `-1` or lower. `zIndex` is omitted when unavailable.
+
+```typescript
+import type { CardDetection } from 'cardsightai';
+
+// Pick the card closest to the camera: the highest zIndex wins
+const detections: CardDetection[] = result.data?.detections ?? [];
+const front = detections
+  .filter((d) => d.zIndex !== undefined)
+  .sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0))[0];
+if (front) {
+  console.log(`Front card: ${front.card.name ?? 'not identified'}`);
+  if (front.zIndex !== 0) {
+    console.log('The card closest to the camera was not returned');
+  }
+}
+```
+
 The response also reports two counts (v4.2.0+):
 
 - `detectedCount?: number` — cards found in the image, whether or not they were identified. Present on unsuccessful identifications too, so you can tell "no card in the image" (`0`) from "a card was found but not identified". Omitted when the count is unavailable.
@@ -232,7 +250,8 @@ if (detectedCount === 0) {
             confidence: "High"
           }
         ]
-      }
+      },
+      zIndex: 0  // Optional - 0 is the card closest to the camera (v4.4.0+)
     }
   ],
   detectedCount: 1,
@@ -258,7 +277,8 @@ if (detectedCount === 0) {
         setName: "Base Set",
         name: "Mike Trout",
         number: "27"
-      }
+      },
+      zIndex: 0   // closest to the camera
     },
     {
       confidence: "Medium",
@@ -270,11 +290,13 @@ if (detectedCount === 0) {
         manufacturer: "Panini",
         releaseName: "Prizm Football",
         setName: "Base Set"
-      }
+      },
+      zIndex: -1  // behind the Mike Trout card
     },
     {
       confidence: "Low",
-      card: {}
+      card: {},
+      zIndex: -2  // furthest back
     }
   ],
   detectedCount: 3,

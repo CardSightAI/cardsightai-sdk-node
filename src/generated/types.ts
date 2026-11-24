@@ -3181,6 +3181,8 @@ export interface components {
             card: components["schemas"]["CardDetailsInput"];
             /** @description Grading slab data matched to this specific card detection. Present when the card is inside a graded slab. */
             grading?: components["schemas"]["SlabGradingDetailInput"];
+            /** @description Front-to-back position of this card among all cards found in the image, like CSS z-index: 0 is the card closest to the camera, -1 the next one back, and so on. Use it to pick the card held up to the camera over cards in the background. The ranking covers every card found, so when the closest card is not among `detections` (for example, its confidence was too low), the highest value returned is -1 or lower. Omitted when unavailable. */
+            zIndex?: number;
         };
         IdentifyCardResponseInput: {
             /** @description Whether the identification process completed successfully */
@@ -5494,6 +5496,8 @@ export interface components {
             card: components["schemas"]["CardDetails"];
             /** @description Grading slab data matched to this specific card detection. Present when the card is inside a graded slab. */
             grading?: components["schemas"]["SlabGradingDetail"];
+            /** @description Front-to-back position of this card among all cards found in the image, like CSS z-index: 0 is the card closest to the camera, -1 the next one back, and so on. Use it to pick the card held up to the camera over cards in the background. The ranking covers every card found, so when the closest card is not among `detections` (for example, its confidence was too low), the highest value returned is -1 or lower. Omitted when unavailable. */
+            zIndex?: number;
         };
         IdentifyCardResponse: {
             /** @description Whether the identification process completed successfully */

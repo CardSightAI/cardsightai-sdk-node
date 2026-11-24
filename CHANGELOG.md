@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-11-05
+
+### Added
+
+- **Card depth order** — Identification detections (and the SDK's `CardDetection`) gained an optional `zIndex`: the card's front-to-back position among all cards found in the image, like CSS `z-index`. `0` is the card closest to the camera, `-1` the next one back, and so on, so the detection with the highest `zIndex` is the card held up to the camera rather than one in the background. The ranking covers every card found, not only the detections returned, so when the closest card is not among `detections` (for example, its confidence was too low), the highest value returned is `-1` or lower. `zIndex` is omitted when unavailable.
+- **Marvel and Disney identification** — The API now identifies Marvel and Disney cards, bringing identifiable sets to 11,000+. No SDK changes are needed: pass the Marvel or Disney segment (by UUID or name) to `identify.cardBySegment()`. The README now lists both segments.
+
+### Changed
+
+- Regenerated types from the latest OpenAPI spec. No endpoints, methods, or parameters were added, removed, or renamed.
+
 ## [4.3.0] - 2026-10-19
 
 ### Added
