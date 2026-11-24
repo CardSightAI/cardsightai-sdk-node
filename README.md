@@ -1558,11 +1558,18 @@ const years = await client.autocomplete.years('2023');
 
 ### Image Retrieval
 
-Get card images directly:
+Get card images directly. The binary image methods return the image (JPEG or PNG) as a `Blob` on `result.data`:
 
 ```typescript
+import { writeFile } from 'node:fs/promises';
+
 // Get card image (returns binary data by default)
-const imageData = await client.images.getCard('card_uuid');
+const image = await client.images.getCard('card_uuid');
+if (image.data) {
+  const bytes = Buffer.from(await image.data.arrayBuffer());
+  const ext = image.data.type === 'image/png' ? 'png' : 'jpg';
+  await writeFile(`card.${ext}`, bytes);
+}
 
 // Get image as base64 JSON
 const imageJson = await client.images.getCard('card_uuid', { format: 'json' });
@@ -1570,18 +1577,23 @@ const imageJson = await client.images.getCard('card_uuid', { format: 'json' });
 // Get image with placeholder fallback (returns a default image instead of 404)
 const imageWithFallback = await client.images.getCard('card_uuid', { default: 'true' });
 
-// Get collection card images
+// Get collection card images (Blob on `data`, same as above)
 const collectionImage = await client.collections.cards.getImage(
   'collection_uuid',
   'card_uuid'
 );
 
-// Get thumbnail
+// Get thumbnail (Blob on `data`)
 const thumbnail = await client.collections.cards.getThumbnail(
   'collection_uuid',
   'card_uuid'
 );
+const thumbnailBytes = thumbnail.data
+  ? Buffer.from(await thumbnail.data.arrayBuffer())
+  : undefined;
 ```
+
+Read the bytes from `result.data`, not from `result.response`. The SDK has already read the response body to build `data`, so calling `result.response.arrayBuffer()` throws `TypeError: Body is unusable`. Headers such as `result.response.headers.get('Content-Type')` are still available. `collections.cards.getImage()` and `getThumbnail()` return a `Blob` as of v4.4.1; earlier versions threw a `SyntaxError` on every successful response.
 
 ### Feedback System
 

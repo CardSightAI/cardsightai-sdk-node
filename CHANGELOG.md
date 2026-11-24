@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2026-11-24
+
+### Fixed
+
+- **`collections.cards.getImage()` and `getThumbnail()` threw on every successful call** — Both methods failed with `SyntaxError: Unexpected token '�' ... is not valid JSON` because the SDK let openapi-fetch parse the JPEG/PNG bytes as JSON. They now request the body as binary, like `images.getCard()` already did, so `result.data` is a `Blob` holding the image. Error responses still throw `CardSightAIError`. This dates back to 1.0.3, when the methods were added. A new unit test (`test/images.test.js`) runs all three image methods against a local server, so it needs no API key.
+
+### Changed
+
+- **Image docs** — The JSDoc for `images.getCard()`, `collections.cards.getImage()`, and `collections.cards.getThumbnail()`, and the README's Image Retrieval section, now say that the image bytes are on `result.data` (a `Blob`). The SDK has already read `result.response`'s body, so reading `result.response.arrayBuffer()` throws `TypeError: Body is unusable`.
+
 ## [4.4.0] - 2026-11-05
 
 ### Added

@@ -618,19 +618,29 @@ export class CardSightAI {
         }),
 
       /**
-       * Get card image
+       * Get the full-resolution image added for a collection card.
+       * The image bytes (JPEG or PNG) are on `result.data` as a `Blob`. The SDK has already
+       * read `result.response`'s body, so read the bytes from `data`, not from `response`.
+       * @param collectionId - Collection UUID
+       * @param cardId - Collection card UUID
        */
       getImage: (collectionId: string, cardId: string) =>
         this.client.GET('/v1/collection/{collectionId}/cards/{cardId}/image', {
-          params: { path: { collectionId, cardId } }
+          params: { path: { collectionId, cardId } },
+          parseAs: 'blob' // Image bytes, not JSON
         }),
 
       /**
-       * Get card thumbnail image
+       * Get the thumbnail image for a collection card.
+       * The image bytes (JPEG or PNG) are on `result.data` as a `Blob`. The SDK has already
+       * read `result.response`'s body, so read the bytes from `data`, not from `response`.
+       * @param collectionId - Collection UUID
+       * @param cardId - Collection card UUID
        */
       getThumbnail: (collectionId: string, cardId: string) =>
         this.client.GET('/v1/collection/{collectionId}/cards/{cardId}/image/thumb', {
-          params: { path: { collectionId, cardId } }
+          params: { path: { collectionId, cardId } },
+          parseAs: 'blob' // Image bytes, not JSON
         })
     },
 
@@ -970,9 +980,12 @@ export class CardSightAI {
   public readonly images = {
     /**
      * Get card image by ID
+     * With `format: 'raw'` (the default), the image bytes (JPEG or PNG) are on `result.data`
+     * as a `Blob`. The SDK has already read `result.response`'s body, so read the bytes from
+     * `data`, not from `response`.
      * @param id - Card ID
      * @param params - Optional query parameters
-     * @param params.format - Image format: 'raw' (returns JPEG binary, default) or 'json' (returns metadata with base64)
+     * @param params.format - Image format: 'raw' (returns image binary, default) or 'json' (returns metadata with base64)
      */
     getCard: async (id: string, params?: GetQueryParams<'/v1/images/cards/{id}'>) => {
       // For raw format, we need to handle the response differently
